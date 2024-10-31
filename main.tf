@@ -65,3 +65,38 @@ resource "aws_cloudwatch_log_group" "materialize" {
 
   tags = var.tags
 }
+
+resource "aws_iam_user" "materialize" {
+  name = "${var.environment}-materialize-user"
+}
+
+resource "aws_iam_access_key" "materialize_user" {
+  user = aws_iam_user.materialize.name
+}
+
+resource "aws_iam_user_policy" "materialize_s3" {
+  name = "materialize-s3-access"
+  user = aws_iam_user.materialize.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          module.storage.bucket_arn,
+          "${module.storage.bucket_arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+# Data source for current region
+data "aws_region" "current" {}
