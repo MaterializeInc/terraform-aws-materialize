@@ -31,7 +31,7 @@ variable "vpc_cidr" {
 variable "availability_zones" {
   description = "List of availability zones"
   type        = list(string)
-  default     = ["us-west-2a", "us-west-2b", "us-west-2c"]
+  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
 }
 
 variable "private_subnet_cidrs" {
@@ -117,7 +117,7 @@ variable "db_identifier" {
 variable "postgres_version" {
   description = "Version of PostgreSQL to use"
   type        = string
-  default     = "15.0"
+  default     = "15"
 }
 
 variable "db_instance_class" {
