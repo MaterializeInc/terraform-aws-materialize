@@ -25,7 +25,6 @@ module "eks" {
   node_group_instance_types = var.node_group_instance_types
   tags                      = var.tags
   cluster_enabled_log_types = var.cluster_enabled_log_types
-  enable_cluster_encryption = var.enable_cluster_encryption
   node_group_capacity_type  = var.node_group_capacity_type
 }
 

@@ -23,7 +23,6 @@ module "materialize_infrastructure" {
   node_group_desired_size   = 2
   node_group_min_size       = 1
   node_group_max_size       = 3
-  enable_cluster_encryption = true
   node_group_capacity_type  = "ON_DEMAND"
 
   # Storage Configuration

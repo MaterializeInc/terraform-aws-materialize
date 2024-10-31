@@ -95,12 +95,6 @@ variable "node_group_capacity_type" {
   default     = "ON_DEMAND"
 }
 
-variable "enable_cluster_encryption" {
-  description = "Enable encryption for EKS cluster secrets"
-  type        = bool
-  default     = true
-}
-
 variable "cluster_enabled_log_types" {
   description = "List of desired control plane logging to enable"
   type        = list(string)

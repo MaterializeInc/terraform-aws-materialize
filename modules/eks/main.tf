@@ -5,6 +5,12 @@ module "eks" {
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
 
+  cluster_addons = {
+    aws-ebs-csi-driver = {
+      service_account_role_arn = module.irsa-ebs-csi.iam_role_arn
+    }
+  }
+
   vpc_id     = var.vpc_id
   subnet_ids = var.private_subnet_ids
 
@@ -32,19 +38,17 @@ module "eks" {
   tags = var.tags
 }
 
-resource "aws_kms_key" "eks" {
-  count = var.enable_cluster_encryption ? 1 : 0
-
-  description             = "EKS Cluster ${var.cluster_name} Encryption Config KMS Key"
-  deletion_window_in_days = 7
-  enable_key_rotation     = true
-
-  tags = var.tags
+data "aws_iam_policy" "ebs_csi_policy" {
+  arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 
-resource "aws_kms_alias" "eks" {
-  count = var.enable_cluster_encryption ? 1 : 0
+module "irsa-ebs-csi" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version = "5.39.0"
 
-  name          = "alias/eks-${var.cluster_name}"
-  target_key_id = aws_kms_key.eks[0].key_id
+  create_role                   = true
+  role_name                     = "AmazonEKSTFEBSCSIRole-${module.eks.cluster_name}"
+  provider_url                  = module.eks.oidc_provider
+  role_policy_arns              = [data.aws_iam_policy.ebs_csi_policy.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
 }
