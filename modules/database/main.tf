@@ -10,8 +10,11 @@ module "db" {
   major_engine_version = "13"
   instance_class       = var.instance_class
 
-  allocated_storage = var.allocated_storage
-  storage_encrypted = true
+  password = var.database_password
+
+  allocated_storage     = var.allocated_storage
+  max_allocated_storage = var.max_allocated_storage
+  storage_encrypted     = true
 
   db_name  = var.database_name
   username = var.database_username
@@ -21,10 +24,10 @@ module "db" {
   subnet_ids             = var.database_subnet_ids
   vpc_security_group_ids = [aws_security_group.database.id]
 
-  maintenance_window = "Mon:00:00-Mon:03:00"
-  backup_window      = "03:00-06:00"
+  maintenance_window = var.maintenance_window
+  backup_window      = var.backup_window
 
-  backup_retention_period = 7
+  backup_retention_period = var.backup_retention_period
   skip_final_snapshot     = true
 
   tags = var.tags

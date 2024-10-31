@@ -78,12 +78,6 @@ variable "maintenance_window" {
   default     = "Mon:00:00-Mon:03:00"
 }
 
-variable "parameter_group_family" {
-  description = "Database parameter group family"
-  type        = string
-  default     = "postgres13"
-}
-
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
