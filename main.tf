@@ -58,15 +58,6 @@ module "database" {
   database_password     = var.database_password
 }
 
-resource "kubernetes_service_account" "materialize" {
-  count = var.create_service_account ? 1 : 0
-
-  metadata {
-    name      = var.service_account_name
-    namespace = var.service_account_namespace
-  }
-}
-
 resource "aws_cloudwatch_log_group" "materialize" {
   count = var.enable_monitoring ? 1 : 0
 

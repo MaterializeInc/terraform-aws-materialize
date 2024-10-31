@@ -208,25 +208,6 @@ variable "bucket_lifecycle_rules" {
   }]
 }
 
-# IAM Variables
-variable "create_service_account" {
-  description = "Create service account for Materialize"
-  type        = bool
-  default     = true
-}
-
-variable "service_account_name" {
-  description = "Name of the Kubernetes service account"
-  type        = string
-  default     = "materialize-sa"
-}
-
-variable "service_account_namespace" {
-  description = "Namespace for the Kubernetes service account"
-  type        = string
-  default     = "materialize-system"
-}
-
 # Monitoring Variables
 variable "enable_monitoring" {
   description = "Enable CloudWatch monitoring"
