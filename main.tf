@@ -116,7 +116,7 @@ resource "aws_iam_role" "materialize_s3" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${trimprefix(module.eks.cluster_oidc_issuer_url, "https://")}:sub" : "system:serviceaccount:${var.namespace}:materialize-sa"
+            "${trimprefix(module.eks.cluster_oidc_issuer_url, "https://")}:sub" : "${var.bucket_prefix}:serviceaccount:${var.namespace}:${var.service_account_name}",
             "${trimprefix(module.eks.cluster_oidc_issuer_url, "https://")}:aud" : "sts.amazonaws.com"
           }
         }

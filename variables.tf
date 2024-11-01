@@ -218,5 +218,17 @@ variable "metrics_retention_days" {
 variable "namespace" {
   description = "Namespace for Materialize resources"
   type        = string
-  default     = "materialize"
+  default     = "materialize-environment"
+}
+
+variable "service_account_name" {
+  description = "Name of the service account"
+  type        = string
+  default     = "12345678-1234-1234-1234-123456789012"
+}
+
+variable "bucket_prefix" {
+  description = "Prefix for the S3 bucket"
+  type        = string
+  default     = "system"
 }
