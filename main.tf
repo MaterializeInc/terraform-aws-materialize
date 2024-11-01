@@ -100,3 +100,54 @@ resource "aws_iam_user_policy" "materialize_s3" {
 
 # Data source for current region
 data "aws_region" "current" {}
+
+resource "aws_iam_role" "materialize_s3" {
+  name = "${var.environment}-materialize-s3-role"
+
+  # Trust policy allowing EKS to assume this role
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = module.eks.oidc_provider_arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${trimprefix(module.eks.cluster_oidc_issuer_url, "https://")}:sub" : "system:serviceaccount:${var.namespace}:materialize-sa"
+            "${trimprefix(module.eks.cluster_oidc_issuer_url, "https://")}:aud" : "sts.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+# Attach S3 bucket policy to the role
+resource "aws_iam_role_policy" "materialize_s3" {
+  name = "materialize-s3-access"
+  role = aws_iam_role.materialize_s3.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          module.storage.bucket_arn,
+          "${module.storage.bucket_arn}/*"
+        ]
+      }
+    ]
+  })
+}

@@ -214,3 +214,9 @@ variable "metrics_retention_days" {
   type        = number
   default     = 7
 }
+
+variable "namespace" {
+  description = "Namespace for Materialize resources"
+  type        = string
+  default     = "materialize"
+}

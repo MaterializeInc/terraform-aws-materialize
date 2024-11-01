@@ -41,3 +41,15 @@ output "persist_backend_url" {
   )
   sensitive = true
 }
+
+# oidc_provider_arn
+output "oidc_provider_arn" {
+  description = "The ARN of the OIDC Provider"
+  value       = module.eks.oidc_provider_arn
+}
+
+# aws_iam_role.materialize_s3.arn
+output "materialize_s3_role_arn" {
+  description = "The ARN of the IAM role for Materialize"
+  value       = aws_iam_role.materialize_s3.arn
+}
