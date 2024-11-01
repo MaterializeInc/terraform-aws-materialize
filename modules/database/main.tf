@@ -10,7 +10,8 @@ module "db" {
   major_engine_version = var.postgres_version
   instance_class       = var.instance_class
 
-  password = var.database_password
+  manage_master_user_password = false
+  password                    = var.database_password
 
   allocated_storage     = var.allocated_storage
   max_allocated_storage = var.max_allocated_storage
@@ -45,6 +46,15 @@ resource "aws_security_group" "database" {
     to_port         = 5432
     protocol        = "tcp"
     security_groups = [var.eks_security_group_id]
+    description     = "Allow PostgreSQL access from EKS cluster"
+  }
+
+  ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [var.eks_node_security_group_id]
+    description     = "Allow PostgreSQL access from EKS nodes"
   }
 
   egress {

@@ -20,7 +20,7 @@ output "s3_bucket_name" {
 
 output "metadata_backend_url" {
   description = "PostgreSQL connection URL in the format required by Materialize"
-  value = format("postgres://%s:%s@%s/%s?sslmode=disable",
+  value = format("postgres://%s:%s@%s/%s?sslmode=require",
     var.database_username,
     var.database_password,
     module.database.db_instance_endpoint,
@@ -30,16 +30,13 @@ output "metadata_backend_url" {
 }
 
 output "persist_backend_url" {
-  description = "S3 connection URL in the format required by Materialize"
-  value = format("s3://%s:%s@%s/%s?endpoint=https%%3A%%2F%%2Fs3.%s.amazonaws.com&region=%s",
-    aws_iam_access_key.materialize_user.id,
-    aws_iam_access_key.materialize_user.secret,
+  description = "S3 connection URL in the format required by Materialize using IRSA"
+  value = format("s3://%s/%s:serviceaccount:%s:%s",
     var.bucket_name,
     var.environment,
-    data.aws_region.current.name,
-    data.aws_region.current.name
+    var.namespace,
+    var.service_account_name
   )
-  sensitive = true
 }
 
 # oidc_provider_arn

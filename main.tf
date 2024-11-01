@@ -42,19 +42,20 @@ module "storage" {
 module "database" {
   source = "./modules/database"
 
-  db_identifier         = var.db_identifier
-  postgres_version      = var.postgres_version
-  instance_class        = var.db_instance_class
-  allocated_storage     = var.db_allocated_storage
-  database_name         = var.database_name
-  database_username     = var.database_username
-  multi_az              = var.db_multi_az
-  database_subnet_ids   = module.networking.private_subnet_ids
-  vpc_id                = module.networking.vpc_id
-  eks_security_group_id = module.eks.cluster_security_group_id
-  tags                  = var.tags
-  max_allocated_storage = var.db_max_allocated_storage
-  database_password     = var.database_password
+  db_identifier              = var.db_identifier
+  postgres_version           = var.postgres_version
+  instance_class             = var.db_instance_class
+  allocated_storage          = var.db_allocated_storage
+  database_name              = var.database_name
+  database_username          = var.database_username
+  multi_az                   = var.db_multi_az
+  database_subnet_ids        = module.networking.private_subnet_ids
+  vpc_id                     = module.networking.vpc_id
+  eks_security_group_id      = module.eks.cluster_security_group_id
+  eks_node_security_group_id = module.eks.node_security_group_id
+  tags                       = var.tags
+  max_allocated_storage      = var.db_max_allocated_storage
+  database_password          = var.database_password
 }
 
 resource "aws_cloudwatch_log_group" "materialize" {
@@ -97,9 +98,6 @@ resource "aws_iam_user_policy" "materialize_s3" {
     ]
   })
 }
-
-# Data source for current region
-data "aws_region" "current" {}
 
 resource "aws_iam_role" "materialize_s3" {
   name = "${var.environment}-materialize-s3-role"
