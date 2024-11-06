@@ -123,6 +123,10 @@ resource "aws_iam_role" "materialize_s3" {
   })
 
   tags = var.tags
+
+  depends_on = [
+    module.eks
+  ]
 }
 
 # Attach S3 bucket policy to the role

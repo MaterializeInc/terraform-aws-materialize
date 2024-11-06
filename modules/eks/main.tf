@@ -5,12 +5,11 @@ module "eks" {
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
 
-  # TODO: Uncomment the following to enable the EBS CSI driver
-  # cluster_addons = {
-  #   aws-ebs-csi-driver = {
-  #     service_account_role_arn = module.irsa-ebs-csi.iam_role_arn
-  #   }
-  # }
+  cluster_addons = {
+    aws-ebs-csi-driver = {
+      service_account_role_arn = module.irsa-ebs-csi.iam_role_arn
+    }
+  }
 
   vpc_id     = var.vpc_id
   subnet_ids = var.private_subnet_ids
