@@ -84,9 +84,16 @@ variable "node_group_max_size" {
 }
 
 variable "node_group_instance_types" {
-  description = "Instance types for worker nodes"
+  description = <<EOF
+Instance types for worker nodes.
+
+Recommended Configuration for Running Materialize with disk:
+- Tested instance types: `m6g`, `m7g` families (ARM-based Graviton instances)
+- AMI: AWS Bottlerocket (optimized for container workloads)
+- Note: Ensure instance store volumes are available and attached to the nodes for optimal performance with disk-based workloads.
+EOF
   type        = list(string)
-  default     = ["t3.large"]
+  default     = ["m6g.medium"]
 }
 
 variable "node_group_capacity_type" {
