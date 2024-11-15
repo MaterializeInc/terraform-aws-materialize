@@ -14,7 +14,7 @@ The module has been tested with:
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.75.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 2.0 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | ~> 2.0 |
 
@@ -22,7 +22,7 @@ The module has been tested with:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.75.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.75.1 |
 
 ## Modules
 
@@ -96,4 +96,14 @@ The module has been tested with:
 | <a name="output_persist_backend_url"></a> [persist\_backend\_url](#output\_persist\_backend\_url) | S3 connection URL in the format required by Materialize using IRSA |
 | <a name="output_s3_bucket_name"></a> [s3\_bucket\_name](#output\_s3\_bucket\_name) | Name of the S3 bucket |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | VPC ID |
+
+## Post-Deployment Setup
+
+After successfully deploying the infrastructure with this module, you'll need to:
+
+1. (Optional) Configure storage classes
+1. Install the [Materialize Operator](https://github.com/MaterializeInc/materialize/tree/main/misc/helm-charts/operator)
+1. Deploy your first Materialize environment
+
+See our [Operator Installation Guide](docs/operator-setup.md) for instructions.
 <!-- END_TF_DOCS -->

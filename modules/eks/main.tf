@@ -14,13 +14,15 @@ module "eks" {
   cluster_enabled_log_types = var.cluster_enabled_log_types
 
   eks_managed_node_groups = {
-    general = {
+    "${var.environment}-mz-workers" = {
       desired_size = var.node_group_desired_size
       min_size     = var.node_group_min_size
       max_size     = var.node_group_max_size
 
       instance_types = var.node_group_instance_types
       capacity_type  = var.node_group_capacity_type
+
+      name = "${var.environment}-mz"
 
       labels = {
         Environment              = var.environment
