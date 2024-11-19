@@ -33,5 +33,9 @@ module "eks" {
     }
   }
 
+  # Cluster access entry
+  # To add the current caller identity as an administrat
+  enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
+
   tags = var.tags
 }

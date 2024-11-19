@@ -108,6 +108,12 @@ variable "cluster_enabled_log_types" {
   default     = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 }
 
+variable "enable_cluster_creator_admin_permissions" {
+  description = "To add the current caller identity as an administrat"
+  type        = bool
+  default     = true
+}
+
 # RDS Variables
 variable "db_identifier" {
   description = "Identifier for the RDS instance"

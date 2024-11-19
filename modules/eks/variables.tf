@@ -60,3 +60,9 @@ variable "node_group_capacity_type" {
   type        = string
   default     = "ON_DEMAND"
 }
+
+variable "enable_cluster_creator_admin_permissions" {
+  description = "To add the current caller identity as an administrat"
+  type        = bool
+  default     = true
+}
