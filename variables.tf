@@ -246,10 +246,22 @@ variable "bucket_prefix" {
   default     = "system"
 }
 
-variable "mz_service_account_name" {
+variable "mz_iam_service_account_name" {
   description = "Name of the IAM user for Materialize service authentication (will be prefixed with environment name)"
   type        = string
   default     = "materialize-user"
+}
+
+variable "mz_iam_role_name" {
+  description = "Name of the IAM role for Materialize S3 access (will be prefixed with environment name)"
+  type        = string
+  default     = "materialize-s3-role"
+}
+
+variable "mz_iam_policy_name" {
+  description = "Name of the IAM policy for Materialize S3 access"
+  type        = string
+  default     = "materialize-s3-access"
 }
 
 variable "log_group_name_prefix" {

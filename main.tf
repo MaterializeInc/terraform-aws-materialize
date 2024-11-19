@@ -69,7 +69,7 @@ resource "aws_cloudwatch_log_group" "materialize" {
 }
 
 resource "aws_iam_user" "materialize" {
-  name = "${var.environment}-${var.mz_service_account_name}"
+  name = "${var.environment}-${var.mz_iam_service_account_name}"
 }
 
 resource "aws_iam_access_key" "materialize_user" {
@@ -77,7 +77,7 @@ resource "aws_iam_access_key" "materialize_user" {
 }
 
 resource "aws_iam_user_policy" "materialize_s3" {
-  name = "materialize-s3-access"
+  name = var.mz_iam_policy_name
   user = aws_iam_user.materialize.name
 
   policy = jsonencode({
@@ -101,7 +101,7 @@ resource "aws_iam_user_policy" "materialize_s3" {
 }
 
 resource "aws_iam_role" "materialize_s3" {
-  name = "${var.environment}-materialize-s3-role"
+  name = "${var.environment}-${var.mz_iam_role_name}"
 
   # Trust policy allowing EKS to assume this role
   assume_role_policy = jsonencode({
@@ -130,9 +130,8 @@ resource "aws_iam_role" "materialize_s3" {
   ]
 }
 
-# Attach S3 bucket policy to the role
 resource "aws_iam_role_policy" "materialize_s3" {
-  name = "materialize-s3-access"
+  name = var.mz_iam_policy_name
   role = aws_iam_role.materialize_s3.id
 
   policy = jsonencode({

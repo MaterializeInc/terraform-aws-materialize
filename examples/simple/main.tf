@@ -11,7 +11,7 @@ module "materialize_infrastructure" {
   environment             = "dev"
   vpc_name                = "materialize-simple"
   cluster_name            = "materialize-eks-simple"
-  mz_service_account_name = "materialize-user"
+  mz_iam_service_account_name = "materialize-user"
 
   # VPC Configuration
   vpc_cidr             = "10.0.0.0/16"
