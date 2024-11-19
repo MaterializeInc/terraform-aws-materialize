@@ -33,28 +33,9 @@ module "eks" {
     }
   }
 
-  access_entries = local.access_entries
+  # Cluster access entry
+  # To add the current caller identity as an administrat
+  enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
   tags = var.tags
-}
-
-data "aws_caller_identity" "current" {}
-
-locals {
-  assumed_role_name = var.enable_current_user_cluster_admin ? split("/", data.aws_caller_identity.current.arn)[1] : ""
-  sso_role_arn      = var.enable_current_user_cluster_admin ? "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/${local.assumed_role_name}" : ""
-  access_entries = var.enable_current_user_cluster_admin ? {
-    current_user = {
-      kubernetes_groups = ["administrators"]
-      principal_arn     = local.sso_role_arn
-      policy_associations = {
-        eks_admin_access = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          access_scope = {
-            type = "cluster"
-          }
-        }
-      }
-    }
-  } : {}
 }

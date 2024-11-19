@@ -61,8 +61,8 @@ variable "node_group_capacity_type" {
   default     = "ON_DEMAND"
 }
 
-variable "enable_current_user_cluster_admin" {
-  description = "Enable cluster admin access for the current AWS SSO user"
+variable "enable_cluster_creator_admin_permissions" {
+  description = "To add the current caller identity as an administrat"
   type        = bool
   default     = true
 }

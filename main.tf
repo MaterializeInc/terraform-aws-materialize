@@ -14,19 +14,19 @@ module "networking" {
 module "eks" {
   source = "./modules/eks"
 
-  cluster_name                      = var.cluster_name
-  cluster_version                   = var.cluster_version
-  vpc_id                            = module.networking.vpc_id
-  private_subnet_ids                = module.networking.private_subnet_ids
-  environment                       = var.environment
-  node_group_desired_size           = var.node_group_desired_size
-  node_group_min_size               = var.node_group_min_size
-  node_group_max_size               = var.node_group_max_size
-  node_group_instance_types         = var.node_group_instance_types
-  tags                              = var.tags
-  cluster_enabled_log_types         = var.cluster_enabled_log_types
-  node_group_capacity_type          = var.node_group_capacity_type
-  enable_current_user_cluster_admin = var.enable_current_user_cluster_admin
+  cluster_name                             = var.cluster_name
+  cluster_version                          = var.cluster_version
+  vpc_id                                   = module.networking.vpc_id
+  private_subnet_ids                       = module.networking.private_subnet_ids
+  environment                              = var.environment
+  node_group_desired_size                  = var.node_group_desired_size
+  node_group_min_size                      = var.node_group_min_size
+  node_group_max_size                      = var.node_group_max_size
+  node_group_instance_types                = var.node_group_instance_types
+  tags                                     = var.tags
+  cluster_enabled_log_types                = var.cluster_enabled_log_types
+  node_group_capacity_type                 = var.node_group_capacity_type
+  enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 }
 
 module "storage" {

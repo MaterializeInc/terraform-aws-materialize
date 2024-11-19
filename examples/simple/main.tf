@@ -3,6 +3,8 @@ provider "aws" {
 }
 
 module "materialize_infrastructure" {
+  # To pull this from GitHub, use the following:
+  # source = "git::https://github.com/MaterializeInc/terraform-aws-materialize.git"
   source = "../../"
 
   # Basic settings
@@ -18,13 +20,13 @@ module "materialize_infrastructure" {
   single_nat_gateway   = true
 
   # EKS Configuration
-  cluster_version                   = "1.31"
-  node_group_instance_types         = ["m6g.medium"]
-  node_group_desired_size           = 2
-  node_group_min_size               = 1
-  node_group_max_size               = 3
-  node_group_capacity_type          = "ON_DEMAND"
-  enable_current_user_cluster_admin = true
+  cluster_version                          = "1.31"
+  node_group_instance_types                = ["m6g.medium"]
+  node_group_desired_size                  = 2
+  node_group_min_size                      = 1
+  node_group_max_size                      = 3
+  node_group_capacity_type                 = "ON_DEMAND"
+  enable_cluster_creator_admin_permissions = true
 
   # Storage Configuration
   bucket_name              = "materialize-simple-storage-${random_id.suffix.hex}"
