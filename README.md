@@ -69,6 +69,7 @@ The module has been tested with:
 | <a name="input_enable_cluster_creator_admin_permissions"></a> [enable\_cluster\_creator\_admin\_permissions](#input\_enable\_cluster\_creator\_admin\_permissions) | To add the current caller identity as an administrat | `bool` | `true` | no |
 | <a name="input_enable_monitoring"></a> [enable\_monitoring](#input\_enable\_monitoring) | Enable CloudWatch monitoring | `bool` | `true` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Environment name (e.g., prod, staging, dev) | `string` | `"dev"` | no |
+| <a name="input_log_group_name_prefix"></a> [log\_group\_name\_prefix](#input\_log\_group\_name\_prefix) | Prefix for the CloudWatch log group name (will be combined with environment name) | `string` | `"materialize"` | no |
 | <a name="input_metrics_retention_days"></a> [metrics\_retention\_days](#input\_metrics\_retention\_days) | Number of days to retain CloudWatch metrics | `number` | `7` | no |
 | <a name="input_mz_service_account_name"></a> [mz\_service\_account\_name](#input\_mz\_service\_account\_name) | Name of the IAM user for Materialize service authentication (will be prefixed with environment name) | `string` | `"materialize-user"` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for Materialize resources | `string` | `"materialize-environment"` | no |

@@ -251,3 +251,9 @@ variable "mz_service_account_name" {
   type        = string
   default     = "materialize-user"
 }
+
+variable "log_group_name_prefix" {
+  description = "Prefix for the CloudWatch log group name (will be combined with environment name)"
+  type        = string
+  default     = "materialize"
+}

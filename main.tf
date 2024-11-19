@@ -62,7 +62,7 @@ module "database" {
 resource "aws_cloudwatch_log_group" "materialize" {
   count = var.enable_monitoring ? 1 : 0
 
-  name              = "/aws/materialize/${var.environment}"
+  name              = "/aws/${var.log_group_name_prefix}/${var.cluster_name}/${var.environment}"
   retention_in_days = var.metrics_retention_days
 
   tags = var.tags
