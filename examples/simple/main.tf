@@ -19,7 +19,7 @@ module "materialize_infrastructure" {
 
   # EKS Configuration
   cluster_version           = "1.31"
-  node_group_instance_types = ["t3.medium"]
+  node_group_instance_types = ["m6g.medium"]
   node_group_desired_size   = 2
   node_group_min_size       = 1
   node_group_max_size       = 3
@@ -43,7 +43,7 @@ module "materialize_infrastructure" {
 
   # Basic monitoring
   enable_monitoring      = true
-  metrics_retention_days = 7
+  metrics_retention_days = 3
 
   # Tags
   tags = {
