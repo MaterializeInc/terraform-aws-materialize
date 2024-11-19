@@ -60,3 +60,9 @@ variable "node_group_capacity_type" {
   type        = string
   default     = "ON_DEMAND"
 }
+
+variable "enable_current_user_cluster_admin" {
+  description = "Enable cluster admin access for the current AWS SSO user"
+  type        = bool
+  default     = true
+}

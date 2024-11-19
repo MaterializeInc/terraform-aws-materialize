@@ -108,6 +108,12 @@ variable "cluster_enabled_log_types" {
   default     = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 }
 
+variable "enable_current_user_cluster_admin" {
+  description = "Enable cluster admin access for the current AWS SSO user"
+  type        = bool
+  default     = true
+}
+
 # RDS Variables
 variable "db_identifier" {
   description = "Identifier for the RDS instance"

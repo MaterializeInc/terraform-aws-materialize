@@ -18,3 +18,5 @@ node_group_max_size       = 5
 db_instance_class    = "db.t3.micro"
 db_allocated_storage = 20
 db_multi_az          = false
+
+enable_current_user_cluster_admin = true
