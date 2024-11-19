@@ -69,7 +69,7 @@ resource "aws_cloudwatch_log_group" "materialize" {
 }
 
 resource "aws_iam_user" "materialize" {
-  name = "${var.environment}-materialize-user"
+  name = "${var.environment}-${var.mz_service_account_name}"
 }
 
 resource "aws_iam_access_key" "materialize_user" {

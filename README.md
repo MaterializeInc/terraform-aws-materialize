@@ -70,6 +70,7 @@ The module has been tested with:
 | <a name="input_enable_monitoring"></a> [enable\_monitoring](#input\_enable\_monitoring) | Enable CloudWatch monitoring | `bool` | `true` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Environment name (e.g., prod, staging, dev) | `string` | `"dev"` | no |
 | <a name="input_metrics_retention_days"></a> [metrics\_retention\_days](#input\_metrics\_retention\_days) | Number of days to retain CloudWatch metrics | `number` | `7` | no |
+| <a name="input_mz_service_account_name"></a> [mz\_service\_account\_name](#input\_mz\_service\_account\_name) | Name of the IAM user for Materialize service authentication (will be prefixed with environment name) | `string` | `"materialize-user"` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for Materialize resources | `string` | `"materialize-environment"` | no |
 | <a name="input_node_group_capacity_type"></a> [node\_group\_capacity\_type](#input\_node\_group\_capacity\_type) | Capacity type for worker nodes (ON\_DEMAND or SPOT) | `string` | `"ON_DEMAND"` | no |
 | <a name="input_node_group_desired_size"></a> [node\_group\_desired\_size](#input\_node\_group\_desired\_size) | Desired number of worker nodes | `number` | `2` | no |

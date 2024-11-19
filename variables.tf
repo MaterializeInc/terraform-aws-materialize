@@ -245,3 +245,9 @@ variable "bucket_prefix" {
   type        = string
   default     = "system"
 }
+
+variable "mz_service_account_name" {
+  description = "Name of the IAM user for Materialize service authentication (will be prefixed with environment name)"
+  type        = string
+  default     = "materialize-user"
+}
