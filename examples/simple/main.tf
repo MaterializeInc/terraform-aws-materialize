@@ -8,9 +8,9 @@ module "materialize_infrastructure" {
   source = "../../"
 
   # Basic settings
-  environment             = "dev"
-  vpc_name                = "materialize-simple"
-  cluster_name            = "materialize-eks-simple"
+  environment                 = "dev"
+  vpc_name                    = "materialize-simple"
+  cluster_name                = "materialize-eks-simple"
   mz_iam_service_account_name = "materialize-user"
 
   # VPC Configuration
