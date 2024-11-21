@@ -38,6 +38,12 @@ variable "node_group_instance_types" {
   type        = list(string)
 }
 
+variable "node_group_ami_type" {
+  description = "AMI type for the node group"
+  type        = string
+  default     = "AL2023_x86_64_STANDARD"
+}
+
 variable "cluster_enabled_log_types" {
   description = "List of desired control plane logging to enable"
   type        = list(string)
