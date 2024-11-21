@@ -21,6 +21,7 @@ module "eks" {
 
       instance_types = var.node_group_instance_types
       capacity_type  = var.node_group_capacity_type
+      ami_type       = var.node_group_ami_type
 
       name = "${var.environment}-mz"
 

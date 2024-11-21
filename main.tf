@@ -23,6 +23,7 @@ module "eks" {
   node_group_min_size                      = var.node_group_min_size
   node_group_max_size                      = var.node_group_max_size
   node_group_instance_types                = var.node_group_instance_types
+  node_group_ami_type                      = var.node_group_ami_type
   tags                                     = var.tags
   cluster_enabled_log_types                = var.cluster_enabled_log_types
   node_group_capacity_type                 = var.node_group_capacity_type
