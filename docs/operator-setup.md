@@ -71,15 +71,16 @@ cd materialize
 1. Create a values file for the Helm installation (save as `materialize-values.yaml`):
 ```yaml
 operator:
-  args:
-    cloudProvider: "aws"
+  cloudProvider:
+    type: "aws"
     region: "<your-aws-region>" # e.g. us-west-2
-    localDevelopment: false
-    awsAccountID: "<your-aws-account-id>" # e.g. 123456789012
-    createBalancers: true
-    createConsole: true
-    environmentdIAMRoleARN: "<output.materialize_s3_role_arn>" # e.g. arn:aws:iam::123456789012:role/materialize-s3-role
-    startupLogFilter: "INFO"
+    providers:
+      aws:
+        enabled: true
+        accountID: "<your-aws-account-id>" # e.g. 123456789012
+        iam:
+          roles:
+            environment: "<output.materialize_s3_role_arn>" # e.g. arn:aws:iam::123456789012:role/materialize-s3-role
 
 namespace:
   create: true
