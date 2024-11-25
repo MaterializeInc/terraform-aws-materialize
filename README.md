@@ -61,7 +61,7 @@ The module has been tested with:
 | <a name="input_database_username"></a> [database\_username](#input\_database\_username) | Username for the database | `string` | `"materialize"` | no |
 | <a name="input_db_allocated_storage"></a> [db\_allocated\_storage](#input\_db\_allocated\_storage) | Allocated storage for the RDS instance (in GB) | `number` | `20` | no |
 | <a name="input_db_identifier"></a> [db\_identifier](#input\_db\_identifier) | Identifier for the RDS instance | `string` | `"materialize-db"` | no |
-| <a name="input_db_instance_class"></a> [db\_instance\_class](#input\_db\_instance\_class) | Instance class for the RDS instance | `string` | `"db.t3.medium"` | no |
+| <a name="input_db_instance_class"></a> [db\_instance\_class](#input\_db\_instance\_class) | Instance class for the RDS instance | `string` | `"db.t3.large"` | no |
 | <a name="input_db_max_allocated_storage"></a> [db\_max\_allocated\_storage](#input\_db\_max\_allocated\_storage) | Maximum storage for autoscaling (in GB) | `number` | `100` | no |
 | <a name="input_db_multi_az"></a> [db\_multi\_az](#input\_db\_multi\_az) | Enable multi-AZ deployment for RDS | `bool` | `false` | no |
 | <a name="input_enable_bucket_encryption"></a> [enable\_bucket\_encryption](#input\_enable\_bucket\_encryption) | Enable server-side encryption for the S3 bucket | `bool` | `true` | no |
