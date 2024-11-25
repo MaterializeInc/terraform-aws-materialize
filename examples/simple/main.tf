@@ -39,7 +39,7 @@ module "materialize_infrastructure" {
   database_password    = "your-secure-password"
   db_identifier        = "materialize-simple"
   postgres_version     = "15"
-  db_instance_class    = "db.t3.micro"
+  db_instance_class    = "db.t3.large"
   db_allocated_storage = 20
   database_name        = "materialize"
   database_username    = "materialize"
