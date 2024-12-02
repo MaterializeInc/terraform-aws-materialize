@@ -24,55 +24,14 @@ kubectl get pods -n cert-manager
 
 ## Configure Certificate Issuers
 
-1. Create the self-signed root certificate issuer (save as `certificate-issuers.yaml` file):
+Before configuring TLS for Materialize, you'll need to set up appropriate certificate issuers in your cluster. The specific configuration will depend on your environment and requirements. Please refer to the [cert-manager documentation](https://cert-manager.io/docs/configuration/) for detailed guidance on:
 
-```yaml
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: dns01
-spec:
-  selfSigned: {}
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: intermediate-ca
-  namespace: materialize-environment
-spec:
-  ca:
-    secretName: ca-key-pair
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: ca-key-pair
-  namespace: materialize-environment
-spec:
-  isCA: true
-  commonName: materialize-ca
-  secretName: ca-key-pair
-  privateKey:
-    algorithm: ECDSA
-    size: 256
-  issuerRef:
-    name: dns01
-    kind: ClusterIssuer
-```
+- Choosing the right issuer type for your environment
+- Configuring production-ready certificate issuers
+- Setting up intermediate CAs if required
+- Managing certificate lifecycle and renewal
 
-2. Apply the configuration:
-
-```bash
-kubectl apply -f certificate-issuers.yaml
-```
-
-3. Verify the issuers are ready:
-
-```bash
-kubectl get clusterissuer dns01
-kubectl get issuer -n materialize-environment intermediate-ca
-kubectl get certificate -n materialize-environment ca-key-pair
-```
+Once you have configured your certificate issuers, you can proceed with the Materialize TLS configuration.
 
 ## Configure Materialize with TLS
 
@@ -85,24 +44,20 @@ kubectl get certificate -n materialize-environment ca-key-pair
 tls:
   defaultCertificateSpecs:
     balancerdExternal:
-      dnsNames:
-        - balancerd
-        - balancerd.materialize-environment.svc.cluster.local # Change to your namespace
-      issuerRef:
-        name: dns01
-        kind: ClusterIssuer
+      duration: 2160h  # 90 days
+      renewBefore: 360h  # 15 days
+      privateKey:
+        algorithm: ECDSA
+        size: 256
     consoleExternal:
-      dnsNames:
-        - console
-        - console.materialize-environment.svc.cluster.local # Change to your namespace
-      issuerRef:
-        name: dns01
-        kind: ClusterIssuer
-    internal:
-      issuerRef:
-        name: intermediate-ca
-        kind: Issuer
+      duration: 2160h  # 90 days
+      renewBefore: 360h  # 15 days
+      privateKey:
+        algorithm: ECDSA
+        size: 256
 ```
+
+> Note: Configure only the fields that should be common across all Materialize environments. DNS names and secret templates should be configured per environment in the Materialize Custom Resource.
 
 2. Update the Materialize Operator installation:
 
@@ -126,22 +81,12 @@ spec:
   forceRollout: 33333333-3333-3333-3333-333333333333
   balancerdExternalCertificateSpec:
     dnsNames:
-      - balancerd
-      - balancerd.materialize-environment.svc.cluster.local
-    issuerRef:
-      name: dns01
-      kind: ClusterIssuer
+      - mz-balancerd-prod.example.com
+      - mz-balancerd-prod-internal.example.com
   consoleExternalCertificateSpec:
     dnsNames:
-      - console
-      - console.materialize-environment.svc.cluster.local
-    issuerRef:
-      name: dns01
-      kind: ClusterIssuer
-  internalCertificateSpec:
-    issuerRef:
-      name: intermediate-ca
-      kind: Issuer
+      - mz-console-prod.example.com
+      - mz-console-prod-internal.example.com
 ```
 
 The `forceRollout` and `requestRollout` fields are used to trigger a rollout of the Materialize environment. They should be set to unique UUIDs.
