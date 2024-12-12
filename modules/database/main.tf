@@ -38,7 +38,7 @@ module "db" {
 }
 
 resource "aws_security_group" "database" {
-  name_prefix = "materialize-db-"
+  name_prefix = "${var.db_identifier}-sg-"
   vpc_id      = var.vpc_id
 
   ingress {
