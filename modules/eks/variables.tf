@@ -68,7 +68,7 @@ variable "node_group_capacity_type" {
 }
 
 variable "enable_cluster_creator_admin_permissions" {
-  description = "To add the current caller identity as an administrat"
+  description = "To add the current caller identity as an administrator"
   type        = bool
   default     = true
 }
