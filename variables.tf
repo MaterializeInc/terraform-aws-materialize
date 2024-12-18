@@ -246,12 +246,6 @@ variable "service_account_name" {
   default     = "12345678-1234-1234-1234-123456789012"
 }
 
-variable "bucket_prefix" {
-  description = "Prefix for the S3 bucket"
-  type        = string
-  default     = "system"
-}
-
 variable "mz_iam_service_account_name" {
   description = "Name of the IAM user for Materialize service authentication (will be prefixed with environment name)"
   type        = string
