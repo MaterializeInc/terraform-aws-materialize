@@ -16,8 +16,8 @@ module "eks" {
 
   cluster_name                             = var.cluster_name
   cluster_version                          = var.cluster_version
-  vpc_id                                   = module.networking.vpc_id
-  private_subnet_ids                       = module.networking.private_subnet_ids
+  vpc_id                                   = local.network_id
+  private_subnet_ids                       = local.network_private_subnet_ids
   environment                              = var.environment
   node_group_desired_size                  = var.node_group_desired_size
   node_group_min_size                      = var.node_group_min_size
@@ -51,13 +51,18 @@ module "database" {
   database_name              = var.database_name
   database_username          = var.database_username
   multi_az                   = var.db_multi_az
-  database_subnet_ids        = module.networking.private_subnet_ids
-  vpc_id                     = module.networking.vpc_id
+  database_subnet_ids        = local.network_private_subnet_ids
+  vpc_id                     = local.network_id
   eks_security_group_id      = module.eks.cluster_security_group_id
   eks_node_security_group_id = module.eks.node_security_group_id
   tags                       = var.tags
   max_allocated_storage      = var.db_max_allocated_storage
   database_password          = var.database_password
+}
+
+locals {
+  network_id                 = var.create_vpc ? module.networking.vpc_id : var.network_id
+  network_private_subnet_ids = var.create_vpc ? module.networking.private_subnet_ids : var.network_private_subnet_ids
 }
 
 resource "aws_cloudwatch_log_group" "materialize" {

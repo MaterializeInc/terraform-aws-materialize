@@ -16,6 +16,24 @@ variable "tags" {
 }
 
 # Networking Variables
+variable "create_vpc" {
+  description = "Controls if VPC should be created (it affects almost all resources)"
+  type        = bool
+  default     = true
+}
+
+variable "network_id" {
+  default     = ""
+  description = "The ID of the VPC in which resources will be deployed. Only used if create_vpc is false."
+  type        = string
+}
+
+variable "network_private_subnet_ids" {
+  default     = []
+  description = "A list of private subnet IDs in the VPC. Only used if create_vpc is false."
+  type        = list(string)
+}
+
 variable "vpc_name" {
   description = "Name of the VPC"
   type        = string
