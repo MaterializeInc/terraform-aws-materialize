@@ -22,7 +22,7 @@ module "materialize_infrastructure" {
 
   # EKS Configuration
   cluster_version                          = "1.31"
-  node_group_instance_types                = ["m6g.medium"]
+  node_group_instance_types                = ["r5.xlarge"]
   node_group_desired_size                  = 2
   node_group_min_size                      = 1
   node_group_max_size                      = 3
@@ -36,7 +36,7 @@ module "materialize_infrastructure" {
   bucket_force_destroy     = true
 
   # Database Configuration
-  database_password    = "your-secure-password"
+  database_password    = var.database_password
   db_identifier        = "materialize-simple"
   postgres_version     = "15"
   db_instance_class    = "db.t3.large"
@@ -55,6 +55,12 @@ module "materialize_infrastructure" {
     Project     = "materialize-simple"
     Terraform   = "true"
   }
+}
+
+variable "database_password" {
+  description = "Password for the database (should be provided via tfvars or environment variable)"
+  type        = string
+  sensitive   = true
 }
 
 # Generate random suffix for unique S3 bucket name
