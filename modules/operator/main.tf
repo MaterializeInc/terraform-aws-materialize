@@ -17,32 +17,32 @@ resource "kubernetes_namespace" "instance_namespaces" {
 }
 
 resource "helm_release" "materialize_operator" {
-  name       = "${local.name_prefix}-operator"
-  namespace  = kubernetes_namespace.materialize.metadata[0].name
+  name      = "${local.name_prefix}-operator"
+  namespace = kubernetes_namespace.materialize.metadata[0].name
   # TODO: Publish the chart to a public repository, currently using a forked version of the chart
   repository = "https://raw.githubusercontent.com/bobbyiliev/materialize/refs/heads/helm-chart-package/misc/helm-charts"
   chart      = "materialize-operator"
   # version    = var.operator_version
   # TODO: Use the latest version of the chart
-  version    = "v25.1.0-beta.1"
+  version = "v25.1.0-beta.1"
 
   values = [
     yamlencode({
-      operator ={
+      operator = {
         cloudProvider = {
-            type   = "aws"
-            region = data.aws_region.current.name
-            providers = {
+          type   = "aws"
+          region = data.aws_region.current.name
+          providers = {
             aws = {
-                enabled   = true
-                accountID = data.aws_caller_identity.current.account_id
-                iam = {
+              enabled   = true
+              accountID = data.aws_caller_identity.current.account_id
+              iam = {
                 roles = {
-                    environment = var.iam_role_arn
+                  environment = var.iam_role_arn
                 }
-                }
+              }
             }
-            }
+          }
         }
       }
     })
@@ -68,12 +68,12 @@ resource "kubernetes_secret" "materialize_backends" {
       coalesce(each.value.database_name, "${each.key}_db")
     )
     persist_backend_url = format(
-        "s3://%s/%s-%s:serviceaccount:%s:%s",
-        var.s3_bucket_name,
-        var.environment,
-        each.key,
-        coalesce(each.value.namespace, kubernetes_namespace.materialize.metadata[0].name),
-        each.value.instance_id
+      "s3://%s/%s-%s:serviceaccount:%s:%s",
+      var.s3_bucket_name,
+      var.environment,
+      each.key,
+      coalesce(each.value.namespace, kubernetes_namespace.materialize.metadata[0].name),
+      each.value.instance_id
     )
   }
 }
@@ -153,8 +153,8 @@ resource "kubernetes_manifest" "db_init_job" {
       template = {
         spec = {
           containers = [{
-            name    = "init-db"
-            image   = "postgres:latest"
+            name  = "init-db"
+            image = "postgres:latest"
             command = [
               "/bin/sh",
               "-c",
@@ -165,7 +165,7 @@ resource "kubernetes_manifest" "db_init_job" {
             ]
             env = [
               {
-                name  = "DATABASE_URL"
+                name = "DATABASE_URL"
                 value = format(
                   "postgres://%s:%s@%s/%s?sslmode=require",
                   each.value.database_username,
