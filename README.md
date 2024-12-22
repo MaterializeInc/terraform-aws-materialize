@@ -23,7 +23,7 @@ The module has been tested with:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.81.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.82.2 |
 
 ## Modules
 
@@ -52,16 +52,13 @@ The module has been tested with:
 | <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | List of availability zones | `list(string)` | <pre>[<br/>  "us-east-1a",<br/>  "us-east-1b",<br/>  "us-east-1c"<br/>]</pre> | no |
 | <a name="input_bucket_force_destroy"></a> [bucket\_force\_destroy](#input\_bucket\_force\_destroy) | Enable force destroy for the S3 bucket | `bool` | `false` | no |
 | <a name="input_bucket_lifecycle_rules"></a> [bucket\_lifecycle\_rules](#input\_bucket\_lifecycle\_rules) | List of lifecycle rules for the S3 bucket | <pre>list(object({<br/>    id                                 = string<br/>    enabled                            = bool<br/>    prefix                             = string<br/>    transition_days                    = number<br/>    transition_storage_class           = string<br/>    expiration_days                    = number<br/>    noncurrent_version_expiration_days = number<br/>  }))</pre> | <pre>[<br/>  {<br/>    "enabled": true,<br/>    "expiration_days": 365,<br/>    "id": "cleanup",<br/>    "noncurrent_version_expiration_days": 90,<br/>    "prefix": "",<br/>    "transition_days": 90,<br/>    "transition_storage_class": "STANDARD_IA"<br/>  }<br/>]</pre> | no |
-| <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | Name of the S3 bucket | `string` | n/a | yes |
 | <a name="input_cluster_enabled_log_types"></a> [cluster\_enabled\_log\_types](#input\_cluster\_enabled\_log\_types) | List of desired control plane logging to enable | `list(string)` | <pre>[<br/>  "api",<br/>  "audit",<br/>  "authenticator",<br/>  "controllerManager",<br/>  "scheduler"<br/>]</pre> | no |
-| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster | `string` | `"materialize-cluster"` | no |
 | <a name="input_cluster_version"></a> [cluster\_version](#input\_cluster\_version) | Kubernetes version for the EKS cluster | `string` | `"1.31"` | no |
 | <a name="input_create_vpc"></a> [create\_vpc](#input\_create\_vpc) | Controls if VPC should be created (it affects almost all resources) | `bool` | `true` | no |
 | <a name="input_database_name"></a> [database\_name](#input\_database\_name) | Name of the database to create | `string` | `"materialize"` | no |
 | <a name="input_database_password"></a> [database\_password](#input\_database\_password) | Password for the database (should be provided via tfvars or environment variable) | `string` | n/a | yes |
 | <a name="input_database_username"></a> [database\_username](#input\_database\_username) | Username for the database | `string` | `"materialize"` | no |
 | <a name="input_db_allocated_storage"></a> [db\_allocated\_storage](#input\_db\_allocated\_storage) | Allocated storage for the RDS instance (in GB) | `number` | `20` | no |
-| <a name="input_db_identifier"></a> [db\_identifier](#input\_db\_identifier) | Identifier for the RDS instance | `string` | `"materialize-db"` | no |
 | <a name="input_db_instance_class"></a> [db\_instance\_class](#input\_db\_instance\_class) | Instance class for the RDS instance | `string` | `"db.t3.large"` | no |
 | <a name="input_db_max_allocated_storage"></a> [db\_max\_allocated\_storage](#input\_db\_max\_allocated\_storage) | Maximum storage for autoscaling (in GB) | `number` | `100` | no |
 | <a name="input_db_multi_az"></a> [db\_multi\_az](#input\_db\_multi\_az) | Enable multi-AZ deployment for RDS | `bool` | `false` | no |
@@ -69,13 +66,11 @@ The module has been tested with:
 | <a name="input_enable_bucket_versioning"></a> [enable\_bucket\_versioning](#input\_enable\_bucket\_versioning) | Enable versioning for the S3 bucket | `bool` | `true` | no |
 | <a name="input_enable_cluster_creator_admin_permissions"></a> [enable\_cluster\_creator\_admin\_permissions](#input\_enable\_cluster\_creator\_admin\_permissions) | To add the current caller identity as an administrator | `bool` | `true` | no |
 | <a name="input_enable_monitoring"></a> [enable\_monitoring](#input\_enable\_monitoring) | Enable CloudWatch monitoring | `bool` | `true` | no |
-| <a name="input_environment"></a> [environment](#input\_environment) | Environment name (e.g., prod, staging, dev) | `string` | `"dev"` | no |
+| <a name="input_environment"></a> [environment](#input\_environment) | Environment name (e.g., prod, staging, dev) | `string` | n/a | yes |
+| <a name="input_kubernetes_namespace"></a> [kubernetes\_namespace](#input\_kubernetes\_namespace) | The Kubernetes namespace for the Materialize resources | `string` | `"materialize-environment"` | no |
 | <a name="input_log_group_name_prefix"></a> [log\_group\_name\_prefix](#input\_log\_group\_name\_prefix) | Prefix for the CloudWatch log group name (will be combined with environment name) | `string` | `"materialize"` | no |
 | <a name="input_metrics_retention_days"></a> [metrics\_retention\_days](#input\_metrics\_retention\_days) | Number of days to retain CloudWatch metrics | `number` | `7` | no |
-| <a name="input_mz_iam_policy_name"></a> [mz\_iam\_policy\_name](#input\_mz\_iam\_policy\_name) | Name of the IAM policy for Materialize S3 access | `string` | `"materialize-s3-access"` | no |
-| <a name="input_mz_iam_role_name"></a> [mz\_iam\_role\_name](#input\_mz\_iam\_role\_name) | Name of the IAM role for Materialize S3 access (will be prefixed with environment name) | `string` | `"materialize-s3-role"` | no |
-| <a name="input_mz_iam_service_account_name"></a> [mz\_iam\_service\_account\_name](#input\_mz\_iam\_service\_account\_name) | Name of the IAM user for Materialize service authentication (will be prefixed with environment name) | `string` | `"materialize-user"` | no |
-| <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for Materialize resources | `string` | `"materialize-environment"` | no |
+| <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for all resources, usually the organization or project name | `string` | n/a | yes |
 | <a name="input_network_id"></a> [network\_id](#input\_network\_id) | The ID of the VPC in which resources will be deployed. Only used if create\_vpc is false. | `string` | `""` | no |
 | <a name="input_network_private_subnet_ids"></a> [network\_private\_subnet\_ids](#input\_network\_private\_subnet\_ids) | A list of private subnet IDs in the VPC. Only used if create\_vpc is false. | `list(string)` | `[]` | no |
 | <a name="input_node_group_ami_type"></a> [node\_group\_ami\_type](#input\_node\_group\_ami\_type) | AMI type for the node group | `string` | `"AL2023_x86_64_STANDARD"` | no |
@@ -91,7 +86,6 @@ The module has been tested with:
 | <a name="input_single_nat_gateway"></a> [single\_nat\_gateway](#input\_single\_nat\_gateway) | Use a single NAT Gateway for all private subnets | `bool` | `false` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | <pre>{<br/>  "Environment": "dev",<br/>  "Project": "materialize",<br/>  "Terraform": "true"<br/>}</pre> | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | CIDR block for VPC | `string` | `"10.0.0.0/16"` | no |
-| <a name="input_vpc_name"></a> [vpc\_name](#input\_vpc\_name) | Name of the VPC | `string` | `"materialize-vpc"` | no |
 
 ## Outputs
 

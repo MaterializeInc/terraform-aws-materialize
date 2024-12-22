@@ -55,20 +55,13 @@ module "materialize_infrastructure" {
   }
 }
 
-<<<<<<< HEAD
 variable "database_password" {
   description = "Password for the database (should be provided via tfvars or environment variable)"
+  default     = "your-secure-password"
   type        = string
   sensitive   = true
 }
 
-# Generate random suffix for unique S3 bucket name
-resource "random_id" "suffix" {
-  byte_length = 4
-}
-
-=======
->>>>>>> be3d603 (Refactor resource names definitions)
 # Outputs
 output "vpc_id" {
   description = "VPC ID"
