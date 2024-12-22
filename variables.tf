@@ -258,3 +258,27 @@ variable "log_group_name_prefix" {
   type        = string
   default     = "materialize"
 }
+
+# Materialize Helm Chart Variables
+variable "install_materialize_operator" {
+  description = "Whether to install the Materialize operator"
+  type        = bool
+  default     = false
+}
+
+variable "materialize_instances" {
+  description = "Configuration for Materialize instances"
+  type = list(object({
+    name              = string
+    instance_id       = string
+    namespace         = optional(string)
+    database_name     = optional(string)
+    database_username = optional(string)
+    database_password = optional(string)
+    database_host     = optional(string)
+    cpu_request       = optional(string)
+    memory_request    = optional(string)
+    memory_limit      = optional(string)
+  }))
+  default = []
+}

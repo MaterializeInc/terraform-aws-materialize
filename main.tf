@@ -78,9 +78,53 @@ module "database" {
   tags = local.common_tags
 }
 
+module "operator" {
+  count  = var.install_materialize_operator ? 1 : 0
+  source = "./modules/operator"
+
+  namespace              = var.namespace
+  environment            = var.environment
+  instances              = var.materialize_instances
+  iam_role_arn           = aws_iam_role.materialize_s3.arn
+  cluster_endpoint       = module.eks.cluster_endpoint
+  cluster_ca_certificate = module.eks.cluster_certificate_authority_data
+  s3_bucket_name         = module.storage.bucket_name
+
+  providers = {
+    kubernetes = kubernetes,
+    helm       = helm
+  }
+
+  depends_on = [
+    module.eks,
+    module.storage,
+    module.database
+  ]
+}
+
 locals {
   network_id                 = var.create_vpc ? module.networking.vpc_id : var.network_id
   network_private_subnet_ids = var.create_vpc ? module.networking.private_subnet_ids : var.network_private_subnet_ids
+
+  # instance_backend_urls = {
+  #   for instance in var.materialize_instances : instance.name => {
+  #     metadata_backend_url = format(
+  #       "postgres://%s:%s@%s/%s?sslmode=require",
+  #       coalesce(instance.database_username, var.database_username),
+  #       coalesce(instance.database_password, var.database_password),
+  #       module.database.db_instance_endpoint,
+  #       coalesce(instance.database_name, "${instance.name}_db")
+  #     )
+  #     persist_backend_url = format(
+  #       "s3://%s/%s/%s:serviceaccount:%s:%s",
+  #       module.storage.bucket_name,
+  #       var.environment,
+  #       instance.name,
+  #       coalesce(instance.namespace, "materialize-environment"),
+  #       instance.instance_id
+  #     )
+  #   }
+  # }
 
   # Common tags that apply to all resources
   common_tags = merge(
@@ -190,4 +234,8 @@ resource "aws_iam_role_policy" "materialize_s3" {
 
 locals {
   name_prefix = "${var.namespace}-${var.environment}"
+}
+
+data "aws_eks_cluster_auth" "cluster" {
+  name = module.eks.cluster_name
 }

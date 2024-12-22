@@ -22,6 +22,7 @@ module "materialize_infrastructure" {
   # EKS Configuration
   cluster_version = "1.31"
   # node_group_instance_types                = ["m6g.medium"]
+  # TODO: Defaulting to a smaller instance type due to resource constraints
   node_group_instance_types                = ["r5.xlarge"]
   node_group_desired_size                  = 2
   node_group_min_size                      = 1
@@ -46,6 +47,31 @@ module "materialize_infrastructure" {
   # Basic monitoring
   enable_monitoring      = true
   metrics_retention_days = 3
+
+  # Enable and configure Materialize operator
+  install_materialize_operator = true
+
+  # Configure Materialize instances
+  materialize_instances = [
+    {
+      name              = "analytics"
+      instance_id       = "12345678-1234-1234-1234-123456789012"
+      namespace         = "materialize-environment"
+      database_name     = "analytics_db"
+      database_username = "materialize"
+      database_password = var.database_password
+      database_host     = module.materialize_infrastructure.database_endpoint
+    },
+    {
+      name              = "production"
+      instance_id       = "87654321-4321-4321-4321-210987654321"
+      namespace         = "materialize-environment"
+      database_name     = "production_db"
+      database_username = "materialize"
+      database_password = var.database_password
+      database_host     = module.materialize_infrastructure.database_endpoint
+    }
+  ]
 
   # Tags
   tags = {
