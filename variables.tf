@@ -1,8 +1,20 @@
 # General Variables
+variable "namespace" {
+  description = "Namespace for all resources, usually the organization or project name"
+  type        = string
+  validation {
+    condition     = length(var.namespace) <= 18 && can(regex("^[a-z0-9-]+$", var.namespace))
+    error_message = "Namespace must be lowercase alphanumeric and hyphens only, max 18 characters"
+  }
+}
+
 variable "environment" {
   description = "Environment name (e.g., prod, staging, dev)"
   type        = string
-  default     = "dev"
+  validation {
+    condition     = length(var.environment) <= 8 && can(regex("^[a-z0-9]+$", var.environment))
+    error_message = "Environment must be lowercase alphanumeric only, max 8 characters"
+  }
 }
 
 variable "tags" {
@@ -32,12 +44,6 @@ variable "network_private_subnet_ids" {
   default     = []
   description = "A list of private subnet IDs in the VPC. Only used if create_vpc is false."
   type        = list(string)
-}
-
-variable "vpc_name" {
-  description = "Name of the VPC"
-  type        = string
-  default     = "materialize-vpc"
 }
 
 variable "vpc_cidr" {
@@ -71,12 +77,6 @@ variable "single_nat_gateway" {
 }
 
 # EKS Variables
-variable "cluster_name" {
-  description = "Name of the EKS cluster"
-  type        = string
-  default     = "materialize-cluster"
-}
-
 variable "cluster_version" {
   description = "Kubernetes version for the EKS cluster"
   type        = string
@@ -139,12 +139,6 @@ variable "enable_cluster_creator_admin_permissions" {
 }
 
 # RDS Variables
-variable "db_identifier" {
-  description = "Identifier for the RDS instance"
-  type        = string
-  default     = "materialize-db"
-}
-
 variable "postgres_version" {
   description = "Version of PostgreSQL to use"
   type        = string
@@ -194,11 +188,6 @@ variable "db_multi_az" {
 }
 
 # S3 Variables
-variable "bucket_name" {
-  description = "Name of the S3 bucket"
-  type        = string
-}
-
 variable "bucket_force_destroy" {
   description = "Enable force destroy for the S3 bucket"
   type        = bool
@@ -252,8 +241,8 @@ variable "metrics_retention_days" {
   default     = 7
 }
 
-variable "namespace" {
-  description = "Namespace for Materialize resources"
+variable "kubernetes_namespace" {
+  description = "The Kubernetes namespace for the Materialize resources"
   type        = string
   default     = "materialize-environment"
 }
@@ -262,24 +251,6 @@ variable "service_account_name" {
   description = "Name of the service account"
   type        = string
   default     = "12345678-1234-1234-1234-123456789012"
-}
-
-variable "mz_iam_service_account_name" {
-  description = "Name of the IAM user for Materialize service authentication (will be prefixed with environment name)"
-  type        = string
-  default     = "materialize-user"
-}
-
-variable "mz_iam_role_name" {
-  description = "Name of the IAM role for Materialize S3 access (will be prefixed with environment name)"
-  type        = string
-  default     = "materialize-s3-role"
-}
-
-variable "mz_iam_policy_name" {
-  description = "Name of the IAM policy for Materialize S3 access"
-  type        = string
-  default     = "materialize-s3-access"
 }
 
 variable "log_group_name_prefix" {

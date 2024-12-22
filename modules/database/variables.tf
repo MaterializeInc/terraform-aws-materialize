@@ -1,5 +1,10 @@
-variable "db_identifier" {
-  description = "Identifier for the RDS instance"
+variable "namespace" {
+  description = "Namespace prefix for all resources"
+  type        = string
+}
+
+variable "environment" {
+  description = "Environment name"
   type        = string
 }
 

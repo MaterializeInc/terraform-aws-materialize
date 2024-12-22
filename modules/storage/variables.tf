@@ -1,5 +1,10 @@
-variable "bucket_name" {
-  description = "Name of the S3 bucket"
+variable "namespace" {
+  description = "Namespace prefix for all resources"
+  type        = string
+}
+
+variable "environment" {
+  description = "Environment name"
   type        = string
 }
 

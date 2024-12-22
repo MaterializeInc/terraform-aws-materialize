@@ -32,9 +32,9 @@ output "metadata_backend_url" {
 output "persist_backend_url" {
   description = "S3 connection URL in the format required by Materialize using IRSA"
   value = format("s3://%s/%s:serviceaccount:%s:%s",
-    var.bucket_name,
+    module.storage.bucket_name,
     var.environment,
-    var.namespace,
+    var.kubernetes_namespace,
     var.service_account_name
   )
 }

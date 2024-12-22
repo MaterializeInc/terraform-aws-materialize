@@ -7,11 +7,10 @@ module "materialize_infrastructure" {
   # source = "git::https://github.com/MaterializeInc/terraform-aws-materialize.git"
   source = "../../"
 
-  # Basic settings
-  environment                 = "dev"
-  vpc_name                    = "materialize-simple"
-  cluster_name                = "materialize-eks-simple"
-  mz_iam_service_account_name = "materialize-user"
+  # The namespace and environment variables are used to construct the names of the resources
+  # e.g. ${namespace}-${environment}-storage, ${namespace}-${environment}-db etc.
+  namespace   = "simple-mz-tf"
+  environment = "dev"
 
   # VPC Configuration
   vpc_cidr             = "10.0.0.0/16"
@@ -21,7 +20,8 @@ module "materialize_infrastructure" {
   single_nat_gateway   = true
 
   # EKS Configuration
-  cluster_version                          = "1.31"
+  cluster_version = "1.31"
+  # node_group_instance_types                = ["m6g.medium"]
   node_group_instance_types                = ["r5.xlarge"]
   node_group_desired_size                  = 2
   node_group_min_size                      = 1
@@ -30,14 +30,12 @@ module "materialize_infrastructure" {
   enable_cluster_creator_admin_permissions = true
 
   # Storage Configuration
-  bucket_name              = "materialize-simple-storage-${random_id.suffix.hex}"
   enable_bucket_versioning = true
   enable_bucket_encryption = true
   bucket_force_destroy     = true
 
   # Database Configuration
   database_password    = var.database_password
-  db_identifier        = "materialize-simple"
   postgres_version     = "15"
   db_instance_class    = "db.t3.large"
   db_allocated_storage = 20
@@ -57,6 +55,7 @@ module "materialize_infrastructure" {
   }
 }
 
+<<<<<<< HEAD
 variable "database_password" {
   description = "Password for the database (should be provided via tfvars or environment variable)"
   type        = string
@@ -68,6 +67,8 @@ resource "random_id" "suffix" {
   byte_length = 4
 }
 
+=======
+>>>>>>> be3d603 (Refactor resource names definitions)
 # Outputs
 output "vpc_id" {
   description = "VPC ID"

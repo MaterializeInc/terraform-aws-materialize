@@ -1,5 +1,10 @@
-variable "cluster_name" {
-  description = "Name of the EKS cluster"
+variable "namespace" {
+  description = "Namespace prefix for all resources"
+  type        = string
+}
+
+variable "environment" {
+  description = "Environment name"
   type        = string
 }
 
@@ -48,11 +53,6 @@ variable "cluster_enabled_log_types" {
   description = "List of desired control plane logging to enable"
   type        = list(string)
   default     = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
 }
 
 variable "tags" {

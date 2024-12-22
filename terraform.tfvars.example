@@ -1,7 +1,7 @@
-environment       = "my-environment"
-vpc_name          = "my-environment-vpc"
-cluster_name      = "my-environment-eks"
-bucket_name       = "my-environment-bucket"
+# The namespace and the environment are used to create a unique name for the resources
+# eg. ${namespace}-${environment}-${resource_name}
+namespace         = "my-namespace"
+environment       = "dev"
 database_password = "your-secure-password-here"
 
 tags = {

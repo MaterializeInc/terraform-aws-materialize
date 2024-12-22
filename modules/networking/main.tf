@@ -1,10 +1,14 @@
+locals {
+  name_prefix = "${var.namespace}-${var.environment}"
+}
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"
 
   create_vpc = var.create_vpc
 
-  name = var.vpc_name
+  name = "${local.name_prefix}-vpc"
   cidr = var.vpc_cidr
 
   azs             = var.availability_zones
@@ -18,13 +22,13 @@ module "vpc" {
 
   # Tags required for EKS
   private_subnet_tags = {
-    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-    "kubernetes.io/role/internal-elb"           = "1"
+    "kubernetes.io/role/internal-elb"                = "1"
+    "kubernetes.io/cluster/${local.name_prefix}-eks" = "shared"
   }
 
   public_subnet_tags = {
-    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-    "kubernetes.io/role/elb"                    = "1"
+    "kubernetes.io/role/elb"                         = "1"
+    "kubernetes.io/cluster/${local.name_prefix}-eks" = "shared"
   }
 
   tags = var.tags
