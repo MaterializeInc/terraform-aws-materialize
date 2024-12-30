@@ -89,6 +89,7 @@ module "operator" {
   cluster_endpoint       = module.eks.cluster_endpoint
   cluster_ca_certificate = module.eks.cluster_certificate_authority_data
   s3_bucket_name         = module.storage.bucket_name
+  postgres_version       = var.postgres_version
 
   providers = {
     kubernetes = kubernetes,

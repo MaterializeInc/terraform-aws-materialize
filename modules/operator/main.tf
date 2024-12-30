@@ -154,7 +154,7 @@ resource "kubernetes_manifest" "db_init_job" {
         spec = {
           containers = [{
             name  = "init-db"
-            image = "postgres:latest"
+            image = "postgres:${var.postgres_version}"
             command = [
               "/bin/sh",
               "-c",

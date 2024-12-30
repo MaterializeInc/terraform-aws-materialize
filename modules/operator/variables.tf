@@ -56,3 +56,9 @@ variable "instances" {
   }))
   default = []
 }
+
+variable "postgres_version" {
+  description = "Postgres version to use for the metadata backend"
+  type        = string
+  default     = "15"
+}
