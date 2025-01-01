@@ -92,7 +92,7 @@ module "operator" {
   postgres_version       = var.postgres_version
 
   providers = {
-    kubernetes = kubernetes,
+    kubernetes = kubernetes
     helm       = helm
   }
 
@@ -122,7 +122,7 @@ locals {
   #       var.environment,
   #       instance.name,
   #       coalesce(instance.namespace, "materialize-environment"),
-  #       instance.instance_id
+  #       instance.name
   #     )
   #   }
   # }

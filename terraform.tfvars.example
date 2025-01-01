@@ -26,20 +26,17 @@ install_materialize_operator = false
 materialize_instances = [
   {
     name              = "analytics"
-    instance_id       = "12345678-1234-1234-1234-123456789012"
     namespace         = "analytics-env"     # Separate namespace
     database_password = "secure-password-1"
     cpu_request      = "4"
   },
   {
     name              = "reporting"
-    instance_id       = "87654321-4321-4321-4321-987654321098"
     # No namespace specified - will use the operator namespace
     database_password = "secure-password-2"
   },
   {
     name              = "monitoring"
-    instance_id       = "11111111-2222-3333-4444-555555555555"
     namespace         = "analytics-env"     # Share namespace with analytics
     database_password = "secure-password-3"
   }

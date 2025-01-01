@@ -270,7 +270,6 @@ variable "materialize_instances" {
   description = "Configuration for Materialize instances"
   type = list(object({
     name              = string
-    instance_id       = string
     namespace         = optional(string)
     database_name     = optional(string)
     database_username = optional(string)

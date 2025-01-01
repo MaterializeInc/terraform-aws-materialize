@@ -51,27 +51,26 @@ module "materialize_infrastructure" {
   # Enable and configure Materialize operator
   install_materialize_operator = true
 
-  # Configure Materialize instances
-  materialize_instances = [
-    {
-      name              = "analytics"
-      instance_id       = "12345678-1234-1234-1234-123456789012"
-      namespace         = "materialize-environment"
-      database_name     = "analytics_db"
-      database_username = "materialize"
-      database_password = var.database_password
-      database_host     = module.materialize_infrastructure.database_endpoint
-    },
-    {
-      name              = "production"
-      instance_id       = "87654321-4321-4321-4321-210987654321"
-      namespace         = "materialize-environment"
-      database_name     = "production_db"
-      database_username = "materialize"
-      database_password = var.database_password
-      database_host     = module.materialize_infrastructure.database_endpoint
-    }
-  ]
+  # Once the operator is installed, you can define your Materialize instances here.
+  # Uncomment the following block (or provide your own instances) to configure them.
+  # materialize_instances = [
+  #   {
+  #     name              = "analytics"
+  #     namespace         = "materialize-environment"
+  #     database_name     = "analytics_db"
+  #     database_username = "materialize"
+  #     database_password = var.database_password
+  #     database_host     = module.materialize_infrastructure.database_endpoint
+  #   },
+  #   {
+  #     name              = "production"
+  #     namespace         = "materialize-environment"
+  #     database_name     = "production_db"
+  #     database_username = "materialize"
+  #     database_password = var.database_password
+  #     database_host     = module.materialize_infrastructure.database_endpoint
+  #   }
+  # ]
 
   # Tags
   tags = {
@@ -97,6 +96,11 @@ output "vpc_id" {
 output "eks_cluster_endpoint" {
   description = "EKS cluster endpoint"
   value       = module.materialize_infrastructure.eks_cluster_endpoint
+}
+
+output "eks_cluster_name" {
+  description = "EKS cluster name"
+  value       = module.materialize_infrastructure.eks_cluster_name
 }
 
 output "database_endpoint" {

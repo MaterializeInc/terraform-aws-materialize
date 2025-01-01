@@ -8,6 +8,11 @@ output "eks_cluster_endpoint" {
   value       = module.eks.cluster_endpoint
 }
 
+output "eks_cluster_name" {
+  description = "EKS cluster name"
+  value       = module.eks.cluster_name
+}
+
 output "database_endpoint" {
   description = "RDS instance endpoint"
   value       = module.database.db_instance_endpoint
