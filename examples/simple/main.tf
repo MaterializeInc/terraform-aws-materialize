@@ -9,8 +9,8 @@ module "materialize_infrastructure" {
 
   # The namespace and environment variables are used to construct the names of the resources
   # e.g. ${namespace}-${environment}-storage, ${namespace}-${environment}-db etc.
-  namespace   = "simple-mz-tf"
-  environment = "dev"
+  namespace   = var.namespace
+  environment = var.environment
 
   # VPC Configuration
   vpc_cidr             = "10.0.0.0/16"
@@ -55,20 +55,20 @@ module "materialize_infrastructure" {
   # Uncomment the following block (or provide your own instances) to configure them.
   # materialize_instances = [
   #   {
-  #     name              = "analytics"
-  #     namespace         = "materialize-environment"
-  #     database_name     = "analytics_db"
-  #     database_username = "materialize"
-  #     database_password = var.database_password
-  #     database_host     = module.materialize_infrastructure.database_endpoint
+  #     name           = "analytics"
+  #     namespace      = "materialize-environment"
+  #     database_name  = "analytics_db"
+  #     cpu_request    = "2"
+  #     memory_request = "4Gi"
+  #     memory_limit   = "4Gi"
   #   },
   #   {
-  #     name              = "production"
-  #     namespace         = "materialize-environment"
-  #     database_name     = "production_db"
-  #     database_username = "materialize"
-  #     database_password = var.database_password
-  #     database_host     = module.materialize_infrastructure.database_endpoint
+  #     name           = "production"
+  #     namespace      = "materialize-environment"
+  #     database_name  = "production_db"
+  #     cpu_request    = "4"
+  #     memory_request = "8Gi"
+  #     memory_limit   = "8Gi"
   #   }
   # ]
 
@@ -78,6 +78,18 @@ module "materialize_infrastructure" {
     Project     = "materialize-simple"
     Terraform   = "true"
   }
+}
+
+variable "namespace" {
+  description = "Namespace for the resources. Used to prefix the names of the resources"
+  type        = string
+  default     = "simple-mz-tf"
+}
+
+variable "environment" {
+  description = "Environment name"
+  type        = string
+  default     = "dev"
 }
 
 variable "database_password" {

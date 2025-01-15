@@ -55,3 +55,11 @@ output "materialize_s3_role_arn" {
   description = "The ARN of the IAM role for Materialize"
   value       = aws_iam_role.materialize_s3.arn
 }
+
+output "operator_details" {
+  description = "Details of the installed Materialize operator"
+  value = var.install_materialize_operator ? {
+    namespace = module.operator[0].operator_namespace
+    instances = module.operator[0].materialize_instances
+  } : null
+}

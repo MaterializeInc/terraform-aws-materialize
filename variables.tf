@@ -266,18 +266,34 @@ variable "install_materialize_operator" {
   default     = false
 }
 
+variable "operator_version" {
+  description = "Version of the Materialize operator to install"
+  type        = string
+  default     = "v25.1.0-beta.1"
+}
+
+variable "operator_namespace" {
+  description = "Namespace for the Materialize operator"
+  type        = string
+  default     = "materialize"
+}
+
+variable "helm_values" {
+  description = "Additional Helm values to merge with defaults"
+  type        = any
+  default     = {}
+}
+
 variable "materialize_instances" {
   description = "Configuration for Materialize instances"
   type = list(object({
-    name              = string
-    namespace         = optional(string)
-    database_name     = optional(string)
-    database_username = optional(string)
-    database_password = optional(string)
-    database_host     = optional(string)
-    cpu_request       = optional(string)
-    memory_request    = optional(string)
-    memory_limit      = optional(string)
+    name                 = string
+    namespace            = optional(string)
+    database_name        = string
+    environmentd_version = optional(string, "v0.127.1")
+    cpu_request          = optional(string, "1")
+    memory_request       = optional(string, "1Gi")
+    memory_limit         = optional(string, "1Gi")
   }))
   default = []
 }

@@ -79,53 +79,84 @@ module "database" {
 }
 
 module "operator" {
-  count  = var.install_materialize_operator ? 1 : 0
-  source = "./modules/operator"
+  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.0"
 
-  namespace              = var.namespace
-  environment            = var.environment
-  instances              = var.materialize_instances
-  iam_role_arn           = aws_iam_role.materialize_s3.arn
-  cluster_endpoint       = module.eks.cluster_endpoint
-  cluster_ca_certificate = module.eks.cluster_certificate_authority_data
-  s3_bucket_name         = module.storage.bucket_name
-  postgres_version       = var.postgres_version
+  count = var.install_materialize_operator ? 1 : 0
+
+  depends_on = [
+    module.eks,
+    module.database,
+    module.storage
+  ]
+
+  namespace          = var.namespace
+  environment        = var.environment
+  operator_version   = var.operator_version
+  operator_namespace = var.operator_namespace
+
+  helm_values = local.merged_helm_values
+  instances   = local.instances
 
   providers = {
     kubernetes = kubernetes
     helm       = helm
   }
-
-  depends_on = [
-    module.eks,
-    module.storage,
-    module.database
-  ]
 }
 
 locals {
   network_id                 = var.create_vpc ? module.networking.vpc_id : var.network_id
   network_private_subnet_ids = var.create_vpc ? module.networking.private_subnet_ids : var.network_private_subnet_ids
 
-  # instance_backend_urls = {
-  #   for instance in var.materialize_instances : instance.name => {
-  #     metadata_backend_url = format(
-  #       "postgres://%s:%s@%s/%s?sslmode=require",
-  #       coalesce(instance.database_username, var.database_username),
-  #       coalesce(instance.database_password, var.database_password),
-  #       module.database.db_instance_endpoint,
-  #       coalesce(instance.database_name, "${instance.name}_db")
-  #     )
-  #     persist_backend_url = format(
-  #       "s3://%s/%s/%s:serviceaccount:%s:%s",
-  #       module.storage.bucket_name,
-  #       var.environment,
-  #       instance.name,
-  #       coalesce(instance.namespace, "materialize-environment"),
-  #       instance.name
-  #     )
-  #   }
-  # }
+  default_helm_values = {
+    operator = {
+      cloudProvider = {
+        type   = "aws"
+        region = data.aws_region.current.name
+        providers = {
+          aws = {
+            enabled   = true
+            accountID = data.aws_caller_identity.current.account_id
+            iam = {
+              roles = {
+                environment = aws_iam_role.materialize_s3.arn
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  merged_helm_values = merge(local.default_helm_values, var.helm_values)
+
+  instances = [
+    for instance in var.materialize_instances : {
+      name          = instance.name
+      namespace     = instance.namespace
+      database_name = instance.database_name
+
+      metadata_backend_url = format(
+        "postgres://%s:%s@%s/%s?sslmode=require",
+        var.database_username,
+        var.database_password,
+        module.database.db_instance_endpoint,
+        coalesce(instance.database_name, instance.name)
+      )
+
+      persist_backend_url = format(
+        "s3://%s/%s-%s:serviceaccount:%s:%s",
+        module.storage.bucket_name,
+        var.environment,
+        instance.name,
+        coalesce(instance.namespace, var.operator_namespace),
+        instance.name
+      )
+
+      cpu_request    = instance.cpu_request
+      memory_request = instance.memory_request
+      memory_limit   = instance.memory_limit
+    }
+  ]
 
   # Common tags that apply to all resources
   common_tags = merge(
@@ -240,3 +271,6 @@ locals {
 data "aws_eks_cluster_auth" "cluster" {
   name = module.eks.cluster_name
 }
+
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
