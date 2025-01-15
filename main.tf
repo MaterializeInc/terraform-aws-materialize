@@ -267,10 +267,3 @@ resource "aws_iam_role_policy" "materialize_s3" {
 locals {
   name_prefix = "${var.namespace}-${var.environment}"
 }
-
-data "aws_eks_cluster_auth" "cluster" {
-  name = module.eks.cluster_name
-}
-
-data "aws_region" "current" {}
-data "aws_caller_identity" "current" {}

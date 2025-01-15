@@ -11,7 +11,7 @@ variable "environment" {
 variable "bucket_force_destroy" {
   description = "Enable force destroy for the S3 bucket"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "enable_bucket_versioning" {
