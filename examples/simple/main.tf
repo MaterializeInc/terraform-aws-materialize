@@ -63,9 +63,9 @@ module "materialize_infrastructure" {
   #     memory_limit   = "4Gi"
   #   },
   #   {
-  #     name           = "production"
+  #     name           = "demo"
   #     namespace      = "materialize-environment"
-  #     database_name  = "production_db"
+  #     database_name  = "demo_db"
   #     cpu_request    = "4"
   #     memory_request = "8Gi"
   #     memory_limit   = "8Gi"
