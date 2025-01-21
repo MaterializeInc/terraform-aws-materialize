@@ -7,7 +7,7 @@ Terraform module for deploying Materialize on AWS Cloud Platform with all requir
 
 The module has been tested with:
 - PostgreSQL 15
-- Materialize Operator v0.1.0
+- Materialize Helm Operator Terraform Module v0.1.1
 
 ## Requirements
 
@@ -32,7 +32,7 @@ The module has been tested with:
 | <a name="module_database"></a> [database](#module\_database) | ./modules/database | n/a |
 | <a name="module_eks"></a> [eks](#module\_eks) | ./modules/eks | n/a |
 | <a name="module_networking"></a> [networking](#module\_networking) | ./modules/networking | n/a |
-| <a name="module_operator"></a> [operator](#module\_operator) | github.com/MaterializeInc/terraform-helm-materialize | v0.1.0 |
+| <a name="module_operator"></a> [operator](#module\_operator) | github.com/MaterializeInc/terraform-helm-materialize | v0.1.1 |
 | <a name="module_storage"></a> [storage](#module\_storage) | ./modules/storage | n/a |
 
 ## Resources
