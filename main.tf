@@ -109,6 +109,9 @@ locals {
 
   default_helm_values = {
     operator = {
+      image = {
+        tag = var.orchestratord_version
+      }
       cloudProvider = {
         type   = "aws"
         region = data.aws_region.current.name
