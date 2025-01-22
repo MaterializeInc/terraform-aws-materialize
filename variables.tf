@@ -269,7 +269,7 @@ variable "install_materialize_operator" {
 variable "operator_version" {
   description = "Version of the Materialize operator to install"
   type        = string
-  default     = "v25.1.0-beta.1"
+  default     = "v25.1.0"
 }
 
 variable "operator_namespace" {
