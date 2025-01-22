@@ -52,25 +52,7 @@ module "materialize_infrastructure" {
   install_materialize_operator = true
 
   # Once the operator is installed, you can define your Materialize instances here.
-  # Uncomment the following block (or provide your own instances) to configure them.
-  # materialize_instances = [
-  #   {
-  #     name           = "analytics"
-  #     namespace      = "materialize-environment"
-  #     database_name  = "analytics_db"
-  #     cpu_request    = "2"
-  #     memory_request = "4Gi"
-  #     memory_limit   = "4Gi"
-  #   },
-  #   {
-  #     name           = "demo"
-  #     namespace      = "materialize-environment"
-  #     database_name  = "demo_db"
-  #     cpu_request    = "4"
-  #     memory_request = "8Gi"
-  #     memory_limit   = "8Gi"
-  #   }
-  # ]
+  materialize_instances = var.materialize_instances
 
   # Tags
   tags = {
@@ -97,6 +79,19 @@ variable "database_password" {
   default     = "your-secure-password"
   type        = string
   sensitive   = true
+}
+
+variable "materialize_instances" {
+  description = "List of Materialize instances to be created."
+  type = list(object({
+    name           = string
+    namespace      = string
+    database_name  = string
+    cpu_request    = string
+    memory_request = string
+    memory_limit   = string
+  }))
+  default = []
 }
 
 # Outputs
