@@ -1,8 +1,13 @@
+locals {
+  name_prefix = "${var.namespace}-${var.environment}"
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
 
-  cluster_name    = var.cluster_name
+  cluster_name = "${local.name_prefix}-eks"
+
   cluster_version = var.cluster_version
 
   vpc_id     = var.vpc_id
@@ -14,7 +19,7 @@ module "eks" {
   cluster_enabled_log_types = var.cluster_enabled_log_types
 
   eks_managed_node_groups = {
-    "${var.environment}-mz-workers" = {
+    "${local.name_prefix}-mz" = {
       desired_size = var.node_group_desired_size
       min_size     = var.node_group_min_size
       max_size     = var.node_group_max_size
@@ -23,7 +28,7 @@ module "eks" {
       capacity_type  = var.node_group_capacity_type
       ami_type       = var.node_group_ami_type
 
-      name = "${var.environment}-mz"
+      name = local.name_prefix
 
       labels = {
         Environment              = var.environment

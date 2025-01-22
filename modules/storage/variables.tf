@@ -1,12 +1,17 @@
-variable "bucket_name" {
-  description = "Name of the S3 bucket"
+variable "namespace" {
+  description = "Namespace prefix for all resources"
+  type        = string
+}
+
+variable "environment" {
+  description = "Environment name"
   type        = string
 }
 
 variable "bucket_force_destroy" {
   description = "Enable force destroy for the S3 bucket"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "enable_bucket_versioning" {

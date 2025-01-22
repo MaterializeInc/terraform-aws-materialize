@@ -7,11 +7,10 @@ module "materialize_infrastructure" {
   # source = "git::https://github.com/MaterializeInc/terraform-aws-materialize.git"
   source = "../../"
 
-  # Basic settings
-  environment                 = "dev"
-  vpc_name                    = "materialize-simple"
-  cluster_name                = "materialize-eks-simple"
-  mz_iam_service_account_name = "materialize-user"
+  # The namespace and environment variables are used to construct the names of the resources
+  # e.g. ${namespace}-${environment}-storage, ${namespace}-${environment}-db etc.
+  namespace   = var.namespace
+  environment = var.environment
 
   # VPC Configuration
   vpc_cidr             = "10.0.0.0/16"
@@ -21,7 +20,9 @@ module "materialize_infrastructure" {
   single_nat_gateway   = true
 
   # EKS Configuration
-  cluster_version                          = "1.31"
+  cluster_version = "1.31"
+  # node_group_instance_types                = ["m6g.medium"]
+  # TODO: Defaulting to a smaller instance type due to resource constraints
   node_group_instance_types                = ["r5.xlarge"]
   node_group_desired_size                  = 2
   node_group_min_size                      = 1
@@ -30,14 +31,12 @@ module "materialize_infrastructure" {
   enable_cluster_creator_admin_permissions = true
 
   # Storage Configuration
-  bucket_name              = "materialize-simple-storage-${random_id.suffix.hex}"
   enable_bucket_versioning = true
   enable_bucket_encryption = true
   bucket_force_destroy     = true
 
   # Database Configuration
   database_password    = var.database_password
-  db_identifier        = "materialize-simple"
   postgres_version     = "15"
   db_instance_class    = "db.t3.large"
   db_allocated_storage = 20
@@ -49,6 +48,12 @@ module "materialize_infrastructure" {
   enable_monitoring      = true
   metrics_retention_days = 3
 
+  # Enable and configure Materialize operator
+  install_materialize_operator = true
+
+  # Once the operator is installed, you can define your Materialize instances here.
+  materialize_instances = var.materialize_instances
+
   # Tags
   tags = {
     Environment = "dev"
@@ -57,15 +62,36 @@ module "materialize_infrastructure" {
   }
 }
 
+variable "namespace" {
+  description = "Namespace for the resources. Used to prefix the names of the resources"
+  type        = string
+  default     = "simple-mz-tf"
+}
+
+variable "environment" {
+  description = "Environment name"
+  type        = string
+  default     = "dev"
+}
+
 variable "database_password" {
   description = "Password for the database (should be provided via tfvars or environment variable)"
+  default     = "your-secure-password"
   type        = string
   sensitive   = true
 }
 
-# Generate random suffix for unique S3 bucket name
-resource "random_id" "suffix" {
-  byte_length = 4
+variable "materialize_instances" {
+  description = "List of Materialize instances to be created."
+  type = list(object({
+    name           = string
+    namespace      = string
+    database_name  = string
+    cpu_request    = string
+    memory_request = string
+    memory_limit   = string
+  }))
+  default = []
 }
 
 # Outputs
@@ -77,6 +103,11 @@ output "vpc_id" {
 output "eks_cluster_endpoint" {
   description = "EKS cluster endpoint"
   value       = module.materialize_infrastructure.eks_cluster_endpoint
+}
+
+output "eks_cluster_name" {
+  description = "EKS cluster name"
+  value       = module.materialize_infrastructure.eks_cluster_name
 }
 
 output "database_endpoint" {

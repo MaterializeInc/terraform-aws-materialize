@@ -8,6 +8,11 @@ output "eks_cluster_endpoint" {
   value       = module.eks.cluster_endpoint
 }
 
+output "eks_cluster_name" {
+  description = "EKS cluster name"
+  value       = module.eks.cluster_name
+}
+
 output "database_endpoint" {
   description = "RDS instance endpoint"
   value       = module.database.db_instance_endpoint
@@ -32,9 +37,9 @@ output "metadata_backend_url" {
 output "persist_backend_url" {
   description = "S3 connection URL in the format required by Materialize using IRSA"
   value = format("s3://%s/%s:serviceaccount:%s:%s",
-    var.bucket_name,
+    module.storage.bucket_name,
     var.environment,
-    var.namespace,
+    var.kubernetes_namespace,
     var.service_account_name
   )
 }
@@ -49,4 +54,12 @@ output "oidc_provider_arn" {
 output "materialize_s3_role_arn" {
   description = "The ARN of the IAM role for Materialize"
   value       = aws_iam_role.materialize_s3.arn
+}
+
+output "operator_details" {
+  description = "Details of the installed Materialize operator"
+  value = var.install_materialize_operator ? {
+    namespace = module.operator[0].operator_namespace
+    instances = module.operator[0].materialize_instances
+  } : null
 }

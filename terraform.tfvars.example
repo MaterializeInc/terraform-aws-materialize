@@ -1,7 +1,7 @@
-environment       = "my-environment"
-vpc_name          = "my-environment-vpc"
-cluster_name      = "my-environment-eks"
-bucket_name       = "my-environment-bucket"
+# The namespace and the environment are used to create a unique name for the resources
+# eg. ${namespace}-${environment}-${resource_name}
+namespace         = "my-namespace"
+environment       = "dev"
 database_password = "your-secure-password-here"
 
 tags = {
@@ -20,3 +20,24 @@ db_allocated_storage = 20
 db_multi_az          = false
 
 enable_cluster_creator_admin_permissions = true
+
+# Materialize Helm chart values
+install_materialize_operator = false
+materialize_instances = [
+  {
+    name              = "analytics"
+    namespace         = "analytics-env"     # Separate namespace
+    database_password = "secure-password-1"
+    cpu_request      = "4"
+  },
+  {
+    name              = "reporting"
+    # No namespace specified - will use the operator namespace
+    database_password = "secure-password-2"
+  },
+  {
+    name              = "monitoring"
+    namespace         = "analytics-env"     # Share namespace with analytics
+    database_password = "secure-password-3"
+  }
+]

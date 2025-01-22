@@ -1,76 +1,188 @@
 module "networking" {
   source = "./modules/networking"
 
-  vpc_name             = var.vpc_name
+  # The namespace and environment variables are used to construct the names of the resources
+  # e.g. ${namespace}-${environment}-vpc
+  namespace   = var.namespace
+  environment = var.environment
+
   vpc_cidr             = var.vpc_cidr
   availability_zones   = var.availability_zones
   private_subnet_cidrs = var.private_subnet_cidrs
   public_subnet_cidrs  = var.public_subnet_cidrs
-  cluster_name         = var.cluster_name
   single_nat_gateway   = var.single_nat_gateway
-  tags                 = var.tags
+
+  tags = local.common_tags
 }
 
 module "eks" {
   source = "./modules/eks"
 
-  cluster_name                             = var.cluster_name
+  # The namespace and environment variables are used to construct the names of the resources
+  # e.g. ${namespace}-${environment}-eks
+  namespace   = var.namespace
+  environment = var.environment
+
   cluster_version                          = var.cluster_version
-  vpc_id                                   = module.networking.vpc_id
-  private_subnet_ids                       = module.networking.private_subnet_ids
-  environment                              = var.environment
+  vpc_id                                   = local.network_id
+  private_subnet_ids                       = local.network_private_subnet_ids
   node_group_desired_size                  = var.node_group_desired_size
   node_group_min_size                      = var.node_group_min_size
   node_group_max_size                      = var.node_group_max_size
   node_group_instance_types                = var.node_group_instance_types
   node_group_ami_type                      = var.node_group_ami_type
-  tags                                     = var.tags
   cluster_enabled_log_types                = var.cluster_enabled_log_types
   node_group_capacity_type                 = var.node_group_capacity_type
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
+
+  tags = local.common_tags
 }
 
 module "storage" {
   source = "./modules/storage"
 
-  bucket_name              = var.bucket_name
-  tags                     = var.tags
+  # The namespace and environment variables are used to construct the names of the resources
+  # e.g. ${namespace}-${environment}-storage
+  namespace   = var.namespace
+  environment = var.environment
+
   bucket_lifecycle_rules   = var.bucket_lifecycle_rules
   enable_bucket_encryption = var.enable_bucket_encryption
   enable_bucket_versioning = var.enable_bucket_versioning
   bucket_force_destroy     = var.bucket_force_destroy
+
+  tags = local.common_tags
 }
 
 module "database" {
   source = "./modules/database"
 
-  db_identifier              = var.db_identifier
+  # The namespace and environment variables are used to construct the names of the resources
+  # e.g. ${namespace}-${environment}-db
+  namespace   = var.namespace
+  environment = var.environment
+
   postgres_version           = var.postgres_version
   instance_class             = var.db_instance_class
   allocated_storage          = var.db_allocated_storage
   database_name              = var.database_name
   database_username          = var.database_username
   multi_az                   = var.db_multi_az
-  database_subnet_ids        = module.networking.private_subnet_ids
-  vpc_id                     = module.networking.vpc_id
+  database_subnet_ids        = local.network_private_subnet_ids
+  vpc_id                     = local.network_id
   eks_security_group_id      = module.eks.cluster_security_group_id
   eks_node_security_group_id = module.eks.node_security_group_id
-  tags                       = var.tags
   max_allocated_storage      = var.db_max_allocated_storage
   database_password          = var.database_password
+
+  tags = local.common_tags
+}
+
+module "operator" {
+  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.1"
+
+  count = var.install_materialize_operator ? 1 : 0
+
+  depends_on = [
+    module.eks,
+    module.database,
+    module.storage
+  ]
+
+  namespace          = var.namespace
+  environment        = var.environment
+  operator_version   = var.operator_version
+  operator_namespace = var.operator_namespace
+
+  helm_values = local.merged_helm_values
+  instances   = local.instances
+
+  providers = {
+    kubernetes = kubernetes
+    helm       = helm
+  }
+}
+
+locals {
+  network_id                 = var.create_vpc ? module.networking.vpc_id : var.network_id
+  network_private_subnet_ids = var.create_vpc ? module.networking.private_subnet_ids : var.network_private_subnet_ids
+
+  default_helm_values = {
+    operator = {
+      image = {
+        tag = var.orchestratord_version
+      }
+      cloudProvider = {
+        type   = "aws"
+        region = data.aws_region.current.name
+        providers = {
+          aws = {
+            enabled   = true
+            accountID = data.aws_caller_identity.current.account_id
+            iam = {
+              roles = {
+                environment = aws_iam_role.materialize_s3.arn
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  merged_helm_values = merge(local.default_helm_values, var.helm_values)
+
+  instances = [
+    for instance in var.materialize_instances : {
+      name          = instance.name
+      namespace     = instance.namespace
+      database_name = instance.database_name
+
+      metadata_backend_url = format(
+        "postgres://%s:%s@%s/%s?sslmode=require",
+        var.database_username,
+        var.database_password,
+        module.database.db_instance_endpoint,
+        coalesce(instance.database_name, instance.name)
+      )
+
+      persist_backend_url = format(
+        "s3://%s/%s-%s:serviceaccount:%s:%s",
+        module.storage.bucket_name,
+        var.environment,
+        instance.name,
+        coalesce(instance.namespace, var.operator_namespace),
+        instance.name
+      )
+
+      cpu_request    = instance.cpu_request
+      memory_request = instance.memory_request
+      memory_limit   = instance.memory_limit
+    }
+  ]
+
+  # Common tags that apply to all resources
+  common_tags = merge(
+    var.tags,
+    {
+      Namespace   = var.namespace
+      Environment = var.environment
+      ManagedBy   = "terraform"
+    }
+  )
 }
 
 resource "aws_cloudwatch_log_group" "materialize" {
   count = var.enable_monitoring ? 1 : 0
 
-  name              = "/aws/${var.log_group_name_prefix}/${var.cluster_name}/${var.environment}"
+  name              = "/aws/${var.log_group_name_prefix}/${module.eks.cluster_name}/${var.environment}"
   retention_in_days = var.metrics_retention_days
 
   tags = var.tags
 }
 
 resource "aws_iam_user" "materialize" {
-  name = "${var.environment}-${var.mz_iam_service_account_name}"
+  name = "${local.name_prefix}-mz-user"
 }
 
 resource "aws_iam_access_key" "materialize_user" {
@@ -78,7 +190,7 @@ resource "aws_iam_access_key" "materialize_user" {
 }
 
 resource "aws_iam_user_policy" "materialize_s3" {
-  name = var.mz_iam_policy_name
+  name = "${local.name_prefix}-mz-s3-policy"
   user = aws_iam_user.materialize.name
 
   policy = jsonencode({
@@ -102,7 +214,7 @@ resource "aws_iam_user_policy" "materialize_s3" {
 }
 
 resource "aws_iam_role" "materialize_s3" {
-  name = "${var.environment}-${var.mz_iam_role_name}"
+  name = "${local.name_prefix}-mz-role"
 
   # Trust policy allowing EKS to assume this role
   assume_role_policy = jsonencode({
@@ -115,7 +227,7 @@ resource "aws_iam_role" "materialize_s3" {
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
-          StringEquals = {
+          StringLike = {
             "${trimprefix(module.eks.cluster_oidc_issuer_url, "https://")}:sub" : "system:serviceaccount:*:*",
             "${trimprefix(module.eks.cluster_oidc_issuer_url, "https://")}:aud" : "sts.amazonaws.com"
           }
@@ -124,7 +236,7 @@ resource "aws_iam_role" "materialize_s3" {
     ]
   })
 
-  tags = var.tags
+  tags = local.common_tags
 
   depends_on = [
     module.eks
@@ -132,7 +244,7 @@ resource "aws_iam_role" "materialize_s3" {
 }
 
 resource "aws_iam_role_policy" "materialize_s3" {
-  name = var.mz_iam_policy_name
+  name = "${local.name_prefix}-mz-role-policy"
   role = aws_iam_role.materialize_s3.id
 
   policy = jsonencode({
@@ -153,4 +265,8 @@ resource "aws_iam_role_policy" "materialize_s3" {
       }
     ]
   })
+}
+
+locals {
+  name_prefix = "${var.namespace}-${var.environment}"
 }
