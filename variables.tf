@@ -303,3 +303,9 @@ variable "materialize_instances" {
   }))
   default = []
 }
+
+variable "install_metrics_server" {
+  description = "Whether to install the metrics-server for the Materialize Console"
+  type        = bool
+  default     = true
+}

@@ -79,9 +79,11 @@ module "database" {
 }
 
 module "operator" {
-  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.1"
+  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.2"
 
   count = var.install_materialize_operator ? 1 : 0
+
+  install_metrics_server = var.install_metrics_server
 
   depends_on = [
     module.eks,
@@ -108,6 +110,11 @@ locals {
   network_private_subnet_ids = var.create_vpc ? module.networking.private_subnet_ids : var.network_private_subnet_ids
 
   default_helm_values = {
+    observability = {
+      podMetrics = {
+        enabled = true
+      }
+    }
     operator = {
       image = {
         tag = var.orchestratord_version
