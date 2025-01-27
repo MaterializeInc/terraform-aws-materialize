@@ -22,22 +22,4 @@ db_multi_az          = false
 enable_cluster_creator_admin_permissions = true
 
 # Materialize Helm chart values
-install_materialize_operator = false
-materialize_instances = [
-  {
-    name              = "analytics"
-    namespace         = "analytics-env"     # Separate namespace
-    database_password = "secure-password-1"
-    cpu_request      = "4"
-  },
-  {
-    name              = "reporting"
-    # No namespace specified - will use the operator namespace
-    database_password = "secure-password-2"
-  },
-  {
-    name              = "monitoring"
-    namespace         = "analytics-env"     # Share namespace with analytics
-    database_password = "secure-password-3"
-  }
-]
+install_materialize_operator = true
