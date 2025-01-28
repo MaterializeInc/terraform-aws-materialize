@@ -80,7 +80,7 @@ variable "single_nat_gateway" {
 variable "cluster_version" {
   description = "Kubernetes version for the EKS cluster"
   type        = string
-  default     = "1.31"
+  default     = "1.32"
 }
 
 variable "node_group_desired_size" {
@@ -111,7 +111,7 @@ Recommended Configuration for Running Materialize with disk:
 - Note: Ensure instance store volumes are available and attached to the nodes for optimal performance with disk-based workloads.
 EOF
   type        = list(string)
-  default     = ["m6g.medium"]
+  default     = ["r7g.xlarge"]
 }
 
 variable "node_group_capacity_type" {
@@ -123,7 +123,7 @@ variable "node_group_capacity_type" {
 variable "node_group_ami_type" {
   description = "AMI type for the node group"
   type        = string
-  default     = "AL2023_x86_64_STANDARD"
+  default     = "AL2023_ARM_64_STANDARD"
 }
 
 variable "cluster_enabled_log_types" {
