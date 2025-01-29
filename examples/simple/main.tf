@@ -20,13 +20,11 @@ module "materialize_infrastructure" {
   single_nat_gateway   = true
 
   # EKS Configuration
-  cluster_version = "1.31"
-  # node_group_instance_types                = ["m6g.medium"]
-  # TODO: Defaulting to a smaller instance type due to resource constraints
-  node_group_instance_types                = ["r5.xlarge"]
-  node_group_desired_size                  = 2
+  cluster_version                          = "1.32"
+  node_group_instance_types                = ["r7g.xlarge"]
+  node_group_desired_size                  = 1
   node_group_min_size                      = 1
-  node_group_max_size                      = 3
+  node_group_max_size                      = 2
   node_group_capacity_type                 = "ON_DEMAND"
   enable_cluster_creator_admin_permissions = true
 
