@@ -300,6 +300,7 @@ variable "materialize_instances" {
     cpu_request          = optional(string, "1")
     memory_request       = optional(string, "1Gi")
     memory_limit         = optional(string, "1Gi")
+    create_database      = optional(bool, true)
   }))
   default = []
 }
