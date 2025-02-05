@@ -111,7 +111,7 @@ Recommended Configuration for Running Materialize with disk:
 - Note: Ensure instance store volumes are available and attached to the nodes for optimal performance with disk-based workloads.
 EOF
   type        = list(string)
-  default     = ["r7g.xlarge"]
+  default     = ["r7g.2xlarge"]
 }
 
 variable "node_group_capacity_type" {
