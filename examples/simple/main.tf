@@ -29,9 +29,12 @@ module "materialize_infrastructure" {
   enable_cluster_creator_admin_permissions = true
 
   # Storage Configuration
-  enable_bucket_versioning = true
-  enable_bucket_encryption = true
-  bucket_force_destroy     = true
+  bucket_force_destroy = true
+
+  # For testing purposes, we are disabling encryption and versioning to allow for easier cleanup
+  # This should be enabled in production environments for security and data integrity
+  enable_bucket_versioning = false
+  enable_bucket_encryption = false
 
   # Database Configuration
   database_password    = var.database_password
