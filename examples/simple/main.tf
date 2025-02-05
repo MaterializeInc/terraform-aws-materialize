@@ -82,12 +82,13 @@ variable "database_password" {
 variable "materialize_instances" {
   description = "List of Materialize instances to be created."
   type = list(object({
-    name           = string
-    namespace      = string
-    database_name  = string
-    cpu_request    = string
-    memory_request = string
-    memory_limit   = string
+    name            = string
+    namespace       = string
+    database_name   = string
+    cpu_request     = string
+    memory_request  = string
+    memory_limit    = string
+    create_database = optional(bool)
   }))
   default = []
 }

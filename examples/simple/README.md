@@ -65,9 +65,9 @@ Once the infrastructure and the Materialize Operator are installed, you can depl
        name           = "demo"
        namespace      = "materialize-environment"
        database_name  = "demo_db"
-       cpu_request    = "4"
-       memory_request = "8Gi"
-       memory_limit   = "8Gi"
+       cpu_request    = "2"
+       memory_request = "4Gi"
+       memory_limit   = "4Gi"
      }
    ]
    ```
