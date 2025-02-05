@@ -21,7 +21,7 @@ module "materialize_infrastructure" {
 
   # EKS Configuration
   cluster_version                          = "1.32"
-  node_group_instance_types                = ["r7g.xlarge"]
+  node_group_instance_types                = ["r7g.2xlarge"]
   node_group_desired_size                  = 1
   node_group_min_size                      = 1
   node_group_max_size                      = 2
