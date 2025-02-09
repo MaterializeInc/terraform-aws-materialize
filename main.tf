@@ -79,7 +79,7 @@ module "database" {
 }
 
 module "operator" {
-  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.3"
+  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.4"
 
   count = var.install_materialize_operator ? 1 : 0
 
@@ -166,6 +166,11 @@ locals {
       cpu_request    = instance.cpu_request
       memory_request = instance.memory_request
       memory_limit   = instance.memory_limit
+
+      # Rollout options
+      in_place_rollout = instance.in_place_rollout
+      request_rollout  = instance.request_rollout
+      force_rollout    = instance.force_rollout
     }
   ]
 
