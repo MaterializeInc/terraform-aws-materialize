@@ -62,118 +62,67 @@ You should see a volume group named `instance-store-vg`.
 
 ## Install the Materialize Operator
 
-0. Clone the Materialize repository:
+The Materialize Operator is installed automatically when you set the following in your Terraform configuration:
+
+```hcl
+# Enable and configure Materialize Operator
+install_materialize_operator = true
+```
+
+This eliminates the need to manually install the operator via Helm. Make sure that this setting is enabled in your Terraform configuration before applying changes:
+
 ```bash
-git@github.com:MaterializeInc/materialize.git
-cd materialize
+terraform apply
 ```
 
-1. Create a values file for the Helm installation (save as `materialize-values.yaml`):
-```yaml
-operator:
-  cloudProvider:
-    type: "aws"
-    region: "<your-aws-region>" # e.g. us-west-2
-    providers:
-      aws:
-        enabled: true
-        accountID: "<your-aws-account-id>" # e.g. 123456789012
-        iam:
-          roles:
-            environment: "<output.materialize_s3_role_arn>" # e.g. arn:aws:iam::123456789012:role/materialize-s3-role
+You can verify that the Materialize Operator is installed by running:
 
-namespace:
-  create: true
-  name: "materialize"
-
-# Adjust network policies as needed
-networkPolicies:
-  enabled: true
-  egress:
-    enabled: true
-    cidrs: ["0.0.0.0/0"]
-  ingress:
-    enabled: true
-    cidrs: ["0.0.0.0/0"]
-  internal:
-    enabled: true
-
-# Uncomment the following block to configure OpenEBS storage
-# storage:
-#   storageClass:
-#     create: true
-#     name: "openebs-lvm-instance-store-ext4"
-#     provisioner: "local.csi.openebs.io"
-#     parameters:
-#       storage: "lvm"
-#       fsType: "ext4"
-#       volgroup: "instance-store-vg"
-#     volumeBindingMode: "WaitForFirstConsumer"
-```
-
-2. Install the Materialize Operator:
-```bash
-helm install materialize-operator misc/helm-charts/operator \
-  -f materialize-values.yaml
-```
-
-3. Verify the installation:
 ```bash
 kubectl get pods -n materialize
 ```
 
-## Deploy a Materialize Environment
+For more details on installation and configuration, refer to the official Materialize documentation: [Materialize AWS Installation Guide](https://materialize.com/docs/self-managed/v25.1/installation/install-on-aws/).
 
-1. Create a secret with the backend configuration (save as `materialize-backend-secret.yaml`):
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: materialize-backend
-  namespace: materialize-environment
-stringData:
-  metadata_backend_url: "${terraform_output.metadata_backend_url}"
-  persist_backend_url: "${terraform_output.persist_backend_url}"
-```
+Alternatively, you can still install the [operator manually using Helm](https://github.com/MaterializeInc/materialize/tree/main/misc/helm-charts/operator#installing-the-chart).
 
-> Replace `${terraform_output.metadata_backend_url}` and `${terraform_output.persist_backend_url}` with the actual values from the Terraform output.
+## Deploying Materialize Environments
 
-2. Create a Materialize environment (save as `materialize-environment.yaml`):
-```yaml
-apiVersion: materialize.cloud/v1alpha1
-kind: Materialize
-metadata:
-  name: "${var.service_account_name}"
-  namespace: materialize-environment
-spec:
-  environmentdImageRef: materialize/environmentd:latest
-  environmentdResourceRequirements:
-    limits:
-      memory: 16Gi
-    requests:
-      cpu: "2"
-      memory: 16Gi
-  balancerdResourceRequirements:
-    limits:
-      memory: 256Mi
-    requests:
-      cpu: "100m"
-      memory: 256Mi
-  backendSecretName: materialize-backend
-```
+Once the infrastructure and the Materialize Operator are installed, you can deploy Materialize environments by setting the `materialize_instances` variable in your Terraform configuration.
 
-> Replace `${var.service_account_name}` with the desired name for the Materialize environment. It should be a UUID, eg `12345678-1234-1234-1234-123456789012`.
+1. Define your Materialize instances in `terraform.tfvars`:
 
-3. Apply the configuration:
+   ```hcl
+   materialize_instances = [
+     {
+       name           = "analytics"
+       namespace      = "materialize-environment"
+       database_name  = "analytics_db"
+       cpu_request    = "2"
+       memory_request = "4Gi"
+       memory_limit   = "4Gi"
+     },
+     {
+       name           = "demo"
+       namespace      = "materialize-environment"
+       database_name  = "demo_db"
+       cpu_request    = "2"
+       memory_request = "4Gi"
+       memory_limit   = "4Gi"
+     }
+   ]
+   ```
+
+2. Re-apply the Terraform configuration to deploy the Materialize environments:
+
+   ```bash
+   terraform apply
+   ```
+
+Alternatively, you can manually deploy Materialize instances as described in the [Materialize Operator Helm Chart Documentation](https://github.com/MaterializeInc/materialize/tree/main/misc/helm-charts/operator#installing-the-chart).
+
+You can check the status of the Materialize instances by running:
+
 ```bash
-kubectl create namespace materialize-environment
-kubectl apply -f materialize-backend-secret.yaml
-kubectl apply -f materialize-environment.yaml
-```
-
-4. Monitor the deployment:
-```bash
-kubectl get materializes -n materialize-environment
 kubectl get pods -n materialize-environment
 ```
 
@@ -207,11 +156,9 @@ kubectl delete -f materialize-environment.yaml
 
 To uninstall the Materialize operator:
 ```bash
-helm uninstall materialize-operator -n materialize
+terraform destroy
 ```
 
-This will remove the operator but preserve any PVs and data. To completely clean up:
-```bash
-kubectl delete namespace materialize
-kubectl delete namespace materialize-environment
-```
+This will remove all associated resources, including the operator and any deployed Materialize instances.
+
+For more details, visit the [Materialize documentation](https://materialize.com/docs/self-managed/v25.1/installation/install-on-aws/).
