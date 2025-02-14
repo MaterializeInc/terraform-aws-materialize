@@ -266,6 +266,18 @@ variable "install_materialize_operator" {
   default     = false
 }
 
+variable "helm_chart" {
+  description = "Chart name from repository or local path to chart. For local charts, set the path to the chart directory."
+  type        = string
+  default     = "materialize-operator"
+}
+
+variable "use_local_chart" {
+  description = "Whether to use a local chart instead of one from a repository"
+  type        = bool
+  default     = false
+}
+
 variable "operator_version" {
   description = "Version of the Materialize operator to install"
   type        = string
