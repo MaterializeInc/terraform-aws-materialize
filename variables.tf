@@ -281,7 +281,7 @@ variable "use_local_chart" {
 variable "operator_version" {
   description = "Version of the Materialize operator to install"
   type        = string
-  default     = "v25.1.0"
+  default     = null
 }
 
 variable "operator_namespace" {
