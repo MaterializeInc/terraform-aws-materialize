@@ -3,8 +3,8 @@ variable "namespace" {
   description = "Namespace for all resources, usually the organization or project name"
   type        = string
   validation {
-    condition     = length(var.namespace) <= 12 && can(regex("^[a-z0-9-]+$", var.namespace))
-    error_message = "Namespace must be lowercase alphanumeric and hyphens only, max 12 characters"
+    condition     = length(var.namespace) <= 12 && can(regex("^[a-z][a-z0-9-]+$", var.namespace))
+    error_message = "Namespace must be lowercase alphanumeric and hyphens only, start with a letter, max 12 characters"
   }
 }
 
