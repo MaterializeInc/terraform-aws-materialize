@@ -123,7 +123,7 @@ variable "node_group_capacity_type" {
 variable "node_group_ami_type" {
   description = "AMI type for the node group"
   type        = string
-  default     = "AL2023_ARM_64_STANDARD"
+  default     = "BOTTLEROCKET_ARM_64"
 }
 
 variable "cluster_enabled_log_types" {
