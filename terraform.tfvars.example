@@ -1,7 +1,7 @@
 # The namespace and the environment are used to create a unique name for the resources
 # eg. ${namespace}-${environment}-${resource_name}
-namespace         = "my-namespace"
-environment       = "dev"
+namespace         = "my-namespace"  // maximum 12 characters, starts with a letter, lowercase alphanumeric and hyphens
+environment       = "dev"           // maximum 8 characters, lowercase alphanumeric only (e.g., dev, test)
 database_password = "your-secure-password-here"
 
 tags = {
