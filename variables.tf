@@ -179,6 +179,10 @@ variable "database_password" {
   description = "Password for the database (should be provided via tfvars or environment variable)"
   type        = string
   sensitive   = true
+  validation {
+    condition     = length(var.database_password) >= 8 && can(regex("^[[:print:]]+$", var.database_password)) && !can(regex("[/@\" ]", var.database_password))
+    error_message = "Database password must be at least 8 characters, contain only printable ASCII characters, excluding '/', '@', '\"' (double quotes), and ' ' (space)."
+  }
 }
 
 variable "db_multi_az" {
