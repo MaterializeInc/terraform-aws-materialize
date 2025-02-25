@@ -1,6 +1,5 @@
 namespace   = "mz-self-hosted"
 environment = "dev"
-database_password = "your-secret-password"
 
 # Once the operator is installed, you can define your Materialize instances here.
 # Uncomment the following block (or provide your own instances) to configure them:
