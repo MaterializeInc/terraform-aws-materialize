@@ -1,6 +1,5 @@
 namespace   = "mz-self-mngd"  // maximum 12 characters, starts with a letter, lowercase alphanumeric and hyphens
 environment = "dev"   // maximum 8 characters, lowercase alphanumeric only (e.g., dev, test)
-database_password = "your-secret-password"
 
 # Once the operator is installed, you can define your Materialize instances here.
 # Uncomment the following block (or provide your own instances) to configure them:

@@ -37,7 +37,7 @@ module "materialize_infrastructure" {
   enable_bucket_encryption = false
 
   # Database Configuration
-  database_password    = var.database_password
+  database_password    = random_password.pass.result
   postgres_version     = "15"
   db_instance_class    = "db.t3.large"
   db_allocated_storage = 20
@@ -63,6 +63,11 @@ module "materialize_infrastructure" {
   }
 }
 
+resource "random_password" "pass" {
+  length  = 20
+  special = false
+}
+
 variable "namespace" {
   description = "Namespace for the resources. Used to prefix the names of the resources"
   type        = string
@@ -73,13 +78,6 @@ variable "environment" {
   description = "Environment name"
   type        = string
   default     = "dev"
-}
-
-variable "database_password" {
-  description = "Password for the database (should be provided via tfvars or environment variable)"
-  default     = "your-secure-password"
-  type        = string
-  sensitive   = true
 }
 
 variable "materialize_instances" {

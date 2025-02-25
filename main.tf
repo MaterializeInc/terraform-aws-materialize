@@ -153,7 +153,7 @@ locals {
       metadata_backend_url = format(
         "postgres://%s:%s@%s/%s?sslmode=require",
         var.database_username,
-        var.database_password,
+        urlencode(var.database_password),
         module.database.db_instance_endpoint,
         coalesce(instance.database_name, instance.name)
       )
