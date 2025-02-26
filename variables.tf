@@ -267,7 +267,7 @@ variable "log_group_name_prefix" {
 variable "install_materialize_operator" {
   description = "Whether to install the Materialize operator"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "helm_chart" {
