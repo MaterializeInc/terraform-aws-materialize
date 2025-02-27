@@ -79,7 +79,7 @@ module "database" {
 }
 
 module "operator" {
-  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.6"
+  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.7"
 
   count = var.install_materialize_operator ? 1 : 0
 
