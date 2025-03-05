@@ -2,10 +2,40 @@ provider "aws" {
   region = "us-east-1"
 }
 
+provider "kubernetes" {
+  host                   = module.materialize_infrastructure.eks_cluster_endpoint
+  cluster_ca_certificate = base64decode(module.materialize_infrastructure.cluster_certificate_authority_data)
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", module.materialize_infrastructure.eks_cluster_name]
+  }
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = module.materialize_infrastructure.eks_cluster_endpoint
+    cluster_ca_certificate = base64decode(module.materialize_infrastructure.cluster_certificate_authority_data)
+
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", module.materialize_infrastructure.eks_cluster_name]
+    }
+  }
+}
+
 module "materialize_infrastructure" {
   # To pull this from GitHub, use the following:
   # source = "git::https://github.com/MaterializeInc/terraform-aws-materialize.git"
   source = "../../"
+
+  providers = {
+    aws        = aws
+    kubernetes = kubernetes
+    helm       = helm
+  }
 
   # The namespace and environment variables are used to construct the names of the resources
   # e.g. ${namespace}-${environment}-storage, ${namespace}-${environment}-db etc.
@@ -139,4 +169,10 @@ output "oidc_provider_arn" {
 output "materialize_s3_role_arn" {
   description = "The ARN of the IAM role for Materialize"
   value       = module.materialize_infrastructure.materialize_s3_role_arn
+}
+
+output "cluster_certificate_authority_data" {
+  description = "The CA certificate for the EKS cluster"
+  value       = module.materialize_infrastructure.cluster_certificate_authority_data
+  sensitive   = true
 }

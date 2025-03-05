@@ -13,6 +13,11 @@ output "eks_cluster_name" {
   value       = module.eks.cluster_name
 }
 
+output "cluster_certificate_authority_data" {
+  description = "Base64 encoded certificate data required to communicate with the cluster"
+  value       = module.eks.cluster_certificate_authority_data
+}
+
 output "database_endpoint" {
   description = "RDS instance endpoint"
   value       = module.database.db_instance_endpoint
