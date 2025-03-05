@@ -171,6 +171,11 @@ locals {
       memory_request = instance.memory_request
       memory_limit   = instance.memory_limit
 
+
+      balancer_cpu_request    = lookup(instance, "balancer_cpu_request", null)
+      balancer_memory_request = lookup(instance, "balancer_memory_request", null)
+      balancer_memory_limit   = lookup(instance, "balancer_memory_limit", null)
+
       # Rollout options
       in_place_rollout = instance.in_place_rollout
       request_rollout  = instance.request_rollout
