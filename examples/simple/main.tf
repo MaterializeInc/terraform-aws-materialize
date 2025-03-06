@@ -51,6 +51,8 @@ module "materialize_infrastructure" {
 
   # Enable and configure Materialize operator
   install_materialize_operator = true
+  operator_version             = var.operator_version
+  orchestratord_version        = var.orchestratord_version
 
   # Once the operator is installed, you can define your Materialize instances here.
   materialize_instances = var.materialize_instances
@@ -80,12 +82,25 @@ variable "environment" {
   default     = "dev"
 }
 
+variable "operator_version" {
+  description = "Version of the Materialize operator to install"
+  type        = string
+  default     = null
+}
+
+variable "orchestratord_version" {
+  description = "Version of the Materialize orchestrator to install"
+  type        = string
+  default     = "v0.130.4"
+}
+
 variable "materialize_instances" {
   description = "List of Materialize instances to be created."
   type = list(object({
     name                    = string
     namespace               = string
     database_name           = string
+    environmentd_version    = optional(string, "v0.130.4")
     cpu_request             = string
     memory_request          = string
     memory_limit            = string
