@@ -49,10 +49,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "materialize_storage" {
         storage_class = rule.value.transition_storage_class
       }
 
-      expiration {
-        days = rule.value.expiration_days
-      }
-
       noncurrent_version_expiration {
         noncurrent_days = rule.value.noncurrent_version_expiration_days
       }

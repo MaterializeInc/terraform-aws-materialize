@@ -34,7 +34,6 @@ variable "bucket_lifecycle_rules" {
     prefix                             = string
     transition_days                    = number
     transition_storage_class           = string
-    expiration_days                    = number
     noncurrent_version_expiration_days = number
   }))
 }
