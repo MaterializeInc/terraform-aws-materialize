@@ -46,6 +46,12 @@ variable "network_private_subnet_ids" {
   type        = list(string)
 }
 
+variable "network_public_subnet_ids" {
+  default     = []
+  description = "A list of public subnet IDs in the VPC. Only used if create_vpc is false."
+  type        = list(string)
+}
+
 variable "vpc_cidr" {
   description = "CIDR block for VPC"
   type        = string
@@ -261,6 +267,12 @@ variable "log_group_name_prefix" {
   default     = "materialize"
 }
 
+variable "install_aws_load_balancer_controller" {
+  description = "Whether to install the AWS Load Balancer Controller"
+  type        = bool
+  default     = true
+}
+
 # Materialize Helm Chart Variables
 variable "install_materialize_operator" {
   description = "Whether to install the Materialize operator"
@@ -315,6 +327,8 @@ variable "materialize_instances" {
     memory_request          = optional(string, "1Gi")
     memory_limit            = optional(string, "1Gi")
     create_database         = optional(bool, true)
+    create_nlb              = optional(bool, true)
+    internal_nlb            = optional(bool, true)
     in_place_rollout        = optional(bool, false)
     request_rollout         = optional(string)
     force_rollout           = optional(string)
