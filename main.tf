@@ -184,6 +184,14 @@ locals {
         }
       }
     }
+    storage = {
+      storageClass = {
+        create      = var.storage_class_create
+        name        = var.storage_class_name
+        provisioner = var.storage_class_provisioner
+        parameters  = var.storage_class_parameters
+      }
+    }
   }
 
   merged_helm_values = merge(local.default_helm_values, var.helm_values)
