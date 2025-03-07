@@ -145,6 +145,10 @@ export AWS_PROFILE=your-profile-name
 | <a name="input_public_subnet_cidrs"></a> [public\_subnet\_cidrs](#input\_public\_subnet\_cidrs) | CIDR blocks for public subnets | `list(string)` | <pre>[<br/>  "10.0.101.0/24",<br/>  "10.0.102.0/24",<br/>  "10.0.103.0/24"<br/>]</pre> | no |
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | Name of the service account | `string` | `"12345678-1234-1234-1234-123456789012"` | no |
 | <a name="input_single_nat_gateway"></a> [single\_nat\_gateway](#input\_single\_nat\_gateway) | Use a single NAT Gateway for all private subnets | `bool` | `false` | no |
+| <a name="input_storage_class_create"></a> [storage\_class\_create](#input\_storage\_class\_create) | Whether to create the storage class | `bool` | `true` | no |
+| <a name="input_storage_class_name"></a> [storage\_class\_name](#input\_storage\_class\_name) | Name of the storage class | `string` | `"openebs-lvm-instance-store-ext4"` | no |
+| <a name="input_storage_class_parameters"></a> [storage\_class\_parameters](#input\_storage\_class\_parameters) | Parameters for the storage class | <pre>object({<br/>    storage  = string<br/>    fsType   = string<br/>    volgroup = string<br/>  })</pre> | <pre>{<br/>  "fsType": "ext4",<br/>  "storage": "lvm",<br/>  "volgroup": "instance-store-vg"<br/>}</pre> | no |
+| <a name="input_storage_class_provisioner"></a> [storage\_class\_provisioner](#input\_storage\_class\_provisioner) | Storage class provisioner | `string` | `"local.csi.openebs.io"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | <pre>{<br/>  "Environment": "dev",<br/>  "Project": "materialize",<br/>  "Terraform": "true"<br/>}</pre> | no |
 | <a name="input_use_local_chart"></a> [use\_local\_chart](#input\_use\_local\_chart) | Whether to use a local chart instead of one from a repository | `bool` | `false` | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | CIDR block for VPC | `string` | `"10.0.0.0/16"` | no |
