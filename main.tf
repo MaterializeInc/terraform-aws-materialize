@@ -145,10 +145,11 @@ locals {
 
   instances = [
     for instance in var.materialize_instances : {
-      name            = instance.name
-      namespace       = instance.namespace
-      database_name   = instance.database_name
-      create_database = instance.create_database
+      name                 = instance.name
+      namespace            = instance.namespace
+      database_name        = instance.database_name
+      create_database      = instance.create_database
+      environmentd_version = instance.environmentd_version
 
       metadata_backend_url = format(
         "postgres://%s:%s@%s/%s?sslmode=require",
@@ -170,6 +171,10 @@ locals {
       cpu_request    = instance.cpu_request
       memory_request = instance.memory_request
       memory_limit   = instance.memory_limit
+
+      balancer_cpu_request    = instance.balancer_cpu_request
+      balancer_memory_request = instance.balancer_memory_request
+      balancer_memory_limit   = instance.balancer_memory_limit
 
       # Rollout options
       in_place_rollout = instance.in_place_rollout
