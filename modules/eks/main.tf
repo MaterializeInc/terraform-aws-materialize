@@ -1,5 +1,27 @@
 locals {
   name_prefix = "${var.namespace}-${var.environment}"
+
+  # Conditionally create taints only when NVMe is enabled
+  node_taints = var.enable_nvme_storage ? [
+    {
+      key    = "disk-unconfigured"
+      value  = "true"
+      effect = "NO_SCHEDULE"
+    }
+  ] : []
+
+  # Conditionally add disk-config-required label
+  node_labels = merge(
+    {
+      Environment              = var.environment
+      GithubRepo               = "materialize"
+      "materialize.cloud/disk" = "true"
+      "workload"               = "materialize-instance"
+    },
+    var.enable_nvme_storage ? {
+      "materialize.cloud/disk-config-required" = "true"
+    } : {}
+  )
 }
 
 module "eks" {
@@ -30,12 +52,10 @@ module "eks" {
 
       name = local.name_prefix
 
-      labels = {
-        Environment              = var.environment
-        GithubRepo               = "materialize"
-        "materialize.cloud/disk" = "true"
-        "workload"               = "materialize-instance"
-      }
+      labels = local.node_labels
+
+      # Conditionally add taints
+      taints = local.node_taints
     }
   }
 

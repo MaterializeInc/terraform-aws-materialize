@@ -49,6 +49,12 @@ variable "node_group_ami_type" {
   default     = "AL2023_x86_64_STANDARD"
 }
 
+variable "enable_nvme_storage" {
+  description = "Whether to enable NVMe storage configuration with taints and labels"
+  type        = bool
+  default     = false
+}
+
 variable "cluster_enabled_log_types" {
   description = "List of desired control plane logging to enable"
   type        = list(string)
