@@ -144,6 +144,12 @@ variable "enable_cluster_creator_admin_permissions" {
   default     = true
 }
 
+variable "enable_nvme_storage" {
+  description = "Whether to enable NVMe storage configuration with taints and labels"
+  type        = bool
+  default     = true
+}
+
 # RDS Variables
 variable "postgres_version" {
   description = "Version of PostgreSQL to use"
@@ -360,6 +366,12 @@ variable "materialize_instances" {
 
 variable "install_metrics_server" {
   description = "Whether to install the metrics-server for the Materialize Console"
+  type        = bool
+  default     = true
+}
+
+variable "install_openebs" {
+  description = "Whether to install OpenEBS for lgalloc support"
   type        = bool
   default     = true
 }

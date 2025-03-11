@@ -1,5 +1,27 @@
 locals {
   name_prefix = "${var.namespace}-${var.environment}"
+
+  # Conditionally create taints only when NVMe is enabled
+  node_taints = var.enable_nvme_storage ? [
+    {
+      key    = "disk-unconfigured"
+      value  = "true"
+      effect = "NO_SCHEDULE"
+    }
+  ] : []
+
+  # Conditionally add disk-config-required label
+  node_labels = merge(
+    {
+      Environment              = var.environment
+      GithubRepo               = "materialize"
+      "materialize.cloud/disk" = "true"
+      "workload"               = "materialize-instance"
+    },
+    var.enable_nvme_storage ? {
+      "materialize.cloud/disk-config-required" = "true"
+    } : {}
+  )
 }
 
 module "eks" {
@@ -30,12 +52,10 @@ module "eks" {
 
       name = local.name_prefix
 
-      labels = {
-        Environment              = var.environment
-        GithubRepo               = "materialize"
-        "materialize.cloud/disk" = "true"
-        "workload"               = "materialize-instance"
-      }
+      labels = local.node_labels
+
+      # Conditionally add taints
+      taints = local.node_taints
     }
   }
 
@@ -74,4 +94,172 @@ module "eks" {
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
   tags = var.tags
+}
+
+# NVMe disk setup components - only created when NVMe storage is enabled
+resource "kubernetes_service_account" "nvme_setup" {
+  count = var.enable_nvme_storage ? 1 : 0
+
+  metadata {
+    name      = "nvme-setup-sa"
+    namespace = "kube-system"
+  }
+}
+
+resource "kubernetes_cluster_role" "node_taint_manager" {
+  count = var.enable_nvme_storage ? 1 : 0
+
+  metadata {
+    name = "node-taint-manager"
+  }
+
+  rule {
+    api_groups = [""]
+    resources  = ["nodes"]
+    verbs      = ["get", "patch", "update"]
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "nvme_setup_taint_binding" {
+  count = var.enable_nvme_storage ? 1 : 0
+
+  metadata {
+    name = "nvme-setup-taint-binding"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.node_taint_manager[0].metadata[0].name
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.nvme_setup[0].metadata[0].name
+    namespace = "kube-system"
+  }
+}
+
+resource "kubernetes_daemon_set_v1" "nvme_disk_setup" {
+  count = var.enable_nvme_storage ? 1 : 0
+
+  metadata {
+    name      = "nvme-disk-setup"
+    namespace = "kube-system"
+  }
+
+  spec {
+    selector {
+      match_labels = {
+        app = "nvme-disk-setup"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "nvme-disk-setup"
+        }
+      }
+
+      spec {
+        service_account_name = kubernetes_service_account.nvme_setup[0].metadata[0].name
+
+        # Use init container to set up NVMe disks
+        init_container {
+          name  = "setup-nvme"
+          image = var.nvme_bootstrap_image
+
+          security_context {
+            privileged = true
+          }
+
+          env {
+            name = "NODE_NAME"
+            value_from {
+              field_ref {
+                field_path = "spec.nodeName"
+              }
+            }
+          }
+
+          env {
+            name  = "CLOUD_PROVIDER"
+            value = "aws"
+          }
+
+          volume_mount {
+            name       = "host-dev"
+            mount_path = "/dev"
+          }
+
+          volume_mount {
+            name       = "host-sys"
+            mount_path = "/sys"
+          }
+
+          volume_mount {
+            name       = "host-proc"
+            mount_path = "/proc"
+          }
+
+          command = [
+            "/bin/bash",
+            "-c",
+            <<-EOT
+            # Run the disk configuration script with explicit cloud provider
+            /usr/local/bin/configure-disks.sh --cloud-provider aws
+
+            # Remove taint once configuration is complete
+            /usr/local/bin/manage-taints.sh remove
+            EOT
+          ]
+        }
+
+        # Main container is just a pause container
+        container {
+          name  = "pause"
+          image = "k8s.gcr.io/pause:3.7"
+        }
+
+        volume {
+          name = "host-dev"
+          host_path {
+            path = "/dev"
+          }
+        }
+
+        volume {
+          name = "host-sys"
+          host_path {
+            path = "/sys"
+          }
+        }
+
+        volume {
+          name = "host-proc"
+          host_path {
+            path = "/proc"
+          }
+        }
+
+        # Allow this DaemonSet to run on nodes with the disk-unconfigured taint
+        toleration {
+          key      = "disk-unconfigured"
+          operator = "Exists"
+          effect   = "NoSchedule"
+        }
+
+        # Only run on nodes that need disk configuration
+        node_selector = {
+          "materialize.cloud/disk-config-required" = "true"
+        }
+      }
+    }
+  }
+
+  depends_on = [
+    module.eks,
+    kubernetes_cluster_role_binding.nvme_setup_taint_binding
+  ]
 }
