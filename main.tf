@@ -145,11 +145,10 @@ locals {
 
   instances = [
     for instance in var.materialize_instances : {
-      name                 = instance.name
-      namespace            = instance.namespace
-      database_name        = instance.database_name
-      create_database      = instance.create_database
-      environmentd_version = instance.environmentd_version
+      name            = instance.name
+      namespace       = instance.namespace
+      database_name   = instance.database_name
+      create_database = instance.create_database
 
       metadata_backend_url = format(
         "postgres://%s:%s@%s/%s?sslmode=require",
@@ -172,14 +171,14 @@ locals {
       memory_request = instance.memory_request
       memory_limit   = instance.memory_limit
 
-      balancer_cpu_request    = instance.balancer_cpu_request
-      balancer_memory_request = instance.balancer_memory_request
-      balancer_memory_limit   = instance.balancer_memory_limit
-
       # Rollout options
       in_place_rollout = instance.in_place_rollout
       request_rollout  = instance.request_rollout
       force_rollout    = instance.force_rollout
+
+      balancer_cpu_request    = instance.balancer_cpu_request
+      balancer_memory_request = instance.balancer_memory_request
+      balancer_memory_limit   = instance.balancer_memory_limit
     }
   ]
 
@@ -291,4 +290,20 @@ resource "aws_iam_role_policy" "materialize_s3" {
 
 locals {
   name_prefix = "${var.namespace}-${var.environment}"
+}
+
+module "pg_bouncer" {
+  for_each = {
+    for instance in var.materialize_instances : instance.name => instance.namespace
+  }
+
+  source    = "./modules/pg_bouncer"
+  namespace = each.value
+  name      = each.key
+  # This needs to be added to the operator
+  # materialize_host = "${[for i in module.operator.materialize_instances : i.id if i == each.key].0.id}.${each.value.namespace}.svc.cluster.local"
+
+  depends_on = [
+    module.eks
+  ]
 }
