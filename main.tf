@@ -36,6 +36,8 @@ module "eks" {
   enable_nvme_storage                      = var.enable_nvme_storage
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
+  install_openebs = var.install_openebs
+
   tags = local.common_tags
 
   providers = {
@@ -84,13 +86,11 @@ module "database" {
 }
 
 module "operator" {
-  # TODO: Switch to using tags once the new release is available
-  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=add-install-support-for-openebs"
+  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.8"
 
   count = var.install_materialize_operator ? 1 : 0
 
   install_metrics_server = var.install_metrics_server
-  install_openebs        = var.install_openebs
 
   depends_on = [
     module.eks,
