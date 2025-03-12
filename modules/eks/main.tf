@@ -263,3 +263,29 @@ resource "kubernetes_daemon_set_v1" "nvme_disk_setup" {
     kubernetes_cluster_role_binding.nvme_setup_taint_binding
   ]
 }
+
+# Install OpenEBS for lgalloc support
+resource "kubernetes_namespace" "openebs" {
+  count = var.install_openebs ? 1 : 0
+
+  metadata {
+    name = var.openebs_namespace
+  }
+}
+
+resource "helm_release" "openebs" {
+  count = var.install_openebs ? 1 : 0
+
+  name       = "openebs"
+  namespace  = kubernetes_namespace.openebs[0].metadata[0].name
+  repository = "https://openebs.github.io/openebs"
+  chart      = "openebs"
+  version    = var.openebs_version
+
+  set {
+    name  = "engines.replicated.mayastor.enabled"
+    value = "false"
+  }
+
+  depends_on = [kubernetes_namespace.openebs]
+}

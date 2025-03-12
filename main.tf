@@ -36,6 +36,8 @@ module "eks" {
   enable_nvme_storage                      = var.enable_nvme_storage
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
+  install_openebs = var.install_openebs
+
   tags = local.common_tags
 
   depends_on = [
@@ -108,7 +110,6 @@ module "operator" {
   count = var.install_materialize_operator ? 1 : 0
 
   install_metrics_server = var.install_metrics_server
-  install_openebs        = var.install_openebs
 
   depends_on = [
     module.eks,
