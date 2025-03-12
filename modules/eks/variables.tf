@@ -52,7 +52,7 @@ variable "node_group_ami_type" {
 variable "enable_nvme_storage" {
   description = "Whether to enable NVMe storage configuration with taints and labels"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "cluster_enabled_log_types" {
@@ -77,4 +77,10 @@ variable "enable_cluster_creator_admin_permissions" {
   description = "To add the current caller identity as an administrator"
   type        = bool
   default     = true
+}
+
+variable "nvme_bootstrap_image" {
+  description = "Docker image for NVMe disk bootstrap container"
+  type        = string
+  default     = "bobbyiliev/nvme-bootstrap:latest"
 }
