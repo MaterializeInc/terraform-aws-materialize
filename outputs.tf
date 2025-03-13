@@ -3,6 +3,16 @@ output "vpc_id" {
   value       = module.networking.vpc_id
 }
 
+output "private_subnet_ids" {
+  description = "List of private subnet IDs"
+  value       = module.networking.private_subnet_ids
+}
+
+output "public_subnet_ids" {
+  description = "List of public subnet IDs"
+  value       = module.networking.public_subnet_ids
+}
+
 output "eks_cluster_endpoint" {
   description = "EKS cluster endpoint"
   value       = module.eks.cluster_endpoint
@@ -53,6 +63,11 @@ output "persist_backend_url" {
 output "oidc_provider_arn" {
   description = "The ARN of the OIDC Provider"
   value       = module.eks.oidc_provider_arn
+}
+
+output "cluster_oidc_issuer_url" {
+  description = "The URL on the EKS cluster for the OpenID Connect identity provider"
+  value       = module.eks.cluster_oidc_issuer_url
 }
 
 # aws_iam_role.materialize_s3.arn
