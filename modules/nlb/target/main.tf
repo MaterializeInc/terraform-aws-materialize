@@ -1,9 +1,10 @@
 resource "aws_lb_target_group" "target_group" {
-  name        = var.name
-  port        = var.port
-  protocol    = "TCP"
-  target_type = "ip"
-  vpc_id      = var.vpc_id
+  name               = var.name
+  port               = var.port
+  preserve_client_ip = true
+  protocol           = "TCP"
+  target_type        = "ip"
+  vpc_id             = var.vpc_id
 
   health_check {
     enabled             = true

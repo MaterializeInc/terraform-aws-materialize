@@ -319,22 +319,23 @@ variable "helm_values" {
 variable "materialize_instances" {
   description = "Configuration for Materialize instances"
   type = list(object({
-    name                    = string
-    namespace               = optional(string)
-    database_name           = string
-    environmentd_version    = optional(string, "v0.130.4")
-    cpu_request             = optional(string, "1")
-    memory_request          = optional(string, "1Gi")
-    memory_limit            = optional(string, "1Gi")
-    create_database         = optional(bool, true)
-    create_nlb              = optional(bool, true)
-    internal_nlb            = optional(bool, true)
-    in_place_rollout        = optional(bool, false)
-    request_rollout         = optional(string)
-    force_rollout           = optional(string)
-    balancer_memory_request = optional(string, "256Mi")
-    balancer_memory_limit   = optional(string, "256Mi")
-    balancer_cpu_request    = optional(string, "100m")
+    name                             = string
+    namespace                        = optional(string)
+    database_name                    = string
+    environmentd_version             = optional(string, "v0.130.4")
+    cpu_request                      = optional(string, "1")
+    memory_request                   = optional(string, "1Gi")
+    memory_limit                     = optional(string, "1Gi")
+    create_database                  = optional(bool, true)
+    create_nlb                       = optional(bool, true)
+    internal_nlb                     = optional(bool, true)
+    enable_cross_zone_load_balancing = optional(bool, true)
+    in_place_rollout                 = optional(bool, false)
+    request_rollout                  = optional(string)
+    force_rollout                    = optional(string)
+    balancer_memory_request          = optional(string, "256Mi")
+    balancer_memory_limit            = optional(string, "256Mi")
+    balancer_cpu_request             = optional(string, "100m")
   }))
   default = []
 

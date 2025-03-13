@@ -138,12 +138,13 @@ module "nlb" {
 
   for_each = { for idx, instance in local.instances : instance.name => instance if lookup(instance, "create_nlb", true) }
 
-  name_prefix    = each.value.name
-  namespace      = each.value.namespace
-  internal       = each.value.internal_nlb
-  subnet_ids     = each.value.internal_nlb ? local.network_private_subnet_ids : local.network_public_subnet_ids
-  vpc_id         = local.network_id
-  mz_resource_id = module.operator[0].materialize_instance_resource_ids[each.value.name]
+  name_prefix                      = each.value.name
+  namespace                        = each.value.namespace
+  internal                         = each.value.internal_nlb
+  subnet_ids                       = each.value.internal_nlb ? local.network_private_subnet_ids : local.network_public_subnet_ids
+  enable_cross_zone_load_balancing = each.value.enable_cross_zone_load_balancing
+  vpc_id                           = local.network_id
+  mz_resource_id                   = module.operator[0].materialize_instance_resource_ids[each.value.name]
 
   depends_on = [
     module.aws_lbc,
@@ -189,13 +190,14 @@ locals {
 
   instances = [
     for instance in var.materialize_instances : {
-      name                 = instance.name
-      namespace            = instance.namespace
-      database_name        = instance.database_name
-      create_database      = instance.create_database
-      environmentd_version = instance.environmentd_version
-      create_nlb           = instance.create_nlb
-      internal_nlb         = instance.internal_nlb
+      name                             = instance.name
+      namespace                        = instance.namespace
+      database_name                    = instance.database_name
+      create_database                  = instance.create_database
+      environmentd_version             = instance.environmentd_version
+      create_nlb                       = instance.create_nlb
+      internal_nlb                     = instance.internal_nlb
+      enable_cross_zone_load_balancing = instance.enable_cross_zone_load_balancing
 
       metadata_backend_url = format(
         "postgres://%s:%s@%s/%s?sslmode=require",
