@@ -79,7 +79,8 @@ module "database" {
 }
 
 module "operator" {
-  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.7"
+  #source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.7"
+  source = "../terraform-helm-materialize/modules/common"
 
   count = var.install_materialize_operator ? 1 : 0
 
@@ -91,13 +92,10 @@ module "operator" {
     module.storage
   ]
 
-  namespace          = var.namespace
-  environment        = var.environment
   operator_version   = var.operator_version
   operator_namespace = var.operator_namespace
 
   helm_values = local.merged_helm_values
-  instances   = local.instances
 
   // For development purposes, you can use a local Helm chart instead of fetching it from the Helm repository
   use_local_chart = var.use_local_chart
@@ -106,6 +104,57 @@ module "operator" {
   providers = {
     kubernetes = kubernetes
     helm       = helm
+  }
+}
+
+module "materialize_instance" {
+  #source = "github.com/MaterializeInc/terraform-helm-materialize//modules/instance?ref=separate_materialize_cr"
+  source = "../terraform-helm-materialize/modules/instance"
+
+  for_each = { for idx, instance in var.materialize_instances : instance.name => instance }
+
+  depends_on = [
+    module.eks,
+    module.database,
+    module.storage
+  ]
+
+  name      = each.value.name
+  namespace = each.value.namespace
+
+  metadata_backend_url = format(
+    "postgres://%s:%s@%s/%s?sslmode=require",
+    var.database_username,
+    urlencode(var.database_password),
+    module.database.db_instance_endpoint,
+    coalesce(each.value.database_name, each.value.name)
+  )
+
+  persist_backend_url = format(
+    "s3://%s/%s-%s:serviceaccount:%s:%s",
+    module.storage.bucket_name,
+    var.environment,
+    each.value.name,
+    coalesce(each.value.namespace, var.operator_namespace),
+    each.value.name
+  )
+
+  environmentd_version        = each.value.environmentd_version
+  environmentd_cpu_request    = each.value.cpu_request
+  environmentd_memory_request = each.value.memory_request
+  environmentd_memory_limit   = each.value.memory_limit
+
+  balancerd_cpu_request    = each.value.balancer_cpu_request
+  balancerd_memory_request = each.value.balancer_memory_request
+  balancerd_memory_limit   = each.value.balancer_memory_limit
+
+  # Rollout options
+  in_place_rollout = each.value.in_place_rollout
+  request_rollout  = each.value.request_rollout
+  force_rollout    = each.value.force_rollout
+
+  providers = {
+    kubernetes = kubernetes
   }
 }
 
@@ -142,46 +191,6 @@ locals {
   }
 
   merged_helm_values = merge(local.default_helm_values, var.helm_values)
-
-  instances = [
-    for instance in var.materialize_instances : {
-      name                 = instance.name
-      namespace            = instance.namespace
-      database_name        = instance.database_name
-      create_database      = instance.create_database
-      environmentd_version = instance.environmentd_version
-
-      metadata_backend_url = format(
-        "postgres://%s:%s@%s/%s?sslmode=require",
-        var.database_username,
-        urlencode(var.database_password),
-        module.database.db_instance_endpoint,
-        coalesce(instance.database_name, instance.name)
-      )
-
-      persist_backend_url = format(
-        "s3://%s/%s-%s:serviceaccount:%s:%s",
-        module.storage.bucket_name,
-        var.environment,
-        instance.name,
-        coalesce(instance.namespace, var.operator_namespace),
-        instance.name
-      )
-
-      cpu_request    = instance.cpu_request
-      memory_request = instance.memory_request
-      memory_limit   = instance.memory_limit
-
-      balancer_cpu_request    = instance.balancer_cpu_request
-      balancer_memory_request = instance.balancer_memory_request
-      balancer_memory_limit   = instance.balancer_memory_limit
-
-      # Rollout options
-      in_place_rollout = instance.in_place_rollout
-      request_rollout  = instance.request_rollout
-      force_rollout    = instance.force_rollout
-    }
-  ]
 
   # Common tags that apply to all resources
   common_tags = merge(
