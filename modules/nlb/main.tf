@@ -1,8 +1,9 @@
 resource "aws_lb" "nlb" {
-  name               = var.name_prefix
-  internal           = var.internal
-  load_balancer_type = "network"
-  subnets            = var.subnet_ids
+  name                             = var.name_prefix
+  internal                         = var.internal
+  load_balancer_type               = "network"
+  subnets                          = var.subnet_ids
+  enable_cross_zone_load_balancing = var.enable_cross_zone_load_balancing
 }
 
 module "target_pgwire" {

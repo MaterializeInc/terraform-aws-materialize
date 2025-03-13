@@ -28,3 +28,9 @@ variable "mz_resource_id" {
   description = "The resourceId from the Materialize CR"
   type        = string
 }
+
+variable "enable_cross_zone_load_balancing" {
+  description = "Whether to enable cross zone load balancing on the NLB."
+  type        = bool
+  default     = true
+}
