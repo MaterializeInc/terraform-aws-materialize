@@ -138,6 +138,12 @@ variable "enable_cluster_creator_admin_permissions" {
   default     = true
 }
 
+variable "enable_nvme_storage" {
+  description = "Whether to enable NVMe storage configuration with taints and labels"
+  type        = bool
+  default     = true
+}
+
 # RDS Variables
 variable "postgres_version" {
   description = "Version of PostgreSQL to use"
@@ -347,4 +353,42 @@ variable "install_metrics_server" {
   description = "Whether to install the metrics-server for the Materialize Console"
   type        = bool
   default     = true
+}
+
+variable "install_openebs" {
+  description = "Whether to install OpenEBS for lgalloc support"
+  type        = bool
+  default     = true
+}
+
+variable "storage_class_create" {
+  description = "Whether to create the storage class"
+  type        = bool
+  default     = true
+}
+
+variable "storage_class_name" {
+  description = "Name of the storage class"
+  type        = string
+  default     = "openebs-lvm-instance-store-ext4"
+}
+
+variable "storage_class_provisioner" {
+  description = "Storage class provisioner"
+  type        = string
+  default     = "local.csi.openebs.io"
+}
+
+variable "storage_class_parameters" {
+  description = "Parameters for the storage class"
+  type = object({
+    storage  = string
+    fsType   = string
+    volgroup = string
+  })
+  default = {
+    storage  = "lvm"
+    fsType   = "ext4"
+    volgroup = "instance-store-vg"
+  }
 }
