@@ -21,12 +21,12 @@ provider "aws" {
 
 # Required for EKS authentication
 provider "kubernetes" {
-  host                   = module.materialize_infrastructure.eks_cluster_endpoint
-  cluster_ca_certificate = base64decode(module.materialize_infrastructure.cluster_certificate_authority_data)
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
-    args        = ["eks", "get-token", "--cluster-name", module.materialize_infrastructure.eks_cluster_name]
+    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
     command     = "aws"
   }
 }
@@ -34,21 +34,17 @@ provider "kubernetes" {
 # Required for Materialize Operator installation
 provider "helm" {
   kubernetes {
-    host                   = module.materialize_infrastructure.eks_cluster_endpoint
-    cluster_ca_certificate = base64decode(module.materialize_infrastructure.cluster_certificate_authority_data)
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
-      args        = ["eks", "get-token", "--cluster-name", module.materialize_infrastructure.eks_cluster_name]
+      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
       command     = "aws"
     }
   }
 }
 
-module "materialize_infrastructure" {
-  source = "git::https://github.com/MaterializeInc/terraform-aws-materialize.git"
-  # Other required variables
-}
 ```
 
 > **Note:** The Kubernetes and Helm providers are configured to use the AWS CLI for authentication with the EKS cluster. This requires that you have the AWS CLI installed and configured with access to the AWS account where the EKS cluster is deployed.
@@ -126,7 +122,7 @@ export AWS_PROFILE=your-profile-name
 | <a name="input_install_metrics_server"></a> [install\_metrics\_server](#input\_install\_metrics\_server) | Whether to install the metrics-server for the Materialize Console | `bool` | `true` | no |
 | <a name="input_kubernetes_namespace"></a> [kubernetes\_namespace](#input\_kubernetes\_namespace) | The Kubernetes namespace for the Materialize resources | `string` | `"materialize-environment"` | no |
 | <a name="input_log_group_name_prefix"></a> [log\_group\_name\_prefix](#input\_log\_group\_name\_prefix) | Prefix for the CloudWatch log group name (will be combined with environment name) | `string` | `"materialize"` | no |
-| <a name="input_materialize_instances"></a> [materialize\_instances](#input\_materialize\_instances) | Configuration for Materialize instances | <pre>list(object({<br/>    name                 = string<br/>    namespace            = optional(string)<br/>    database_name        = string<br/>    environmentd_version = optional(string, "v0.130.4")<br/>    cpu_request          = optional(string, "1")<br/>    memory_request       = optional(string, "1Gi")<br/>    memory_limit         = optional(string, "1Gi")<br/>    create_database      = optional(bool, true)<br/>    in_place_rollout     = optional(bool, false)<br/>    request_rollout      = optional(string)<br/>    force_rollout        = optional(string)<br/>  }))</pre> | `[]` | no |
+| <a name="input_materialize_instances"></a> [materialize\_instances](#input\_materialize\_instances) | Configuration for Materialize instances | <pre>list(object({<br/>    name                    = string<br/>    namespace               = optional(string)<br/>    database_name           = string<br/>    environmentd_version    = optional(string, "v0.130.4")<br/>    cpu_request             = optional(string, "1")<br/>    memory_request          = optional(string, "1Gi")<br/>    memory_limit            = optional(string, "1Gi")<br/>    create_database         = optional(bool, true)<br/>    in_place_rollout        = optional(bool, false)<br/>    request_rollout         = optional(string)<br/>    force_rollout           = optional(string)<br/>    balancer_memory_request = optional(string, "256Mi")<br/>    balancer_memory_limit   = optional(string, "256Mi")<br/>    balancer_cpu_request    = optional(string, "100m")<br/>  }))</pre> | `[]` | no |
 | <a name="input_metrics_retention_days"></a> [metrics\_retention\_days](#input\_metrics\_retention\_days) | Number of days to retain CloudWatch metrics | `number` | `7` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for all resources, usually the organization or project name | `string` | n/a | yes |
 | <a name="input_network_id"></a> [network\_id](#input\_network\_id) | The ID of the VPC in which resources will be deployed. Only used if create\_vpc is false. | `string` | `""` | no |
