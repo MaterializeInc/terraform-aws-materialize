@@ -36,6 +36,25 @@ module "eks" {
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
   tags = local.common_tags
+
+  depends_on = [
+    module.networking,
+  ]
+}
+
+module "aws_lbc" {
+  source = "./modules/aws-lbc"
+  count  = var.install_aws_load_balancer_controller ? 1 : 0
+
+  eks_cluster_name  = module.eks.cluster_name
+  oidc_provider_arn = module.eks.oidc_provider_arn
+  oidc_issuer_url   = module.eks.cluster_oidc_issuer_url
+  vpc_id            = module.networking.vpc_id
+  region            = data.aws_region.current.name
+
+  depends_on = [
+    module.eks,
+  ]
 }
 
 module "storage" {
@@ -76,10 +95,14 @@ module "database" {
   database_password          = var.database_password
 
   tags = local.common_tags
+
+  depends_on = [
+    module.networking,
+  ]
 }
 
 module "operator" {
-  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.7"
+  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.8"
 
   count = var.install_materialize_operator ? 1 : 0
 
@@ -88,7 +111,8 @@ module "operator" {
   depends_on = [
     module.eks,
     module.database,
-    module.storage
+    module.storage,
+    module.networking,
   ]
 
   namespace          = var.namespace
@@ -109,9 +133,30 @@ module "operator" {
   }
 }
 
+module "nlb" {
+  source = "./modules/nlb"
+
+  for_each = { for idx, instance in local.instances : instance.name => instance if lookup(instance, "create_nlb", true) }
+
+  name_prefix                      = each.value.name
+  namespace                        = each.value.namespace
+  internal                         = each.value.internal_nlb
+  subnet_ids                       = each.value.internal_nlb ? local.network_private_subnet_ids : local.network_public_subnet_ids
+  enable_cross_zone_load_balancing = each.value.enable_cross_zone_load_balancing
+  vpc_id                           = local.network_id
+  mz_resource_id                   = module.operator[0].materialize_instance_resource_ids[each.value.name]
+
+  depends_on = [
+    module.aws_lbc,
+    module.operator,
+    module.eks,
+  ]
+}
+
 locals {
   network_id                 = var.create_vpc ? module.networking.vpc_id : var.network_id
   network_private_subnet_ids = var.create_vpc ? module.networking.private_subnet_ids : var.network_private_subnet_ids
+  network_public_subnet_ids  = var.create_vpc ? module.networking.public_subnet_ids : var.network_public_subnet_ids
 
   default_helm_values = {
     observability = {
@@ -145,11 +190,14 @@ locals {
 
   instances = [
     for instance in var.materialize_instances : {
-      name                 = instance.name
-      namespace            = instance.namespace
-      database_name        = instance.database_name
-      create_database      = instance.create_database
-      environmentd_version = instance.environmentd_version
+      name                             = instance.name
+      namespace                        = instance.namespace
+      database_name                    = instance.database_name
+      create_database                  = instance.create_database
+      environmentd_version             = instance.environmentd_version
+      create_nlb                       = instance.create_nlb
+      internal_nlb                     = instance.internal_nlb
+      enable_cross_zone_load_balancing = instance.enable_cross_zone_load_balancing
 
       metadata_backend_url = format(
         "postgres://%s:%s@%s/%s?sslmode=require",
