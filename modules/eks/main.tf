@@ -1,5 +1,47 @@
 locals {
   name_prefix = "${var.namespace}-${var.environment}"
+
+  disk_setup_user_data = base64encode(<<-EOT
+    #!/bin/bash
+    set -xeuo pipefail
+
+    yum update -y
+    yum install -y lvm2 util-linux jq e2fsprogs
+
+    BOTTLEROCKET_ROOT="/.bottlerocket/rootfs"
+    DRIVE_PATHS=()
+
+    mapfile -t SSD_NVME_DEVICE_LIST < <(lsblk --json --output-all | jq -r '.blockdevices[] | select(.model // empty | contains("Amazon EC2 NVMe Instance Storage")) | .path')
+
+    echo "Found NVMe devices: $${SSD_NVME_DEVICE_LIST[@]}"
+
+    if [ $${#SSD_NVME_DEVICE_LIST[@]} -eq 0 ]; then
+      echo "No NVMe instance storage devices found. Exiting."
+      exit 0
+    fi
+
+    for device in "$${SSD_NVME_DEVICE_LIST[@]}"; do
+      DRIVE_PATHS+=("$${BOTTLEROCKET_ROOT}$${device}")
+    done
+
+    echo "Configuring drives: $${DRIVE_PATHS[@]}"
+
+    for device_path in "$${DRIVE_PATHS[@]}"; do
+      echo "Creating PV on $${device_path}"
+      pvcreate "$${device_path}"
+    done
+
+    echo "Creating VG instance-store-vg"
+    vgcreate instance-store-vg "$${DRIVE_PATHS[@]}"
+
+    echo "PV Status:"
+    pvs
+    echo "VG Status:"
+    vgs
+
+    echo "Completed LVM setup successfully"
+  EOT
+  )
 }
 
 module "eks" {
@@ -36,6 +78,15 @@ module "eks" {
         "materialize.cloud/disk" = "true"
         "workload"               = "materialize-instance"
       }
+
+      bootstrap_extra_args = <<-TOML
+        [settings.bootstrap-containers.disk-setup]
+        source = "public.ecr.aws/amazonlinux/amazonlinux:2"
+        mode = "once"
+        essential = true
+        user-data = "${local.disk_setup_user_data}"
+      TOML
+
     }
   }
 
@@ -74,4 +125,30 @@ module "eks" {
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
   tags = var.tags
+}
+
+# Install OpenEBS for lgalloc support
+resource "kubernetes_namespace" "openebs" {
+  count = var.install_openebs ? 1 : 0
+
+  metadata {
+    name = var.openebs_namespace
+  }
+}
+
+resource "helm_release" "openebs" {
+  count = var.install_openebs ? 1 : 0
+
+  name       = "openebs"
+  namespace  = kubernetes_namespace.openebs[0].metadata[0].name
+  repository = "https://openebs.github.io/openebs"
+  chart      = "openebs"
+  version    = var.openebs_version
+
+  set {
+    name  = "engines.replicated.mayastor.enabled"
+    value = "false"
+  }
+
+  depends_on = [kubernetes_namespace.openebs]
 }
