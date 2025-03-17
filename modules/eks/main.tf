@@ -4,10 +4,6 @@ locals {
   disk_setup_user_data = base64encode(<<-EOT
     #!/bin/bash
     set -xeuo pipefail
-
-    yum update -y
-    yum install -y lvm2 util-linux jq e2fsprogs
-
     BOTTLEROCKET_ROOT="/.bottlerocket/rootfs"
     DRIVE_PATHS=()
 
@@ -31,15 +27,7 @@ locals {
       pvcreate "$${device_path}"
     done
 
-    echo "Creating VG instance-store-vg"
     vgcreate instance-store-vg "$${DRIVE_PATHS[@]}"
-
-    echo "PV Status:"
-    pvs
-    echo "VG Status:"
-    vgs
-
-    echo "Completed LVM setup successfully"
   EOT
   )
 }
@@ -57,7 +45,6 @@ module "eks" {
 
   cluster_endpoint_public_access = true
 
-  # Add CloudWatch logging
   cluster_enabled_log_types = var.cluster_enabled_log_types
 
   eks_managed_node_groups = {
@@ -80,8 +67,9 @@ module "eks" {
       }
 
       enable_bootstrap_user_data = true
+
       bootstrap_extra_args = <<-TOML
-        [settings.bootstrap-containers.disk-setup]
+        [settings.bootstrap-containers.default]
         mode = "once"
         essential = true
         user-data = "${local.disk_setup_user_data}"
@@ -89,10 +77,10 @@ module "eks" {
 
       # Simpler test to see if the user data is being applied
       # bootstrap_extra_args = <<-TOML
-      #   [settings.bootstrap-containers.disk-setup]
+      #   [settings.bootstrap-containers.default]
       #   mode = "once"
       #   essential = true
-      #   user-data = "${base64encode("#!/bin/bash\necho 'Simple test' > /tmp/test.log")}"
+      #   user-data = "IyEvYmluL2Jhc2gKZWNobyBIRUxMTyBXT1JMRA=="
       # TOML
 
     }
