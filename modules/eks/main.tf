@@ -79,13 +79,21 @@ module "eks" {
         "workload"               = "materialize-instance"
       }
 
+      enable_bootstrap_user_data = true
       bootstrap_extra_args = <<-TOML
         [settings.bootstrap-containers.disk-setup]
-        source = "public.ecr.aws/amazonlinux/amazonlinux:2"
         mode = "once"
         essential = true
         user-data = "${local.disk_setup_user_data}"
       TOML
+
+      # Simpler test to see if the user data is being applied
+      # bootstrap_extra_args = <<-TOML
+      #   [settings.bootstrap-containers.disk-setup]
+      #   mode = "once"
+      #   essential = true
+      #   user-data = "${base64encode("#!/bin/bash\necho 'Simple test' > /tmp/test.log")}"
+      # TOML
 
     }
   }
