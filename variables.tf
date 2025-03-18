@@ -113,11 +113,11 @@ Instance types for worker nodes.
 
 Recommended Configuration for Running Materialize with disk:
 - Tested instance types: `m6g`, `m7g` families (ARM-based Graviton instances)
-- AMI: AWS Bottlerocket (optimized for container workloads)
+- Enable disk setup when using `r7gd`
 - Note: Ensure instance store volumes are available and attached to the nodes for optimal performance with disk-based workloads.
 EOF
   type        = list(string)
-  default     = ["r8g.2xlarge"]
+  default     = ["r7gd.2xlarge"]
 }
 
 variable "node_group_capacity_type" {
