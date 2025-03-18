@@ -199,3 +199,8 @@ output "cluster_certificate_authority_data" {
   value       = module.materialize_infrastructure.cluster_certificate_authority_data
   sensitive   = true
 }
+
+output "nlb_details" {
+  description = "Details of the Materialize instance NLBs."
+  value       = module.materialize_infrastructure.nlb_details
+}

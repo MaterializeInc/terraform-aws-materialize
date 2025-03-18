@@ -83,3 +83,13 @@ output "operator_details" {
     instances = module.operator[0].materialize_instances
   } : null
 }
+
+output "nlb_details" {
+  description = "Details of the Materialize instance NLBs."
+  value = [
+    for nlb in module.nlb : {
+      arn      = nlb.nlb_arn
+      dns_name = nlb.nlb_dns_name
+    }
+  ]
+}

@@ -317,7 +317,7 @@ variable "helm_values" {
 }
 
 variable "materialize_instances" {
-  description = "Configuration for Materialize instances"
+  description = "Configuration for Materialize instances. Due to limitations in Terraform, `materialize_instances` cannot be defined on the first `terraform apply`."
   type = list(object({
     name                             = string
     namespace                        = optional(string)
