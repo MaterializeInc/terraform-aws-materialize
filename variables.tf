@@ -370,6 +370,12 @@ variable "install_openebs" {
   default     = true
 }
 
+variable "enable_disk_setup" {
+  description = "Whether to enable disk setup"
+  type        = bool
+  default     = true
+}
+
 variable "storage_class_create" {
   description = "Whether to create the storage class"
   type        = bool

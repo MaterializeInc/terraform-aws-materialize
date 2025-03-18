@@ -35,6 +35,7 @@ module "eks" {
   node_group_capacity_type                 = var.node_group_capacity_type
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
   install_openebs                          = var.install_openebs
+  enable_disk_setup                        = var.enable_disk_setup
 
   tags = local.common_tags
 
