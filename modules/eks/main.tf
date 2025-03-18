@@ -1,35 +1,7 @@
 locals {
   name_prefix = "${var.namespace}-${var.environment}"
 
-  disk_setup_user_data = base64encode(<<-EOT
-    #!/bin/bash
-    set -xeuo pipefail
-    BOTTLEROCKET_ROOT="/.bottlerocket/rootfs"
-    DRIVE_PATHS=()
-
-    mapfile -t SSD_NVME_DEVICE_LIST < <(lsblk --json --output-all | jq -r '.blockdevices[] | select(.model // empty | contains("Amazon EC2 NVMe Instance Storage")) | .path')
-
-    echo "Found NVMe devices: $${SSD_NVME_DEVICE_LIST[@]}"
-
-    if [ $${#SSD_NVME_DEVICE_LIST[@]} -eq 0 ]; then
-      echo "No NVMe instance storage devices found. Exiting."
-      exit 0
-    fi
-
-    for device in "$${SSD_NVME_DEVICE_LIST[@]}"; do
-      DRIVE_PATHS+=("$${BOTTLEROCKET_ROOT}$${device}")
-    done
-
-    echo "Configuring drives: $${DRIVE_PATHS[@]}"
-
-    for device_path in "$${DRIVE_PATHS[@]}"; do
-      echo "Creating PV on $${device_path}"
-      pvcreate "$${device_path}"
-    done
-
-    vgcreate instance-store-vg "$${DRIVE_PATHS[@]}"
-  EOT
-  )
+  disk_setup_script = file("${path.module}/bootstrap.sh")
 }
 
 module "eks" {
@@ -66,22 +38,12 @@ module "eks" {
         "workload"               = "materialize-instance"
       }
 
-      enable_bootstrap_user_data = true
-
-      bootstrap_extra_args = <<-TOML
-        [settings.bootstrap-containers.default]
-        mode = "once"
-        essential = true
-        user-data = "${local.disk_setup_user_data}"
-      TOML
-
-      # Simpler test to see if the user data is being applied
-      # bootstrap_extra_args = <<-TOML
-      #   [settings.bootstrap-containers.default]
-      #   mode = "once"
-      #   essential = true
-      #   user-data = "IyEvYmluL2Jhc2gKZWNobyBIRUxMTyBXT1JMRA=="
-      # TOML
+      cloudinit_pre_nodeadm = [
+        {
+          content_type = "text/x-shellscript"
+          content      = local.disk_setup_script
+        }
+      ]
 
     }
   }
