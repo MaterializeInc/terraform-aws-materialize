@@ -4,6 +4,12 @@ variable "namespace" {
   default     = "kube-system"
 }
 
+variable "name_prefix" {
+  description = "Prefix to use for AWS LBC resources"
+  type        = string
+  default     = ""
+}
+
 variable "service_account_name" {
   description = "Name of the Kubernetes service account used by the AWS LBC"
   type        = string
@@ -13,7 +19,7 @@ variable "service_account_name" {
 variable "iam_name" {
   description = "Name of the AWS IAM role and policy"
   type        = string
-  default     = "aws-load-balancer-controller"
+  default     = "albc"
 }
 
 variable "eks_cluster_name" {
