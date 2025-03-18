@@ -46,6 +46,7 @@ module "aws_lbc" {
   source = "./modules/aws-lbc"
   count  = var.install_aws_load_balancer_controller ? 1 : 0
 
+  name_prefix       = "${var.namespace}-${var.environment}"
   eks_cluster_name  = module.eks.cluster_name
   oidc_provider_arn = module.eks.oidc_provider_arn
   oidc_issuer_url   = module.eks.cluster_oidc_issuer_url
