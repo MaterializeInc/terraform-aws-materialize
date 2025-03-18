@@ -34,16 +34,16 @@ module "eks" {
       labels = {
         Environment              = var.environment
         GithubRepo               = "materialize"
-        "materialize.cloud/disk" = "true"
+        "materialize.cloud/disk" = var.enable_disk_setup ? "true" : "false"
         "workload"               = "materialize-instance"
       }
 
-      cloudinit_pre_nodeadm = [
+      cloudinit_pre_nodeadm = var.enable_disk_setup ? [
         {
           content_type = "text/x-shellscript"
           content      = local.disk_setup_script
         }
-      ]
+      ] : []
 
     }
   }

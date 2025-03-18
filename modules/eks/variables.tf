@@ -91,3 +91,9 @@ variable "openebs_version" {
   type        = string
   default     = "4.2.0"
 }
+
+variable "enable_disk_setup" {
+  description = "Whether to enable disk setup using the bootstrap script"
+  type        = bool
+  default     = true
+}
