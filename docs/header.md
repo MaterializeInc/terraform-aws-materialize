@@ -56,7 +56,7 @@ export AWS_PROFILE=your-profile-name
 
 ## Disk Support for Materialize
 
-This module supports configuring disk supprot for Materialize using NVMe instance storage and OpenEBS and lgalloc.
+This module supports configuring disk support for Materialize using NVMe instance storage and OpenEBS and lgalloc.
 
 When using disk support, you need to use instance types from the `r7gd` or `r6gd` family or other instance types with NVMe instance storage.
 
