@@ -83,6 +83,7 @@ module "materialize_infrastructure" {
   install_materialize_operator = true
   operator_version             = var.operator_version
   orchestratord_version        = var.orchestratord_version
+  helm_values                  = var.helm_values
 
   # Once the operator is installed, you can define your Materialize instances here.
   materialize_instances = var.materialize_instances
@@ -99,6 +100,7 @@ resource "random_password" "pass" {
   length  = 20
   special = false
 }
+
 
 variable "namespace" {
   description = "Namespace for the resources. Used to prefix the names of the resources"
@@ -145,6 +147,12 @@ variable "materialize_instances" {
     balancer_cpu_request    = optional(string, "100m")
   }))
   default = []
+}
+
+variable "helm_values" {
+  description = "Additional Helm values to merge with defaults"
+  type        = any
+  default     = {}
 }
 
 # Outputs
