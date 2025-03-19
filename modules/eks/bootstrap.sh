@@ -1,35 +1,36 @@
 #!/bin/bash
-set -xe
+set -xeuo pipefail
 
 echo "Starting NVMe disk setup"
 
-yum install -y lvm2
+# Install required tools
+yum install -y nvme-cli lvm2
 
-ROOT_PART=$(findmnt -n -o SOURCE / | sed 's/\[.*\]//')
-ROOT_DEVICE=$(lsblk -no PKNAME "$ROOT_PART")
-ROOT_DEVICE="/dev/${ROOT_DEVICE}"
-
-NVME_DEVICES=()
-
-for dev in /dev/nvme*n1; do
-  if [ "$dev" != "$ROOT_DEVICE" ] && [ -b "$dev" ]; then
-    NVME_DEVICES+=("$dev")
-  fi
-done
-
-echo "Found NVMe devices: ${NVME_DEVICES[@]:-none}"
-
-if [ ${#NVME_DEVICES[@]} -eq 0 ]; then
+# Check if NVMe instance storage is available
+if ! nvme list | grep -q "Amazon EC2 NVMe Instance Storage"; then
   echo "No NVMe instance storage devices found"
   exit 0
 fi
 
-for device in "${NVME_DEVICES[@]}"; do
+# Collect NVMe instance storage devices
+mapfile -t SSD_NVME_DEVICE_LIST < <(nvme list | grep "Amazon EC2 NVMe Instance Storage" | awk '{print $1}' || true)
+
+echo "Found NVMe devices: ${SSD_NVME_DEVICE_LIST[*]:-none}"
+
+if [ ${#SSD_NVME_DEVICE_LIST[@]} -eq 0 ]; then
+  echo "No usable NVMe instance storage devices found"
+  exit 0
+fi
+
+# Create physical volumes
+for device in "${SSD_NVME_DEVICE_LIST[@]}"; do
   pvcreate -f "$device"
 done
 
-vgcreate instance-store-vg "${NVME_DEVICES[@]}"
+# Create volume group
+vgcreate instance-store-vg "${SSD_NVME_DEVICE_LIST[@]}"
 
+# Display results
 pvs
 vgs
 
