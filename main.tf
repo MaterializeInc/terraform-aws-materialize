@@ -190,14 +190,14 @@ locals {
         }
       }
     }
-    storage = {
+    storage = var.enable_disk_support ? {
       storageClass = {
         create      = local.disk_config.create_storage_class
         name        = local.disk_config.storage_class_name
         provisioner = local.disk_config.storage_class_provisioner
         parameters  = local.disk_config.storage_class_parameters
       }
-    }
+    } : {}
   }
 
   merged_helm_values = merge(local.default_helm_values, var.helm_values)
