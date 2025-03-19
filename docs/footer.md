@@ -17,6 +17,20 @@ By default, Network Load Balancers are created for each Materialize instance, wi
 
 The DNS name and ARN for the NLBs will be in the `terraform output` as `nlb_details`.
 
+#### TLS support
+
+For example purposes, optional TLS support is provided by using `cert-manager` and a self-signed `ClusterIssuer`.
+
+More advanced TLS support using user-provided CAs or per-Materialize `Issuer`s are out of scope of this Terraform module. Please refer to the [cert-manager documentation](https://cert-manager.io/docs/configuration/) for detailed guidance on more advanced usage.
+
+###### To enable installation of `cert-manager` and configuration of the self-signed `ClusterIssuer`
+* Set `install_cert_manager` to `true`.
+* Run `terraform apply`.
+* Set `use_self_signed_cluster_issuer` to `true`.
+* Run `terraform apply`.
+
+Due to limitations in Terraform, it cannot plan Kubernetes resources using CRDs that do not exist yet. We need to first install `cert-manager` in the first `terraform apply`, before defining any `ClusterIssuer` or `Certificate` resources which get created in the second `terraform apply`.
+
 ## Upgrade Notes
 
 #### v0.3.0

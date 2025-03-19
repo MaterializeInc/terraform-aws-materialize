@@ -107,6 +107,24 @@ module "database" {
   ]
 }
 
+module "certificates" {
+  source = "./modules/certificates"
+
+  install_cert_manager           = var.install_cert_manager
+  use_self_signed_cluster_issuer = var.use_self_signed_cluster_issuer
+  cert_manager_namespace         = var.cert_manager_namespace
+  name_prefix                    = local.name_prefix
+
+  depends_on = [
+    module.eks,
+    # The AWS LBC installs webhooks, and all other K8S stuff can fail
+    # if they are deployed, but the AWS LBC pods aren't up yet.
+    # This doesn't actually need the LBC,
+    # but we want to avoid concurrently updating these.
+    module.aws_lbc,
+  ]
+}
+
 module "operator" {
   source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.8"
 
@@ -119,6 +137,12 @@ module "operator" {
     module.database,
     module.storage,
     module.networking,
+    module.certificates,
+    # The AWS LBC installs webhooks, and all other K8S stuff can fail
+    # if they are deployed, but the AWS LBC pods aren't up yet.
+    # This doesn't actually need the LBC,
+    # but we want to avoid concurrently updating these.
+    module.aws_lbc,
   ]
 
   namespace          = var.namespace
@@ -196,6 +220,34 @@ locals {
         name        = local.disk_config.storage_class_name
         provisioner = local.disk_config.storage_class_provisioner
         parameters  = local.disk_config.storage_class_parameters
+      }
+    } : {}
+    tls = var.use_self_signed_cluster_issuer ? {
+      defaultCertificateSpecs = {
+        balancerdExternal = {
+          dnsNames = [
+            "balancerd",
+          ]
+          issuerRef = {
+            name = module.certificates.cluster_issuer_name
+            kind = "ClusterIssuer"
+          }
+        }
+        consoleExternal = {
+          dnsNames = [
+            "console",
+          ]
+          issuerRef = {
+            name = module.certificates.cluster_issuer_name
+            kind = "ClusterIssuer"
+          }
+        }
+        internal = {
+          issuerRef = {
+            name = module.certificates.cluster_issuer_name
+            kind = "ClusterIssuer"
+          }
+        }
       }
     } : {}
   }

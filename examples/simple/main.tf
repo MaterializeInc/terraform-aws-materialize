@@ -79,6 +79,10 @@ module "materialize_infrastructure" {
   enable_monitoring      = true
   metrics_retention_days = 3
 
+  # Certificates
+  install_cert_manager           = var.install_cert_manager
+  use_self_signed_cluster_issuer = var.use_self_signed_cluster_issuer
+
   # Enable and configure Materialize operator
   install_materialize_operator = true
   operator_version             = var.operator_version
@@ -153,6 +157,18 @@ variable "helm_values" {
   description = "Additional Helm values to merge with defaults"
   type        = any
   default     = {}
+}
+
+variable "install_cert_manager" {
+  description = "Whether to install cert-manager."
+  type        = bool
+  default     = false
+}
+
+variable "use_self_signed_cluster_issuer" {
+  description = "Whether to install and use a self-signed ClusterIssuer for TLS. Due to limitations in Terraform, this may not be enabled before the cert-manager CRDs are installed."
+  type        = bool
+  default     = false
 }
 
 # Outputs
