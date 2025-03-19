@@ -46,7 +46,7 @@ module "aws_lbc" {
   source = "./modules/aws-lbc"
   count  = var.install_aws_load_balancer_controller ? 1 : 0
 
-  name_prefix       = "${var.namespace}-${var.environment}"
+  name_prefix       = local.name_prefix
   eks_cluster_name  = module.eks.cluster_name
   oidc_provider_arn = module.eks.oidc_provider_arn
   oidc_issuer_url   = module.eks.cluster_oidc_issuer_url
@@ -139,7 +139,7 @@ module "nlb" {
 
   for_each = { for idx, instance in local.instances : instance.name => instance if lookup(instance, "create_nlb", true) }
 
-  name_prefix                      = each.value.name
+  name_prefix                      = "${local.name_prefix}-${each.value.name}"
   namespace                        = each.value.namespace
   internal                         = each.value.internal_nlb
   subnet_ids                       = each.value.internal_nlb ? local.network_private_subnet_ids : local.network_public_subnet_ids
