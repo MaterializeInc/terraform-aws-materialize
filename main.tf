@@ -33,7 +33,10 @@ module "eks" {
   node_group_ami_type                      = var.node_group_ami_type
   cluster_enabled_log_types                = var.cluster_enabled_log_types
   node_group_capacity_type                 = var.node_group_capacity_type
+  enable_nvme_storage                      = var.enable_nvme_storage
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
+
+  install_openebs = var.install_openebs
 
   tags = local.common_tags
 
@@ -183,6 +186,14 @@ locals {
             }
           }
         }
+      }
+    }
+    storage = {
+      storageClass = {
+        create      = var.storage_class_create
+        name        = var.storage_class_name
+        provisioner = var.storage_class_provisioner
+        parameters  = var.storage_class_parameters
       }
     }
   }
