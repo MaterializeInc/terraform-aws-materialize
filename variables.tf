@@ -112,7 +112,7 @@ variable "node_group_instance_types" {
 Instance types for worker nodes.
 
 Recommended Configuration for Running Materialize with disk:
-- Tested instance types: `m6g`, `m7g` families (ARM-based Graviton instances)
+- Tested instance types: `r6gd`, `r7gd` families (ARM-based Graviton instances)
 - Enable disk setup when using `r7gd`
 - Note: Ensure instance store volumes are available and attached to the nodes for optimal performance with disk-based workloads.
 EOF
