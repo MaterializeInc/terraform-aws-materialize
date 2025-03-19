@@ -364,47 +364,27 @@ variable "install_metrics_server" {
   default     = true
 }
 
-variable "install_openebs" {
-  description = "Whether to install OpenEBS for lgalloc support"
+variable "enable_disk_support" {
+  description = "Enable disk support for Materialize using OpenEBS and NVMe instance storage. When enabled, this configures OpenEBS, runs the disk setup script for NVMe devices, and creates appropriate storage classes."
   type        = bool
   default     = true
 }
 
-variable "enable_disk_setup" {
-  description = "Whether to enable disk setup"
-  type        = bool
-  default     = true
-}
-
-variable "storage_class_create" {
-  description = "Whether to create the storage class"
-  type        = bool
-  default     = true
-}
-
-variable "storage_class_name" {
-  description = "Name of the storage class"
-  type        = string
-  default     = "openebs-lvm-instance-store-ext4"
-}
-
-variable "storage_class_provisioner" {
-  description = "Storage class provisioner"
-  type        = string
-  default     = "local.csi.openebs.io"
-}
-
-variable "storage_class_parameters" {
-  description = "Parameters for the storage class"
+variable "disk_support_config" {
+  description = "Advanced configuration for disk support (only used when enable_disk_support = true)"
   type = object({
-    storage  = string
-    fsType   = string
-    volgroup = string
+    install_openebs           = optional(bool, true)
+    run_disk_setup_script     = optional(bool, true)
+    create_storage_class      = optional(bool, true)
+    openebs_version           = optional(string, "4.2.0")
+    openebs_namespace         = optional(string, "openebs")
+    storage_class_name        = optional(string, "openebs-lvm-instance-store-ext4")
+    storage_class_provisioner = optional(string, "local.csi.openebs.io")
+    storage_class_parameters = optional(object({
+      storage  = optional(string, "lvm")
+      fsType   = optional(string, "ext4")
+      volgroup = optional(string, "instance-store-vg")
+    }), {})
   })
-
-  default = {
-    storage  = "lvm"
-    fsType   = "ext4"
-    volgroup = "instance-store-vg"
-  }
+  default = {}
 }
