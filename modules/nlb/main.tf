@@ -9,7 +9,7 @@ resource "aws_lb" "nlb" {
 module "target_pgwire" {
   source = "./target"
 
-  name              = "pgwire"
+  name              = "${var.name_prefix}-pgwire"
   nlb_arn           = aws_lb.nlb.arn
   namespace         = var.namespace
   vpc_id            = var.vpc_id
@@ -21,7 +21,7 @@ module "target_pgwire" {
 module "target_http" {
   source = "./target"
 
-  name              = "http"
+  name              = "${var.name_prefix}-http"
   nlb_arn           = aws_lb.nlb.arn
   namespace         = var.namespace
   vpc_id            = var.vpc_id
@@ -33,7 +33,7 @@ module "target_http" {
 module "target_console" {
   source = "./target"
 
-  name              = "console"
+  name              = "${var.name_prefix}-console"
   nlb_arn           = aws_lb.nlb.arn
   namespace         = var.namespace
   vpc_id            = var.vpc_id
