@@ -7,7 +7,7 @@ Terraform module for deploying Materialize on AWS Cloud Platform with all requir
 
 The module has been tested with:
 - PostgreSQL 15
-- Materialize Helm Operator Terraform Module v0.1.1
+- Materialize Helm Operator Terraform Module v0.1.8
 
 ## Providers Configuration
 
@@ -125,7 +125,7 @@ export AWS_PROFILE=your-profile-name
 | <a name="input_install_metrics_server"></a> [install\_metrics\_server](#input\_install\_metrics\_server) | Whether to install the metrics-server for the Materialize Console | `bool` | `true` | no |
 | <a name="input_kubernetes_namespace"></a> [kubernetes\_namespace](#input\_kubernetes\_namespace) | The Kubernetes namespace for the Materialize resources | `string` | `"materialize-environment"` | no |
 | <a name="input_log_group_name_prefix"></a> [log\_group\_name\_prefix](#input\_log\_group\_name\_prefix) | Prefix for the CloudWatch log group name (will be combined with environment name) | `string` | `"materialize"` | no |
-| <a name="input_materialize_instances"></a> [materialize\_instances](#input\_materialize\_instances) | Configuration for Materialize instances | <pre>list(object({<br/>    name                    = string<br/>    namespace               = optional(string)<br/>    database_name           = string<br/>    environmentd_version    = optional(string, "v0.130.4")<br/>    cpu_request             = optional(string, "1")<br/>    memory_request          = optional(string, "1Gi")<br/>    memory_limit            = optional(string, "1Gi")<br/>    create_database         = optional(bool, true)<br/>    create_nlb              = optional(bool, true)<br/>    internal_nlb            = optional(bool, true)<br/>    in_place_rollout        = optional(bool, false)<br/>    request_rollout         = optional(string)<br/>    force_rollout           = optional(string)<br/>    balancer_memory_request = optional(string, "256Mi")<br/>    balancer_memory_limit   = optional(string, "256Mi")<br/>    balancer_cpu_request    = optional(string, "100m")<br/>  }))</pre> | `[]` | no |
+| <a name="input_materialize_instances"></a> [materialize\_instances](#input\_materialize\_instances) | Configuration for Materialize instances. Due to limitations in Terraform, `materialize_instances` cannot be defined on the first `terraform apply`. | <pre>list(object({<br/>    name                             = string<br/>    namespace                        = optional(string)<br/>    database_name                    = string<br/>    environmentd_version             = optional(string, "v0.130.4")<br/>    cpu_request                      = optional(string, "1")<br/>    memory_request                   = optional(string, "1Gi")<br/>    memory_limit                     = optional(string, "1Gi")<br/>    create_database                  = optional(bool, true)<br/>    create_nlb                       = optional(bool, true)<br/>    internal_nlb                     = optional(bool, true)<br/>    enable_cross_zone_load_balancing = optional(bool, true)<br/>    in_place_rollout                 = optional(bool, false)<br/>    request_rollout                  = optional(string)<br/>    force_rollout                    = optional(string)<br/>    balancer_memory_request          = optional(string, "256Mi")<br/>    balancer_memory_limit            = optional(string, "256Mi")<br/>    balancer_cpu_request             = optional(string, "100m")<br/>  }))</pre> | `[]` | no |
 | <a name="input_metrics_retention_days"></a> [metrics\_retention\_days](#input\_metrics\_retention\_days) | Number of days to retain CloudWatch metrics | `number` | `7` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for all resources, usually the organization or project name | `string` | n/a | yes |
 | <a name="input_network_id"></a> [network\_id](#input\_network\_id) | The ID of the VPC in which resources will be deployed. Only used if create\_vpc is false. | `string` | `""` | no |
@@ -160,6 +160,7 @@ export AWS_PROFILE=your-profile-name
 | <a name="output_eks_cluster_name"></a> [eks\_cluster\_name](#output\_eks\_cluster\_name) | EKS cluster name |
 | <a name="output_materialize_s3_role_arn"></a> [materialize\_s3\_role\_arn](#output\_materialize\_s3\_role\_arn) | The ARN of the IAM role for Materialize |
 | <a name="output_metadata_backend_url"></a> [metadata\_backend\_url](#output\_metadata\_backend\_url) | PostgreSQL connection URL in the format required by Materialize |
+| <a name="output_nlb_details"></a> [nlb\_details](#output\_nlb\_details) | Details of the Materialize instance NLBs. |
 | <a name="output_oidc_provider_arn"></a> [oidc\_provider\_arn](#output\_oidc\_provider\_arn) | The ARN of the OIDC Provider |
 | <a name="output_operator_details"></a> [operator\_details](#output\_operator\_details) | Details of the installed Materialize operator |
 | <a name="output_persist_backend_url"></a> [persist\_backend\_url](#output\_persist\_backend\_url) | S3 connection URL in the format required by Materialize using IRSA |
@@ -177,4 +178,33 @@ After successfully deploying the infrastructure with this module, you'll need to
 1. Deploy your first Materialize environment
 
 See our [Operator Installation Guide](docs/operator-setup.md) for instructions.
+
+## Connecting to Materialize instances
+
+By default, Network Load Balancers are created for each Materialize instance, with three listeners:
+1. Port 6875 for SQL connections to the database.
+1. Port 6876 for HTTP(S) connections to the database.
+1. Port 8080 for HTTP(S) connections to the web console.
+
+The DNS name and ARN for the NLBs will be in the `terraform output` as `nlb_details`.
+
+## Upgrade Notes
+
+#### v0.3.0
+We now install the AWS Load Balancer Controller and create Network Load Balancers for each Materialize instance.
+
+If managing Materialize instances with this module, additional action may be required to upgrade to this version.
+
+###### If you want to disable NLB support
+* Set `install_aws_load_balancer_controller` to `false`.
+* Set `materialize_instances[*].create_nlb` to `false`.
+
+###### If you want to enable NLB support
+* Leave `install_aws_load_balancer_controller` set to its default of `true`.
+* Set `materialize_instances[*].create_nlb` to `false`.
+* Run `terraform apply`.
+* Set `materialize_instances[*].create_nlb` to `true`.
+* Run `terraform apply`.
+
+Due to limitations in Terraform, it cannot plan Kubernetes resources using CRDs that do not exist yet. We need to first install the AWS Load Balancer Controller in the first `terraform apply`, before defining any `TargetGroupBinding` resources which get created in the second `terraform apply`.
 <!-- END_TF_DOCS -->
