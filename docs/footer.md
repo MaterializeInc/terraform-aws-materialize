@@ -21,7 +21,7 @@ The DNS name and ARN for the NLBs will be in the `terraform output` as `nlb_deta
 
 For example purposes, optional TLS support is provided by using `cert-manager` and a self-signed `ClusterIssuer`.
 
-More advanced TLS support using user-provided CAs or per-Materialize `Issuer`s are out of scope of this Terraform module. Please refer to the [cert-manager documentation](https://cert-manager.io/docs/configuration/) for detailed guidance on more advanced usage.
+More advanced TLS support using user-provided CAs or per-Materialize `Issuer`s are out of scope for this Terraform module. Please refer to the [cert-manager documentation](https://cert-manager.io/docs/configuration/) for detailed guidance on more advanced usage.
 
 ###### To enable installation of `cert-manager` and configuration of the self-signed `ClusterIssuer`
 1. Set `install_cert_manager` to `true`.
