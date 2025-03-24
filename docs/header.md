@@ -8,13 +8,9 @@ The module has been tested with:
 - Materialize Helm Operator Terraform Module v0.1.8
 
 > [!WARNING]
-> This module is provided on a best-effort basis and Materialize cannot offer support for it.
+> This module is intended to be used for demonstrations, simple evaluations, and as a template for building your own production deployment of Materialize.
 >
-> It is not guaranteed to be forward-compatible and may include breaking changes in future versions.
->
-> The module is intended for demonstration and evaluation purposes only, not for production use.
->
-> Instead, consider forking this repository as a starting point for building your own production infrastructure.
+> This module should not be relied upon for production deployments directly: future releases of the module will contain breaking changes. When used as a starting point for a production deployment, you must either fork this repo and pin to a specific version, or use the code as a reference when developing your own deployment.
 
 ## Providers Configuration
 
