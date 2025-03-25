@@ -325,7 +325,7 @@ variable "operator_namespace" {
 variable "orchestratord_version" {
   description = "Version of the Materialize orchestrator to install"
   type        = string
-  default     = "v0.130.4"
+  default     = null
 }
 
 variable "helm_values" {
