@@ -273,6 +273,36 @@ variable "install_aws_load_balancer_controller" {
   default     = true
 }
 
+variable "install_cert_manager" {
+  description = "Whether to install cert-manager."
+  type        = bool
+  default     = false
+}
+
+variable "use_self_signed_cluster_issuer" {
+  description = "Whether to install and use a self-signed ClusterIssuer for TLS. Due to limitations in Terraform, this may not be enabled before the cert-manager CRDs are installed."
+  type        = bool
+  default     = false
+}
+
+variable "cert_manager_namespace" {
+  description = "The name of the namespace in which cert-manager is or will be installed."
+  type        = string
+  default     = "cert-manager"
+}
+
+variable "cert_manager_install_timeout" {
+  description = "Timeout for installing the cert-manager helm chart, in seconds."
+  type        = number
+  default     = 300
+}
+
+variable "cert_manager_chart_version" {
+  description = "Version of the cert-manager helm chart to install."
+  type        = string
+  default     = "v1.17.1"
+}
+
 # Materialize Helm Chart Variables
 variable "install_materialize_operator" {
   description = "Whether to install the Materialize operator"
@@ -307,7 +337,7 @@ variable "operator_namespace" {
 variable "orchestratord_version" {
   description = "Version of the Materialize orchestrator to install"
   type        = string
-  default     = "v0.130.4"
+  default     = null
 }
 
 variable "helm_values" {
