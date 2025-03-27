@@ -17,3 +17,13 @@ variable "name_prefix" {
   description = "The name prefix to use for Kubernetes resources. Does not apply to cert-manager itself, as that is a singleton per cluster."
   type        = string
 }
+
+variable "cert_manager_install_timeout" {
+  description = "Timeout for installing the cert-manager helm chart, in seconds."
+  type        = number
+}
+
+variable "cert_manager_chart_version" {
+  description = "Version of the cert-manager helm chart to install."
+  type        = string
+}

@@ -15,7 +15,8 @@ resource "helm_release" "cert_manager" {
   namespace  = kubernetes_namespace.cert_manager[0].metadata[0].name
   repository = "https://charts.jetstack.io"
   chart      = "cert-manager"
-  version    = "v1.17.1"
+  version    = var.cert_manager_chart_version
+  timeout    = var.cert_manager_install_timeout
 
   set {
     name  = "crds.enabled"

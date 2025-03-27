@@ -111,6 +111,8 @@ module "certificates" {
   source = "./modules/certificates"
 
   install_cert_manager           = var.install_cert_manager
+  cert_manager_install_timeout   = var.cert_manager_install_timeout
+  cert_manager_chart_version     = var.cert_manager_chart_version
   use_self_signed_cluster_issuer = var.use_self_signed_cluster_issuer
   cert_manager_namespace         = var.cert_manager_namespace
   name_prefix                    = local.name_prefix
