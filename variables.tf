@@ -276,13 +276,13 @@ variable "install_aws_load_balancer_controller" {
 variable "install_cert_manager" {
   description = "Whether to install cert-manager."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "use_self_signed_cluster_issuer" {
-  description = "Whether to install and use a self-signed ClusterIssuer for TLS. Due to limitations in Terraform, this may not be enabled before the cert-manager CRDs are installed."
+  description = "Whether to install and use a self-signed ClusterIssuer for TLS. To work around limitations in Terraform, this will be treated as `false` if no materialize instances are defined."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "cert_manager_namespace" {
