@@ -79,8 +79,11 @@ output "materialize_s3_role_arn" {
 output "operator_details" {
   description = "Details of the installed Materialize operator"
   value = var.install_materialize_operator ? {
-    namespace = module.operator[0].operator_namespace
-    instances = module.operator[0].materialize_instances
+    namespace             = module.operator[0].operator_namespace
+    release_name          = module.operator[0].operator_release_name
+    release_status        = module.operator[0].operator_release_status
+    instances             = module.operator[0].materialize_instances
+    instance_resource_ids = module.operator[0].materialize_instance_resource_ids
   } : null
 }
 
