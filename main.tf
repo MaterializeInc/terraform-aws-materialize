@@ -170,6 +170,7 @@ module "nlb" {
 
   for_each = { for idx, instance in local.instances : instance.name => instance if lookup(instance, "create_nlb", true) }
 
+  instance_name                    = each.value.name
   name_prefix                      = "${local.name_prefix}-${each.value.name}"
   namespace                        = each.value.namespace
   internal                         = each.value.internal_nlb
