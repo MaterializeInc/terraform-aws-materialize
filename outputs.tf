@@ -89,10 +89,10 @@ output "operator_details" {
 
 output "nlb_details" {
   description = "Details of the Materialize instance NLBs."
-  value = [
-    for nlb in module.nlb : {
+  value = {
+    for nlb in module.nlb : nlb.instance_name => {
       arn      = nlb.nlb_arn
       dns_name = nlb.nlb_dns_name
     }
-  ]
+  }
 }

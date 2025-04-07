@@ -1,3 +1,8 @@
+variable "instance_name" {
+  description = "The name of the Materialize instance."
+  type        = string
+}
+
 variable "name_prefix" {
   description = "Prefix to use for NLB, Target Groups, Listeners, and TargetGroupBindings"
   type        = string
