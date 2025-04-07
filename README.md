@@ -110,7 +110,7 @@ disk_support_config = {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.88.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.94.1 |
 
 ## Modules
 
@@ -122,7 +122,7 @@ disk_support_config = {
 | <a name="module_eks"></a> [eks](#module\_eks) | ./modules/eks | n/a |
 | <a name="module_networking"></a> [networking](#module\_networking) | ./modules/networking | n/a |
 | <a name="module_nlb"></a> [nlb](#module\_nlb) | ./modules/nlb | n/a |
-| <a name="module_operator"></a> [operator](#module\_operator) | github.com/MaterializeInc/terraform-helm-materialize | v0.1.9 |
+| <a name="module_operator"></a> [operator](#module\_operator) | github.com/MaterializeInc/terraform-helm-materialize | v0.1.11 |
 | <a name="module_storage"></a> [storage](#module\_storage) | ./modules/storage | n/a |
 
 ## Resources
@@ -130,11 +130,8 @@ disk_support_config = {
 | Name | Type |
 |------|------|
 | [aws_cloudwatch_log_group.materialize](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
-| [aws_iam_access_key.materialize_user](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_access_key) | resource |
 | [aws_iam_role.materialize_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy.materialize_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
-| [aws_iam_user.materialize](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user) | resource |
-| [aws_iam_user_policy.materialize_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user_policy) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 
@@ -173,7 +170,7 @@ disk_support_config = {
 | <a name="input_install_metrics_server"></a> [install\_metrics\_server](#input\_install\_metrics\_server) | Whether to install the metrics-server for the Materialize Console | `bool` | `true` | no |
 | <a name="input_kubernetes_namespace"></a> [kubernetes\_namespace](#input\_kubernetes\_namespace) | The Kubernetes namespace for the Materialize resources | `string` | `"materialize-environment"` | no |
 | <a name="input_log_group_name_prefix"></a> [log\_group\_name\_prefix](#input\_log\_group\_name\_prefix) | Prefix for the CloudWatch log group name (will be combined with environment name) | `string` | `"materialize"` | no |
-| <a name="input_materialize_instances"></a> [materialize\_instances](#input\_materialize\_instances) | Configuration for Materialize instances. Due to limitations in Terraform, `materialize_instances` cannot be defined on the first `terraform apply`. | <pre>list(object({<br/>    name                             = string<br/>    namespace                        = optional(string)<br/>    database_name                    = string<br/>    environmentd_version             = optional(string)<br/>    cpu_request                      = optional(string, "1")<br/>    memory_request                   = optional(string, "1Gi")<br/>    memory_limit                     = optional(string, "1Gi")<br/>    create_database                  = optional(bool, true)<br/>    create_nlb                       = optional(bool, true)<br/>    internal_nlb                     = optional(bool, true)<br/>    enable_cross_zone_load_balancing = optional(bool, true)<br/>    in_place_rollout                 = optional(bool, false)<br/>    request_rollout                  = optional(string)<br/>    force_rollout                    = optional(string)<br/>    balancer_memory_request          = optional(string, "256Mi")<br/>    balancer_memory_limit            = optional(string, "256Mi")<br/>    balancer_cpu_request             = optional(string, "100m")<br/>  }))</pre> | `[]` | no |
+| <a name="input_materialize_instances"></a> [materialize\_instances](#input\_materialize\_instances) | Configuration for Materialize instances. Due to limitations in Terraform, `materialize_instances` cannot be defined on the first `terraform apply`. | <pre>list(object({<br/>    name                             = string<br/>    namespace                        = optional(string)<br/>    database_name                    = string<br/>    environmentd_version             = optional(string)<br/>    cpu_request                      = optional(string, "1")<br/>    memory_request                   = optional(string, "1Gi")<br/>    memory_limit                     = optional(string, "1Gi")<br/>    create_database                  = optional(bool, true)<br/>    create_nlb                       = optional(bool, true)<br/>    internal_nlb                     = optional(bool, true)<br/>    enable_cross_zone_load_balancing = optional(bool, true)<br/>    in_place_rollout                 = optional(bool, false)<br/>    request_rollout                  = optional(string)<br/>    force_rollout                    = optional(string)<br/>    balancer_memory_request          = optional(string, "256Mi")<br/>    balancer_memory_limit            = optional(string, "256Mi")<br/>    balancer_cpu_request             = optional(string, "100m")<br/>    license_key                      = optional(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_metrics_retention_days"></a> [metrics\_retention\_days](#input\_metrics\_retention\_days) | Number of days to retain CloudWatch metrics | `number` | `7` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for all resources, usually the organization or project name | `string` | n/a | yes |
 | <a name="input_network_id"></a> [network\_id](#input\_network\_id) | The ID of the VPC in which resources will be deployed. Only used if create\_vpc is false. | `string` | `""` | no |

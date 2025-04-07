@@ -366,6 +366,7 @@ variable "materialize_instances" {
     balancer_memory_request          = optional(string, "256Mi")
     balancer_memory_limit            = optional(string, "256Mi")
     balancer_cpu_request             = optional(string, "100m")
+    license_key                      = optional(string)
   }))
   default = []
 
