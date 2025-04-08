@@ -5,7 +5,7 @@ Terraform module for deploying Materialize on AWS Cloud Platform with all requir
 The module has been tested with:
 
 - PostgreSQL 15
-- Materialize Helm Operator Terraform Module v0.1.8
+- Materialize Helm Operator Terraform Module v0.1.12
 
 > [!WARNING]
 > This module is intended for demonstration/evaluation purposes as well as for serving as a template when building your own production deployment of Materialize.
