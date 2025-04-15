@@ -46,7 +46,7 @@ variable "node_group_instance_types" {
 variable "node_group_ami_type" {
   description = "AMI type for the node group"
   type        = string
-  default     = "AL2023_x86_64_STANDARD"
+  default     = "AL2023_ARM_64_STANDARD"
 }
 
 variable "cluster_enabled_log_types" {
@@ -96,4 +96,62 @@ variable "enable_disk_setup" {
   description = "Whether to enable disk setup using the bootstrap script"
   type        = bool
   default     = true
+}
+
+variable "vpc_cidr" {
+  description = "CIDR of eks vpc"
+  type        = string
+}
+
+variable "cluster_service_ipv4_cidr" {
+  description = "CIDR block to assign Kubernetes service IP addresses from"
+  type        = string
+  default     = "10.100.0.0/16"
+}
+
+# Karpenter configuration
+variable "install_karpenter" {
+  description = "Whether to install Karpenter"
+  type        = bool
+  default     = false
+}
+
+variable "karpenter_version" {
+  description = "Version of the Karpenter Helm chart to install"
+  type        = string
+  default     = "1.3.3"
+}
+
+variable "karpenter_namespace" {
+  description = "Namespace for Karpenter"
+  type        = string
+  default     = "karpenter"
+}
+
+variable "karpenter_service_account" {
+  description = "Name of the Karpenter service account"
+  type        = string
+  default     = "karpenter"
+}
+
+variable "karpenter_settings" {
+  description = "Additional settings for Karpenter Helm chart"
+  type        = map(string)
+  default     = {}
+}
+
+variable "karpenter_instance_sizes" {
+  description = "Additional settings for Karpenter Helm chart"
+  type        = list(string)
+  default = [
+    "r7gd.xlarge",
+    "r7gd.2xlarge",
+    "r7gd.4xlarge",
+    "r7gd.8xlarge",
+  ]
+}
+
+variable "region" {
+  description = "AWS region"
+  type        = string
 }
