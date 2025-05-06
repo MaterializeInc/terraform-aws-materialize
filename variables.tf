@@ -148,13 +148,13 @@ variable "enable_cluster_creator_admin_permissions" {
 variable "postgres_version" {
   description = "Version of PostgreSQL to use"
   type        = string
-  default     = "15"
+  default     = "17"
 }
 
 variable "db_instance_class" {
-  description = "Instance class for the RDS instance"
+  description = "Instance class for the RDS instance. This is used for concensus and metadata and is general not bottlnecked by memory or disk. Recomended instance family m7i, m6i, m7g, and m8g"
   type        = string
-  default     = "db.t3.large"
+  default     = "db.m6i.large"
 }
 
 variable "db_allocated_storage" {
