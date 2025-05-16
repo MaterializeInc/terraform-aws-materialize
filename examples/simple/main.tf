@@ -154,10 +154,7 @@ variable "materialize_instances" {
       name  = string
       value = string
     })), [])
-    environmentd_extra_args = optional(list(object({
-      name  = string
-      value = string
-    })), [])
+    environmentd_extra_args = optional(list(string), [])
   }))
   default = []
 }
