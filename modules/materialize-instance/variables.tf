@@ -185,11 +185,6 @@ variable "use_self_signed_cluster_issuer" {
   default     = true
 }
 
-variable "materialize_iam_role_arn" {
-  description = "ARN of the IAM role for Materialize instance to use. Provided by the operator module."
-  type        = string
-}
-
 variable "metadata_backend_url" {
   description = "The full connection URL for the metadata backend (Postgres)."
   type        = string

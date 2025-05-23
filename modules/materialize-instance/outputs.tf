@@ -32,8 +32,3 @@ output "persist_backend_url" {
   description = "Persist backend URL used by the Materialize instance"
   value = var.persist_backend_url
 }
-
-# output "cluster_issuer_name" {
-#   description = "Name of the ClusterIssuer"
-#   value       = var.use_self_signed_cluster_issuer ? kubernetes_manifest.root_ca_cluster_issuer[0].object.metadata.name : null
-# }

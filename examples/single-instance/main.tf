@@ -1,6 +1,3 @@
-# Single Instance Example
-# This example shows how to deploy a single Materialize instance with default settings.
-
 provider "aws" {
   region = var.aws_region
 }
@@ -48,47 +45,39 @@ module "networking" {
 # 2. Create EKS cluster
 module "eks" {
   source = "../../modules/eks"
-
   name_prefix = var.name_prefix
-
-  cluster_version                          = "1.28"
-  vpc_id                                   = module.networking.vpc_id
-  private_subnet_ids                       = module.networking.private_subnet_ids
-  node_group_desired_size                  = 2
-  node_group_min_size                      = 2
-  node_group_max_size                      = 3
-  node_group_instance_types                = ["r7g.xlarge"] # Use optimized instances for Materialize
-  node_group_ami_type                      = "AL2023_ARM_64_STANDARD"
-  cluster_enabled_log_types                = ["api", "audit"]
-  node_group_capacity_type                 = "ON_DEMAND"
+  cluster_version = "1.28"
+  vpc_id = module.networking.vpc_id
+  private_subnet_ids = module.networking.private_subnet_ids
+  cluster_enabled_log_types = ["api", "audit"]
   enable_cluster_creator_admin_permissions = true
+  tags = {}
+}
 
-  depends_on = [
-    module.networking,
-  ]
+# 2.1. Create EKS node group
+module "eks_node_group" {
+  source = "../../modules/eks-node-group"
+  cluster_name   = module.eks.cluster_name
+  subnet_ids     = module.networking.private_subnet_ids
+  node_group_name = "${var.name_prefix}-mz"
+  desired_size   = 2
+  min_size       = 2
+  max_size       = 3
+  instance_types = ["r7g.xlarge"]
+  capacity_type  = "ON_DEMAND"
+  ami_type       = "AL2023_ARM_64_STANDARD"
+  enable_disk_setup = true
+  cluster_service_cidr = module.eks.cluster_service_cidr
+  cluster_primary_security_group_id = module.eks.node_security_group_id
 
-  providers = {
-    aws        = aws
-    kubernetes = kubernetes
-    helm       = helm
+  labels = {
+    GithubRepo               = "materialize"
+    "materialize.cloud/disk" = "true"
+    "workload"               = "materialize-instance"
   }
 }
 
-# 3. Install OpenEBS for storage
-module "openebs" {
-  source = "../../modules/openebs"
-
-  install_openebs   = true
-  openebs_namespace = "openebs"
-  openebs_version   = "4.2.0"
-
-  depends_on = [
-    module.eks,
-    module.networking,
-  ]
-}
-
-# 4. Install AWS Load Balancer Controller
+# 3. Install AWS Load Balancer Controller
 module "aws_lbc" {
   source = "../../modules/aws-lbc"
 
@@ -100,7 +89,24 @@ module "aws_lbc" {
   region            = var.aws_region
 
   depends_on = [
-    module.eks
+    module.eks,
+    module.eks_node_group,
+  ]
+}
+
+# 4. Install OpenEBS for storage
+module "openebs" {
+  source = "../../modules/openebs"
+
+  install_openebs   = true
+  openebs_namespace = "openebs"
+  openebs_version   = "4.2.0"
+
+  depends_on = [
+    module.networking,
+    module.eks,
+    module.eks_node_group,
+    module.aws_lbc,
   ]
 }
 
@@ -111,13 +117,15 @@ module "certificates" {
   install_cert_manager           = true
   cert_manager_install_timeout   = 300
   cert_manager_chart_version     = "v1.13.3"
-  use_self_signed_cluster_issuer = true # TODO: This fails if Kubernetes is not ready yet
+  use_self_signed_cluster_issuer = false # TODO: This fails if Kubernetes is not ready yet
   cert_manager_namespace         = "cert-manager"
   name_prefix                    = var.name_prefix
 
   depends_on = [
+    module.networking,
     module.eks,
-    module.aws_lbc
+    module.eks_node_group,
+    module.aws_lbc,
   ]
 }
 
@@ -136,6 +144,7 @@ module "operator" {
   depends_on = [
     module.eks,
     module.networking,
+    module.eks_node_group,
   ]
 }
 
@@ -145,7 +154,7 @@ resource "random_password" "database_password" {
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-# Add module "database"
+# 7. Setup dedicated database instance for Materialize
 module "database" {
   source = "../../modules/database"
   name_prefix                = var.name_prefix
@@ -164,7 +173,7 @@ module "database" {
   tags                       = {}
 }
 
-# Add module "storage"
+# 8. Setup S3 bucket for Materialize
 module "storage" {
   source = "../../modules/storage"
   name_prefix               = var.name_prefix
@@ -175,7 +184,35 @@ module "storage" {
   tags                      = {}
 }
 
-# Add locals for backend URLs
+# Uncomment this to deploy a Materialize instance once the infrastructure is ready
+# 9. Setup Materialize instance
+# module "materialize_instance" {
+#   source = "../../modules/materialize-instance"
+#   name_prefix                = var.name_prefix
+#   instance_name              = "main"
+#   instance_namespace         = "materialize-environment"
+#   operator_namespace         = module.operator.operator_namespace
+#   vpc_id                     = module.networking.vpc_id
+#   private_subnet_ids         = module.networking.private_subnet_ids
+#   public_subnet_ids          = module.networking.public_subnet_ids
+#   eks_security_group_id      = module.eks.cluster_security_group_id
+#   eks_node_security_group_id = module.eks.node_security_group_id
+#   oidc_provider_arn          = module.eks.oidc_provider_arn
+#   cluster_oidc_issuer_url    = module.eks.cluster_oidc_issuer_url
+#   metadata_backend_url       = local.metadata_backend_url
+#   persist_backend_url        = local.persist_backend_url
+
+#   depends_on = [
+#     module.eks,
+#     module.database,
+#     module.storage,
+#     module.networking,
+#     module.certificates,
+#     module.operator,
+#     module.aws_lbc,
+#   ]
+# }
+
 locals {
   metadata_backend_url = format(
     "postgres://%s:%s@%s/%s?sslmode=require",
@@ -192,32 +229,4 @@ locals {
     "materialize-environment",
     "main"
   )
-}
-
-module "materialize_instance" {
-  source = "../../modules/materialize-instance"
-  name_prefix                = var.name_prefix
-  instance_name              = "main"
-  instance_namespace         = "materialize-environment"
-  operator_namespace         = module.operator.operator_namespace
-  vpc_id                     = module.networking.vpc_id
-  private_subnet_ids         = module.networking.private_subnet_ids
-  public_subnet_ids          = module.networking.public_subnet_ids
-  eks_security_group_id      = module.eks.cluster_security_group_id
-  eks_node_security_group_id = module.eks.node_security_group_id
-  oidc_provider_arn          = module.eks.oidc_provider_arn
-  cluster_oidc_issuer_url    = module.eks.cluster_oidc_issuer_url
-  materialize_iam_role_arn   = module.operator.materialize_s3_iam_role_arn
-  metadata_backend_url       = local.metadata_backend_url
-  persist_backend_url        = local.persist_backend_url
-
-  depends_on = [
-    module.eks,
-    module.database,
-    module.storage,
-    module.networking,
-    module.certificates,
-    module.operator,
-    module.aws_lbc,
-  ]
 }
