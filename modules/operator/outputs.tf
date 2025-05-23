@@ -13,7 +13,7 @@ output "operator_release_status" {
   value       = helm_release.materialize_operator.status
 }
 
-output "materialize_s3_iam_role_arn" {
+output "materialize_s3_role_arn" {
   description = "ARN of the IAM role for Materialize S3 access."
   value       = aws_iam_role.materialize_s3.arn
 }

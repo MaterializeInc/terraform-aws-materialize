@@ -42,7 +42,7 @@ output "metadata_backend_url" {
   description = "PostgreSQL connection URL in the format required by Materialize"
   value = format("postgres://%s:%s@%s/%s?sslmode=require",
     var.database_username,
-    var.database_password,
+    urlencode(random_password.database_password.result),
     module.database.db_instance_endpoint,
     var.database_name
   )
@@ -53,7 +53,7 @@ output "persist_backend_url" {
   description = "S3 connection URL in the format required by Materialize using IRSA"
   value = format("s3://%s/%s:serviceaccount:%s:%s",
     module.storage.bucket_name,
-    var.environment,
+    var.name_prefix,
     var.kubernetes_namespace,
     var.service_account_name
   )
@@ -70,50 +70,20 @@ output "cluster_oidc_issuer_url" {
   value       = module.eks.cluster_oidc_issuer_url
 }
 
-# aws_iam_role.materialize_s3.arn
 output "materialize_s3_role_arn" {
   description = "The ARN of the IAM role for Materialize"
-  value       = aws_iam_role.materialize_s3.arn
-}
-
-output "operator_details" {
-  description = "Details of the installed Materialize operator"
-  value = var.install_materialize_operator ? {
-    namespace             = module.operator[0].operator_namespace
-    release_name          = module.operator[0].operator_release_name
-    release_status        = module.operator[0].operator_release_status
-    instances             = module.operator[0].materialize_instances
-    instance_resource_ids = module.operator[0].materialize_instance_resource_ids
-  } : null
+  value       = module.operator.materialize_s3_role_arn
 }
 
 output "nlb_details" {
   description = "Details of the Materialize instance NLBs."
   value = {
-    for nlb in module.nlb : nlb.instance_name => {
-      arn      = nlb.nlb_arn
-      dns_name = nlb.nlb_dns_name
-    }
+    arn      = try(module.materialize_instance.nlb_arn, null)
+    dns_name = try(module.materialize_instance.nlb_dns_name, null)
   }
-}
-
-output "eks_cluster_name" {
-  description = "Name of the EKS cluster"
-  value       = module.eks.cluster_name
 }
 
 output "materialize_operator_namespace" {
   description = "Namespace where the Materialize operator is installed"
   value       = module.operator.operator_namespace
-}
-
-output "metadata_backend_url" {
-  description = "Metadata backend URL"
-  value       = local.metadata_backend_url
-  sensitive   = true
-}
-
-output "persist_backend_url" {
-  description = "Persist backend URL"
-  value       = local.persist_backend_url
 }

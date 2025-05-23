@@ -10,6 +10,12 @@ variable "operator_version" {
   nullable    = false
 }
 
+variable "orchestratord_version" {
+  description = "Version of the Materialize orchestrator to install"
+  type        = string
+  default     = null
+}
+
 variable "helm_repository" {
   description = "Repository URL for the Materialize operator Helm chart. Leave empty if using local chart."
   type        = string
@@ -88,4 +94,29 @@ variable "use_self_signed_cluster_issuer" {
   description = "Whether to use a self-signed cluster issuer for cert-manager."
   type        = bool
   default     = false
+}
+
+variable "enable_disk_support" {
+  description = "Enable disk support for Materialize using OpenEBS and NVMe instance storage. When enabled, this configures OpenEBS, runs the disk setup script for NVMe devices, and creates appropriate storage classes."
+  type        = bool
+  default     = true
+}
+
+variable "disk_support_config" {
+  description = "Advanced configuration for disk support (only used when enable_disk_support = true)"
+  type = object({
+    install_openebs           = optional(bool, true)
+    run_disk_setup_script     = optional(bool, true)
+    create_storage_class      = optional(bool, true)
+    openebs_version           = optional(string, "4.2.0")
+    openebs_namespace         = optional(string, "openebs")
+    storage_class_name        = optional(string, "openebs-lvm-instance-store-ext4")
+    storage_class_provisioner = optional(string, "local.csi.openebs.io")
+    storage_class_parameters = optional(object({
+      storage  = optional(string, "lvm")
+      fsType   = optional(string, "ext4")
+      volgroup = optional(string, "instance-store-vg")
+    }), {})
+  })
+  default = {}
 }

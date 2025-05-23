@@ -10,12 +10,6 @@ variable "name_prefix" {
   default     = "mz-demo"
 }
 
-variable "use_self_signed_cluster_issuer" {
-  description = "Whether to use a self-signed ClusterIssuer for TLS certificates."
-  type        = bool
-  default     = true
-}
-
 variable "tags" {
   description = "Default tags to apply to all resources"
   type        = map(string)
@@ -178,16 +172,6 @@ variable "database_username" {
   description = "Username for the database"
   type        = string
   default     = "materialize"
-}
-
-variable "database_password" {
-  description = "Password for the database (should be provided via tfvars or environment variable)"
-  type        = string
-  sensitive   = true
-  validation {
-    condition     = length(var.database_password) >= 8 && can(regex("^[[:print:]]+$", var.database_password)) && !can(regex("[/@\" ]", var.database_password))
-    error_message = "Database password must be at least 8 characters, contain only printable ASCII characters, excluding '/', '@', '\"' (double quotes), and ' ' (space)."
-  }
 }
 
 variable "db_multi_az" {
@@ -417,4 +401,10 @@ variable "disk_support_config" {
     }), {})
   })
   default = {}
+}
+
+variable "install_materialize_instance" {
+  description = "Whether to install the Materialize instance. Default is false as it requires the Kubernetes cluster to be created first."
+  type        = bool
+  default     = false
 }

@@ -25,10 +25,10 @@ output "nlb_dns_name" {
 
 output "metadata_backend_url" {
   description = "Metadata backend URL used by the Materialize instance"
-  value = var.metadata_backend_url
+  value       = var.metadata_backend_url
 }
 
 output "persist_backend_url" {
   description = "Persist backend URL used by the Materialize instance"
-  value = var.persist_backend_url
+  value       = var.persist_backend_url
 }
