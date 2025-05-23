@@ -1,20 +1,19 @@
-# General Variables
-variable "namespace" {
-  description = "Namespace for all resources, usually the organization or project name"
+variable "aws_region" {
+  description = "The AWS region where the resources will be created."
   type        = string
-  validation {
-    condition     = length(var.namespace) <= 12 && can(regex("^[a-z][a-z0-9-]+$", var.namespace))
-    error_message = "Namespace must be lowercase alphanumeric and hyphens only, start with a letter, max 12 characters"
-  }
+  default     = "us-east-1"
 }
 
-variable "environment" {
-  description = "Environment name (e.g., prod, staging, dev)"
+variable "name_prefix" {
+  description = "A prefix to add to all resource names."
   type        = string
-  validation {
-    condition     = length(var.environment) <= 8 && can(regex("^[a-z0-9]+$", var.environment))
-    error_message = "Environment must be lowercase alphanumeric only, max 8 characters"
-  }
+  default     = "mz-demo"
+}
+
+variable "use_self_signed_cluster_issuer" {
+  description = "Whether to use a self-signed ClusterIssuer for TLS certificates."
+  type        = bool
+  default     = true
 }
 
 variable "tags" {
