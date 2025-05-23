@@ -1,20 +1,13 @@
-# General Variables
-variable "namespace" {
-  description = "Namespace for all resources, usually the organization or project name"
+variable "aws_region" {
+  description = "The AWS region where the resources will be created."
   type        = string
-  validation {
-    condition     = length(var.namespace) <= 12 && can(regex("^[a-z][a-z0-9-]+$", var.namespace))
-    error_message = "Namespace must be lowercase alphanumeric and hyphens only, start with a letter, max 12 characters"
-  }
+  default     = "us-east-1"
 }
 
-variable "environment" {
-  description = "Environment name (e.g., prod, staging, dev)"
+variable "name_prefix" {
+  description = "A prefix to add to all resource names."
   type        = string
-  validation {
-    condition     = length(var.environment) <= 8 && can(regex("^[a-z0-9]+$", var.environment))
-    error_message = "Environment must be lowercase alphanumeric only, max 8 characters"
-  }
+  default     = "mz-demo"
 }
 
 variable "tags" {
@@ -179,16 +172,6 @@ variable "database_username" {
   description = "Username for the database"
   type        = string
   default     = "materialize"
-}
-
-variable "database_password" {
-  description = "Password for the database (should be provided via tfvars or environment variable)"
-  type        = string
-  sensitive   = true
-  validation {
-    condition     = length(var.database_password) >= 8 && can(regex("^[[:print:]]+$", var.database_password)) && !can(regex("[/@\" ]", var.database_password))
-    error_message = "Database password must be at least 8 characters, contain only printable ASCII characters, excluding '/', '@', '\"' (double quotes), and ' ' (space)."
-  }
 }
 
 variable "db_multi_az" {
@@ -418,4 +401,10 @@ variable "disk_support_config" {
     }), {})
   })
   default = {}
+}
+
+variable "install_materialize_instance" {
+  description = "Whether to install the Materialize instance. Default is false as it requires the Kubernetes cluster to be created first."
+  type        = bool
+  default     = false
 }

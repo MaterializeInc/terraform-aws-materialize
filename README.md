@@ -15,14 +15,25 @@ The module has been tested with:
 > - Fork this repo and pin to a specific version, or
 > - Use the code as a reference when developing your own deployment.
 
+## Architecture Overview
+
+This module creates a complete AWS infrastructure stack for running Materialize, including:
+
+- **Networking**: VPC, subnets, NAT gateways, and security groups
+- **Compute**: EKS cluster with managed node groups
+- **Storage**: RDS PostgreSQL for metadata and S3 for persistent data
+- **Load Balancing**: AWS Load Balancer Controller for Network Load Balancers
+- **Storage Classes**: OpenEBS for Kubernetes persistent volumes
+- **TLS/Certificates**: cert-manager for TLS certificate management
+- **Materialize Operator**: Kubernetes operator for managing Materialize instances
+
 ## Providers Configuration
 
 The module requires the following providers to be configured:
 
 ```hcl
 provider "aws" {
-  region = "us-east-1"
-  # Other AWS provider configuration as needed
+  region = var.aws_region
 }
 
 # Required for EKS authentication
@@ -50,7 +61,6 @@ provider "helm" {
     }
   }
 }
-
 ```
 
 > **Note:** The Kubernetes and Helm providers are configured to use the AWS CLI for authentication with the EKS cluster. This requires that you have the AWS CLI installed and configured with access to the AWS account where the EKS cluster is deployed.
@@ -61,38 +71,94 @@ You can also set the `AWS_PROFILE` environment variable to the name of the profi
 export AWS_PROFILE=your-profile-name
 ```
 
+## Usage
+
+### Basic Usage
+
+```hcl
+module "materialize_platform" {
+  source = "path/to/this/module"
+
+  # Basic configuration
+  name_prefix  = "my-materialize"
+  aws_region   = "us-east-1"
+
+  # After the infrastructure is deployed, you can deploy a Materialize instance
+  # by setting this to true
+  install_materialize_instance = false
+}
+```
+
+## Modular Architecture
+
+This module is built using a modular architecture, allowing you to use individual components if needed:
+
+```hcl
+# Use individual modules for more control
+module "networking" {
+  source = "./modules/networking"
+  # ... configuration
+}
+
+module "eks" {
+  source = "./modules/eks"
+  # ... configuration
+}
+
+module "materialize_instance" {
+  source = "./modules/materialize-instance"
+
+  instance_name        = "main"
+  instance_namespace   = "materialize-main"
+  metadata_backend_url = "postgres://..."
+  persist_backend_url  = "s3://..."
+
+  # Infrastructure references
+  vpc_id             = module.networking.vpc_id
+  private_subnet_ids = module.networking.private_subnet_ids
+  # ... other config
+}
+```
+
+## Available Modules
+
+The following individual modules are available:
+
+- `modules/networking` - VPC, subnets, and networking components
+- `modules/eks` - EKS cluster configuration
+- `modules/eks-node-group` - EKS managed node groups
+- `modules/database` - RDS PostgreSQL for metadata storage
+- `modules/storage` - S3 bucket for persistent data
+- `modules/aws-lbc` - AWS Load Balancer Controller
+- `modules/openebs` - OpenEBS storage classes
+- `modules/certificates` - cert-manager for TLS
+- `modules/operator` - Materialize Kubernetes operator
+- `modules/materialize-instance` - Individual Materialize instances
+- `modules/nlb` - Network Load Balancer for instances
+
 ## Disk Support for Materialize
 
-This module supports configuring disk support for Materialize using NVMe instance storage and OpenEBS and lgalloc.
+This module supports configuring disk support for Materialize using NVMe instance storage and OpenEBS.
 
 When using disk support, you need to use instance types from the `r7gd` or `r6gd` family or other instance types with NVMe instance storage.
 
 ### Enabling Disk Support
 
-To enable disk support with default settings:
+Disk support is enabled by default when using compatible instance types. The module automatically:
+
+1. Installs OpenEBS via Helm
+2. Configures NVMe instance store volumes using the bootstrap script
+3. Creates appropriate storage classes for Materialize
+4. Labels nodes with `materialize.cloud/disk = "true"`
+
+### Node Group Configuration
 
 ```hcl
-enable_disk_support = true
-```
-
-This will:
-1. Install OpenEBS via Helm
-2. Configure NVMe instance store volumes using the bootstrap script
-3. Create appropriate storage classes for Materialize
-
-### Advanced Configuration
-
-In case that you need more control over the disk setup:
-
-```hcl
-enable_disk_support = true
-
-disk_support_config = {
-  openebs_version = "4.2.0"
-  storage_class_name = "custom-storage-class"
-  storage_class_parameters = {
-    volgroup = "custom-volume-group"
-  }
+# Example with disk-enabled instances
+node_group_instance_types = ["r7gd.xlarge"]  # Has NVMe storage
+node_group_labels = {
+  "materialize.cloud/disk" = "true"
+  "workload"               = "materialize-instance"
 }
 ```
 
@@ -110,7 +176,8 @@ disk_support_config = {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.97.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.98.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.7.2 |
 
 ## Modules
 
@@ -120,18 +187,18 @@ disk_support_config = {
 | <a name="module_certificates"></a> [certificates](#module\_certificates) | ./modules/certificates | n/a |
 | <a name="module_database"></a> [database](#module\_database) | ./modules/database | n/a |
 | <a name="module_eks"></a> [eks](#module\_eks) | ./modules/eks | n/a |
+| <a name="module_eks_node_group"></a> [eks\_node\_group](#module\_eks\_node\_group) | ./modules/eks-node-group | n/a |
+| <a name="module_materialize_instance"></a> [materialize\_instance](#module\_materialize\_instance) | ./modules/materialize-instance | n/a |
 | <a name="module_networking"></a> [networking](#module\_networking) | ./modules/networking | n/a |
-| <a name="module_nlb"></a> [nlb](#module\_nlb) | ./modules/nlb | n/a |
-| <a name="module_operator"></a> [operator](#module\_operator) | github.com/MaterializeInc/terraform-helm-materialize | v0.1.14 |
+| <a name="module_openebs"></a> [openebs](#module\_openebs) | ./modules/openebs | n/a |
+| <a name="module_operator"></a> [operator](#module\_operator) | ./modules/operator | n/a |
 | <a name="module_storage"></a> [storage](#module\_storage) | ./modules/storage | n/a |
 
 ## Resources
 
 | Name | Type |
 |------|------|
-| [aws_cloudwatch_log_group.materialize](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
-| [aws_iam_role.materialize_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role_policy.materialize_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [random_password.database_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 
@@ -140,6 +207,7 @@ disk_support_config = {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | List of availability zones | `list(string)` | <pre>[<br/>  "us-east-1a",<br/>  "us-east-1b",<br/>  "us-east-1c"<br/>]</pre> | no |
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region where the resources will be created. | `string` | `"us-east-1"` | no |
 | <a name="input_bucket_force_destroy"></a> [bucket\_force\_destroy](#input\_bucket\_force\_destroy) | Enable force destroy for the S3 bucket | `bool` | `true` | no |
 | <a name="input_bucket_lifecycle_rules"></a> [bucket\_lifecycle\_rules](#input\_bucket\_lifecycle\_rules) | List of lifecycle rules for the S3 bucket | <pre>list(object({<br/>    id                                 = string<br/>    enabled                            = bool<br/>    prefix                             = string<br/>    transition_days                    = number<br/>    transition_storage_class           = string<br/>    noncurrent_version_expiration_days = number<br/>  }))</pre> | <pre>[<br/>  {<br/>    "enabled": true,<br/>    "id": "cleanup",<br/>    "noncurrent_version_expiration_days": 90,<br/>    "prefix": "",<br/>    "transition_days": 90,<br/>    "transition_storage_class": "STANDARD_IA"<br/>  }<br/>]</pre> | no |
 | <a name="input_cert_manager_chart_version"></a> [cert\_manager\_chart\_version](#input\_cert\_manager\_chart\_version) | Version of the cert-manager helm chart to install. | `string` | `"v1.17.1"` | no |
@@ -149,7 +217,6 @@ disk_support_config = {
 | <a name="input_cluster_version"></a> [cluster\_version](#input\_cluster\_version) | Kubernetes version for the EKS cluster | `string` | `"1.32"` | no |
 | <a name="input_create_vpc"></a> [create\_vpc](#input\_create\_vpc) | Controls if VPC should be created (it affects almost all resources) | `bool` | `true` | no |
 | <a name="input_database_name"></a> [database\_name](#input\_database\_name) | Name of the database to create | `string` | `"materialize"` | no |
-| <a name="input_database_password"></a> [database\_password](#input\_database\_password) | Password for the database (should be provided via tfvars or environment variable) | `string` | n/a | yes |
 | <a name="input_database_username"></a> [database\_username](#input\_database\_username) | Username for the database | `string` | `"materialize"` | no |
 | <a name="input_db_allocated_storage"></a> [db\_allocated\_storage](#input\_db\_allocated\_storage) | Allocated storage for the RDS instance (in GB) | `number` | `20` | no |
 | <a name="input_db_instance_class"></a> [db\_instance\_class](#input\_db\_instance\_class) | Instance class for the RDS instance. This is used for concensus and metadata and is general not bottlnecked by memory or disk. Recomended instance family m7i, m6i, m7g, and m8g | `string` | `"db.m6i.large"` | no |
@@ -161,18 +228,18 @@ disk_support_config = {
 | <a name="input_enable_cluster_creator_admin_permissions"></a> [enable\_cluster\_creator\_admin\_permissions](#input\_enable\_cluster\_creator\_admin\_permissions) | To add the current caller identity as an administrator | `bool` | `true` | no |
 | <a name="input_enable_disk_support"></a> [enable\_disk\_support](#input\_enable\_disk\_support) | Enable disk support for Materialize using OpenEBS and NVMe instance storage. When enabled, this configures OpenEBS, runs the disk setup script for NVMe devices, and creates appropriate storage classes. | `bool` | `true` | no |
 | <a name="input_enable_monitoring"></a> [enable\_monitoring](#input\_enable\_monitoring) | Enable CloudWatch monitoring | `bool` | `true` | no |
-| <a name="input_environment"></a> [environment](#input\_environment) | Environment name (e.g., prod, staging, dev) | `string` | n/a | yes |
 | <a name="input_helm_chart"></a> [helm\_chart](#input\_helm\_chart) | Chart name from repository or local path to chart. For local charts, set the path to the chart directory. | `string` | `"materialize-operator"` | no |
 | <a name="input_helm_values"></a> [helm\_values](#input\_helm\_values) | Additional Helm values to merge with defaults | `any` | `{}` | no |
 | <a name="input_install_aws_load_balancer_controller"></a> [install\_aws\_load\_balancer\_controller](#input\_install\_aws\_load\_balancer\_controller) | Whether to install the AWS Load Balancer Controller | `bool` | `true` | no |
 | <a name="input_install_cert_manager"></a> [install\_cert\_manager](#input\_install\_cert\_manager) | Whether to install cert-manager. | `bool` | `true` | no |
+| <a name="input_install_materialize_instance"></a> [install\_materialize\_instance](#input\_install\_materialize\_instance) | Whether to install the Materialize instance. Default is false as it requires the Kubernetes cluster to be created first. | `bool` | `false` | no |
 | <a name="input_install_materialize_operator"></a> [install\_materialize\_operator](#input\_install\_materialize\_operator) | Whether to install the Materialize operator | `bool` | `true` | no |
 | <a name="input_install_metrics_server"></a> [install\_metrics\_server](#input\_install\_metrics\_server) | Whether to install the metrics-server for the Materialize Console | `bool` | `true` | no |
 | <a name="input_kubernetes_namespace"></a> [kubernetes\_namespace](#input\_kubernetes\_namespace) | The Kubernetes namespace for the Materialize resources | `string` | `"materialize-environment"` | no |
 | <a name="input_log_group_name_prefix"></a> [log\_group\_name\_prefix](#input\_log\_group\_name\_prefix) | Prefix for the CloudWatch log group name (will be combined with environment name) | `string` | `"materialize"` | no |
 | <a name="input_materialize_instances"></a> [materialize\_instances](#input\_materialize\_instances) | Configuration for Materialize instances. Due to limitations in Terraform, `materialize_instances` cannot be defined on the first `terraform apply`. | <pre>list(object({<br/>    name                             = string<br/>    namespace                        = optional(string)<br/>    database_name                    = string<br/>    environmentd_version             = optional(string)<br/>    cpu_request                      = optional(string, "1")<br/>    memory_request                   = optional(string, "1Gi")<br/>    memory_limit                     = optional(string, "1Gi")<br/>    create_database                  = optional(bool, true)<br/>    create_nlb                       = optional(bool, true)<br/>    internal_nlb                     = optional(bool, true)<br/>    enable_cross_zone_load_balancing = optional(bool, true)<br/>    in_place_rollout                 = optional(bool, false)<br/>    request_rollout                  = optional(string)<br/>    force_rollout                    = optional(string)<br/>    balancer_memory_request          = optional(string, "256Mi")<br/>    balancer_memory_limit            = optional(string, "256Mi")<br/>    balancer_cpu_request             = optional(string, "100m")<br/>    license_key                      = optional(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_metrics_retention_days"></a> [metrics\_retention\_days](#input\_metrics\_retention\_days) | Number of days to retain CloudWatch metrics | `number` | `7` | no |
-| <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for all resources, usually the organization or project name | `string` | n/a | yes |
+| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | A prefix to add to all resource names. | `string` | `"mz-demo"` | no |
 | <a name="input_network_id"></a> [network\_id](#input\_network\_id) | The ID of the VPC in which resources will be deployed. Only used if create\_vpc is false. | `string` | `""` | no |
 | <a name="input_network_private_subnet_ids"></a> [network\_private\_subnet\_ids](#input\_network\_private\_subnet\_ids) | A list of private subnet IDs in the VPC. Only used if create\_vpc is false. | `list(string)` | `[]` | no |
 | <a name="input_network_public_subnet_ids"></a> [network\_public\_subnet\_ids](#input\_network\_public\_subnet\_ids) | A list of public subnet IDs in the VPC. Only used if create\_vpc is false. | `list(string)` | `[]` | no |
@@ -204,11 +271,11 @@ disk_support_config = {
 | <a name="output_database_endpoint"></a> [database\_endpoint](#output\_database\_endpoint) | RDS instance endpoint |
 | <a name="output_eks_cluster_endpoint"></a> [eks\_cluster\_endpoint](#output\_eks\_cluster\_endpoint) | EKS cluster endpoint |
 | <a name="output_eks_cluster_name"></a> [eks\_cluster\_name](#output\_eks\_cluster\_name) | EKS cluster name |
+| <a name="output_materialize_operator_namespace"></a> [materialize\_operator\_namespace](#output\_materialize\_operator\_namespace) | Namespace where the Materialize operator is installed |
 | <a name="output_materialize_s3_role_arn"></a> [materialize\_s3\_role\_arn](#output\_materialize\_s3\_role\_arn) | The ARN of the IAM role for Materialize |
 | <a name="output_metadata_backend_url"></a> [metadata\_backend\_url](#output\_metadata\_backend\_url) | PostgreSQL connection URL in the format required by Materialize |
 | <a name="output_nlb_details"></a> [nlb\_details](#output\_nlb\_details) | Details of the Materialize instance NLBs. |
 | <a name="output_oidc_provider_arn"></a> [oidc\_provider\_arn](#output\_oidc\_provider\_arn) | The ARN of the OIDC Provider |
-| <a name="output_operator_details"></a> [operator\_details](#output\_operator\_details) | Details of the installed Materialize operator |
 | <a name="output_persist_backend_url"></a> [persist\_backend\_url](#output\_persist\_backend\_url) | S3 connection URL in the format required by Materialize using IRSA |
 | <a name="output_private_subnet_ids"></a> [private\_subnet\_ids](#output\_private\_subnet\_ids) | List of private subnet IDs |
 | <a name="output_public_subnet_ids"></a> [public\_subnet\_ids](#output\_public\_subnet\_ids) | List of public subnet IDs |
