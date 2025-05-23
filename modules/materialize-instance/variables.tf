@@ -70,123 +70,6 @@ variable "cluster_oidc_issuer_url" {
   type        = string
 }
 
-# Database configuration
-variable "create_database" {
-  description = "Whether to create a dedicated RDS instance for this Materialize instance"
-  type        = bool
-  default     = true
-}
-
-variable "existing_metadata_backend_url" {
-  description = "Existing metadata backend URL for the Materialize instance. Only used if create_database is false"
-  type        = string
-  default     = ""
-}
-
-variable "database_name" {
-  description = "Name of the database to create"
-  type        = string
-}
-
-variable "database_username" {
-  description = "Username for the database"
-  type        = string
-  default     = "materialize"
-}
-
-variable "database_password" {
-  description = "Password for the database (should be provided via tfvars or environment variable)"
-  type        = string
-  sensitive   = true
-}
-
-variable "postgres_version" {
-  description = "Version of PostgreSQL to use"
-  type        = string
-  default     = "15"
-}
-
-variable "db_instance_class" {
-  description = "Instance class for the RDS instance"
-  type        = string
-  default     = "db.t3.large"
-}
-
-variable "db_allocated_storage" {
-  description = "Allocated storage for the RDS instance (in GB)"
-  type        = number
-  default     = 20
-}
-
-variable "db_max_allocated_storage" {
-  description = "Maximum storage for autoscaling (in GB)"
-  type        = number
-  default     = 100
-}
-
-variable "db_multi_az" {
-  description = "Enable multi-AZ deployment for RDS"
-  type        = bool
-  default     = false
-}
-
-# Storage configuration
-variable "create_storage" {
-  description = "Whether to create a dedicated S3 bucket for this Materialize instance"
-  type        = bool
-  default     = true
-}
-
-variable "existing_persist_backend_url" {
-  description = "Existing persist backend URL for the Materialize instance. Only used if create_storage is false"
-  type        = string
-  default     = ""
-}
-
-variable "existing_bucket_arn" {
-  description = "ARN of an existing S3 bucket to use. Only used if create_storage is false but IAM roles are still created"
-  type        = string
-  default     = ""
-}
-
-variable "bucket_force_destroy" {
-  description = "Enable force destroy for the S3 bucket"
-  type        = bool
-  default     = true
-}
-
-variable "enable_bucket_versioning" {
-  description = "Enable versioning for the S3 bucket"
-  type        = bool
-  default     = true
-}
-
-variable "enable_bucket_encryption" {
-  description = "Enable server-side encryption for the S3 bucket"
-  type        = bool
-  default     = true
-}
-
-variable "bucket_lifecycle_rules" {
-  description = "List of lifecycle rules for the S3 bucket"
-  type = list(object({
-    id                                 = string
-    enabled                            = bool
-    prefix                             = string
-    transition_days                    = number
-    transition_storage_class           = string
-    noncurrent_version_expiration_days = number
-  }))
-  default = [{
-    id                                 = "cleanup"
-    enabled                            = true
-    prefix                             = ""
-    transition_days                    = 90
-    transition_storage_class           = "STANDARD_IA"
-    noncurrent_version_expiration_days = 90
-  }]
-}
-
 # IAM configuration
 variable "create_iam_role" {
   description = "Whether to create a dedicated IAM role for this Materialize instance"
@@ -300,4 +183,19 @@ variable "use_self_signed_cluster_issuer" {
   description = "Whether to use a self-signed cluster issuer for cert-manager"
   type        = bool
   default     = true
+}
+
+variable "materialize_iam_role_arn" {
+  description = "ARN of the IAM role for Materialize instance to use. Provided by the operator module."
+  type        = string
+}
+
+variable "metadata_backend_url" {
+  description = "The full connection URL for the metadata backend (Postgres)."
+  type        = string
+}
+
+variable "persist_backend_url" {
+  description = "The full connection URL for the persist backend (S3)."
+  type        = string
 }

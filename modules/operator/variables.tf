@@ -57,3 +57,35 @@ variable "install_metrics_server" {
   type        = bool
   default     = true
 }
+
+variable "oidc_provider_arn" {
+  description = "ARN of the OIDC provider for the EKS cluster"
+  type        = string
+}
+
+variable "cluster_oidc_issuer_url" {
+  description = "OIDC issuer URL for the EKS cluster"
+  type        = string
+}
+
+variable "s3_bucket_arn" {
+  description = "ARN of the S3 bucket to allow access to. If null, allows all buckets."
+  type        = string
+  default     = null
+}
+
+variable "aws_region" {
+  description = "AWS region for the operator Helm values."
+  type        = string
+}
+
+variable "aws_account_id" {
+  description = "AWS account ID for the operator Helm values."
+  type        = string
+}
+
+variable "use_self_signed_cluster_issuer" {
+  description = "Whether to use a self-signed cluster issuer for cert-manager."
+  type        = bool
+  default     = false
+}
