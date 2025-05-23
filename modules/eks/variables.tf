@@ -1,10 +1,5 @@
-variable "namespace" {
-  description = "Namespace prefix for all resources"
-  type        = string
-}
-
-variable "environment" {
-  description = "Environment name"
+variable "name_prefix" {
+  description = "Prefix for all resource names (replaces separate namespace and environment variables)"
   type        = string
 }
 
@@ -71,25 +66,6 @@ variable "enable_cluster_creator_admin_permissions" {
   description = "To add the current caller identity as an administrator"
   type        = bool
   default     = true
-}
-
-# OpenEBS configuration
-variable "install_openebs" {
-  description = "Whether to install OpenEBS for NVMe storage"
-  type        = bool
-  default     = true
-}
-
-variable "openebs_namespace" {
-  description = "Namespace for OpenEBS components"
-  type        = string
-  default     = "openebs"
-}
-
-variable "openebs_version" {
-  description = "Version of OpenEBS Helm chart to install"
-  type        = string
-  default     = "4.2.0"
 }
 
 variable "enable_disk_setup" {

@@ -1,6 +1,4 @@
 locals {
-  name_prefix = "${var.namespace}-${var.environment}"
-
   disk_setup_script = file("${path.module}/bootstrap.sh")
 }
 
@@ -8,7 +6,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
 
-  cluster_name = "${local.name_prefix}-eks"
+  cluster_name = "${var.name_prefix}-eks"
 
   cluster_version = var.cluster_version
 
@@ -20,7 +18,7 @@ module "eks" {
   cluster_enabled_log_types = var.cluster_enabled_log_types
 
   eks_managed_node_groups = {
-    "${local.name_prefix}-mz" = {
+    "${var.name_prefix}-mz" = {
       desired_size = var.node_group_desired_size
       min_size     = var.node_group_min_size
       max_size     = var.node_group_max_size
@@ -29,10 +27,9 @@ module "eks" {
       capacity_type  = var.node_group_capacity_type
       ami_type       = var.node_group_ami_type
 
-      name = local.name_prefix
+      name = var.name_prefix
 
       labels = {
-        Environment              = var.environment
         GithubRepo               = "materialize"
         "materialize.cloud/disk" = var.enable_disk_setup ? "true" : "false"
         "workload"               = "materialize-instance"
@@ -83,30 +80,4 @@ module "eks" {
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
   tags = var.tags
-}
-
-# Install OpenEBS for lgalloc support
-resource "kubernetes_namespace" "openebs" {
-  count = var.install_openebs ? 1 : 0
-
-  metadata {
-    name = var.openebs_namespace
-  }
-}
-
-resource "helm_release" "openebs" {
-  count = var.install_openebs ? 1 : 0
-
-  name       = "openebs"
-  namespace  = kubernetes_namespace.openebs[0].metadata[0].name
-  repository = "https://openebs.github.io/openebs"
-  chart      = "openebs"
-  version    = var.openebs_version
-
-  set {
-    name  = "engines.replicated.mayastor.enabled"
-    value = "false"
-  }
-
-  depends_on = [kubernetes_namespace.openebs]
 }

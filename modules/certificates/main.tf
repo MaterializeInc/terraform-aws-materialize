@@ -23,6 +23,11 @@ resource "helm_release" "cert_manager" {
     value = "true"
   }
 
+  set {
+    name  = "installCRDs"
+    value = "true"
+  }
+
   depends_on = [
     kubernetes_namespace.cert_manager,
   ]

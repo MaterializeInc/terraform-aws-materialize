@@ -1,10 +1,5 @@
-variable "namespace" {
-  description = "Namespace prefix for all resources"
-  type        = string
-}
-
-variable "environment" {
-  description = "Environment name"
+variable "name_prefix" {
+  description = "Prefix for all resource names (replaces separate namespace and environment variables)"
   type        = string
 }
 

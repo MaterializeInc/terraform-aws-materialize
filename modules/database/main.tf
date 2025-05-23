@@ -1,12 +1,8 @@
-locals {
-  name_prefix = "${var.namespace}-${var.environment}"
-}
-
 module "db" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~> 6.0"
 
-  identifier = "${local.name_prefix}-db"
+  identifier = "${var.name_prefix}-db"
 
   engine               = "postgres"
   engine_version       = var.postgres_version
@@ -29,7 +25,7 @@ module "db" {
   subnet_ids             = var.database_subnet_ids
   vpc_security_group_ids = [aws_security_group.database.id]
   create_db_subnet_group = true
-  db_subnet_group_name   = "${local.name_prefix}-db-subnet"
+  db_subnet_group_name   = "${var.name_prefix}-db-subnet"
 
   maintenance_window      = var.maintenance_window
   backup_window           = var.backup_window
@@ -42,7 +38,7 @@ module "db" {
 }
 
 resource "aws_security_group" "database" {
-  name_prefix = "${local.name_prefix}-sg-"
+  name_prefix = "${var.name_prefix}-sg-"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -69,7 +65,7 @@ resource "aws_security_group" "database" {
   }
 
   tags = merge(var.tags, {
-    Name = "${local.name_prefix}-sg"
+    Name = "${var.name_prefix}-sg"
   })
 
   lifecycle {
