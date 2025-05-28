@@ -101,22 +101,3 @@ data "kubernetes_resource" "materialize_instance" {
     kubernetes_manifest.materialize_instance
   ]
 }
-
-# Create a dedicated NLB for this instance
-module "nlb" {
-  source = "../nlb"
-  count  = var.create_nlb ? 1 : 0
-
-  instance_name                    = var.instance_name
-  name_prefix                      = var.name_prefix
-  namespace                        = local.instance_namespace
-  internal                         = var.internal_nlb
-  subnet_ids                       = var.internal_nlb ? var.private_subnet_ids : var.public_subnet_ids
-  enable_cross_zone_load_balancing = var.enable_cross_zone_load_balancing
-  vpc_id                           = var.vpc_id
-  mz_resource_id                   = data.kubernetes_resource.materialize_instance.object.status.resourceId
-
-  depends_on = [
-    kubernetes_manifest.materialize_instance
-  ]
-}

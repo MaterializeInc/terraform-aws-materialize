@@ -117,25 +117,6 @@ variable "balancer_cpu_request" {
   default     = "100m"
 }
 
-# Network Load Balancer Configuration
-variable "create_nlb" {
-  description = "Whether to create a Network Load Balancer for this instance"
-  type        = bool
-  default     = false
-}
-
-variable "internal_nlb" {
-  description = "Whether the NLB should be internal (true) or internet-facing (false)"
-  type        = bool
-  default     = true
-}
-
-variable "enable_cross_zone_load_balancing" {
-  description = "Whether to enable cross-zone load balancing for the NLB"
-  type        = bool
-  default     = true
-}
-
 # Namespace Management
 variable "create_namespace" {
   description = "Whether to create the Kubernetes namespace"

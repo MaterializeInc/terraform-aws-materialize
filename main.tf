@@ -208,6 +208,26 @@ module "materialize_instance" {
   ]
 }
 
+# 10. Setup dedicated NLB for Materialize instance
+module "materialize_nlb" {
+  count = var.install_materialize_instance && var.create_nlb ? 1 : 0
+
+  source = "./modules/nlb"
+
+  instance_name                    = "main"
+  name_prefix                      = var.name_prefix
+  namespace                        = "materialize-environment"
+  internal                         = var.internal_nlb
+  subnet_ids                       = var.internal_nlb ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
+  enable_cross_zone_load_balancing = var.enable_cross_zone_load_balancing
+  vpc_id                           = module.networking.vpc_id
+  mz_resource_id                   = module.materialize_instance[0].instance_resource_id
+
+  depends_on = [
+    module.materialize_instance
+  ]
+}
+
 locals {
   metadata_backend_url = format(
     "postgres://%s:%s@%s/%s?sslmode=require",
