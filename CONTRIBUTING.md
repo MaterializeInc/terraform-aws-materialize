@@ -27,7 +27,7 @@ Pull requests are the best way to propose changes to the codebase. We actively w
 This module uses [terraform-docs](https://terraform-docs.io/user-guide/introduction/) to generate documentation. To generate the documentation, run the following command from the root of the repository:
 
 ```bash
-terraform-docs --config .terraform-docs.yml .
+.github/scripts/generate-docs.sh
 ```
 
 ## Development Process
