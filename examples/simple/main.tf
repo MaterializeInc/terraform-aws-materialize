@@ -198,6 +198,8 @@ module "materialize_instance" {
     module.certificates,
     module.operator,
     module.aws_lbc,
+    module.eks_node_group,
+    module.openebs,
   ]
 }
 
