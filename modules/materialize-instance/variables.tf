@@ -129,24 +129,3 @@ variable "operator_namespace" {
   description = "Namespace where the operator is installed (used as fallback if instance_namespace is not provided)"
   type        = string
 }
-
-# Required infrastructure references
-variable "name_prefix" {
-  description = "Prefix for resource names"
-  type        = string
-}
-
-variable "vpc_id" {
-  description = "VPC ID where resources will be created"
-  type        = string
-}
-
-variable "private_subnet_ids" {
-  description = "List of private subnet IDs"
-  type        = list(string)
-}
-
-variable "public_subnet_ids" {
-  description = "List of public subnet IDs"
-  type        = list(string)
-}

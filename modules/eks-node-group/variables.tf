@@ -16,21 +16,32 @@ variable "node_group_name" {
 variable "desired_size" {
   description = "Desired number of worker nodes."
   type        = number
+  default     = 1
 }
 
 variable "min_size" {
   description = "Minimum number of worker nodes."
   type        = number
+  default     = 1
 }
 
 variable "max_size" {
   description = "Maximum number of worker nodes."
   type        = number
+  default     = 4
 }
 
 variable "instance_types" {
-  description = "List of instance types for the node group."
+  description = <<EOF
+Instance types for worker nodes.
+
+Recommended Configuration for Running Materialize with disk:
+- Tested instance types: `r6gd`, `r7gd` families (ARM-based Graviton instances)
+- Enable disk setup when using `r7gd`
+- Note: Ensure instance store volumes are available and attached to the nodes for optimal performance with disk-based workloads.
+EOF
   type        = list(string)
+  default     = ["r7gd.2xlarge"]
 }
 
 variable "capacity_type" {
@@ -42,7 +53,7 @@ variable "capacity_type" {
 variable "ami_type" {
   description = "AMI type for the node group."
   type        = string
-  default     = "AL2023_x86_64_STANDARD"
+  default     = "AL2023_ARM_64_STANDARD"
 }
 
 variable "labels" {
