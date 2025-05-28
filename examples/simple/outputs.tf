@@ -78,8 +78,8 @@ output "materialize_s3_role_arn" {
 output "nlb_details" {
   description = "Details of the Materialize instance NLBs."
   value = {
-    arn      = try(module.materialize_instance.nlb_arn, null)
-    dns_name = try(module.materialize_instance.nlb_dns_name, null)
+    arn      = try(module.materialize_nlb.nlb_arn, null)
+    dns_name = try(module.materialize_nlb.nlb_dns_name, null)
   }
 }
 
