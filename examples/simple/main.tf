@@ -89,7 +89,6 @@ module "aws_lbc" {
 module "openebs" {
   source = "../../modules/openebs"
 
-  install_openebs   = true
   openebs_namespace = "openebs"
   openebs_version   = "4.2.0"
 
@@ -186,7 +185,6 @@ module "materialize_instance" {
   source               = "../../modules/materialize-instance"
   instance_name        = "main"
   instance_namespace   = "materialize-environment"
-  operator_namespace   = module.operator.operator_namespace
   metadata_backend_url = local.metadata_backend_url
   persist_backend_url  = local.persist_backend_url
 
@@ -212,8 +210,7 @@ module "materialize_nlb" {
   instance_name                    = "main"
   name_prefix                      = var.name_prefix
   namespace                        = "materialize-environment"
-  internal                         = var.internal_nlb
-  subnet_ids                       = var.internal_nlb ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
+  subnet_ids                       = module.networking.private_subnet_ids
   enable_cross_zone_load_balancing = true
   vpc_id                           = module.networking.vpc_id
   mz_resource_id                   = module.materialize_instance[0].instance_resource_id

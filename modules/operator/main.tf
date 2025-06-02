@@ -75,8 +75,8 @@ locals {
     } : {}
   }
 
+  # Requires OpenEBS to be installed
   disk_config = {
-    install_openebs           = var.enable_disk_support ? lookup(var.disk_support_config, "install_openebs", true) : false
     run_disk_setup_script     = var.enable_disk_support ? lookup(var.disk_support_config, "run_disk_setup_script", true) : false
     local_ssd_count           = lookup(var.disk_support_config, "local_ssd_count", 1)
     create_storage_class      = var.enable_disk_support ? lookup(var.disk_support_config, "create_storage_class", true) : false

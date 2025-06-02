@@ -59,7 +59,6 @@ output "persist_backend_url" {
   )
 }
 
-# oidc_provider_arn
 output "oidc_provider_arn" {
   description = "The ARN of the OIDC Provider"
   value       = module.eks.oidc_provider_arn
@@ -81,9 +80,4 @@ output "nlb_details" {
     arn      = try(module.materialize_nlb.nlb_arn, null)
     dns_name = try(module.materialize_nlb.nlb_dns_name, null)
   }
-}
-
-output "materialize_operator_namespace" {
-  description = "Namespace where the Materialize operator is installed"
-  value       = module.operator.operator_namespace
 }

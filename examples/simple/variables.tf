@@ -22,12 +22,6 @@ variable "create_nlb" {
   default     = true
 }
 
-variable "internal_nlb" {
-  description = "Whether the NLB should be internal (true) or internet-facing (false)"
-  type        = bool
-  default     = false
-}
-
 variable "kubernetes_namespace" {
   description = "The Kubernetes namespace for the Materialize resources"
   type        = string

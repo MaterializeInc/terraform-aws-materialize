@@ -105,7 +105,6 @@ variable "enable_disk_support" {
 variable "disk_support_config" {
   description = "Advanced configuration for disk support (only used when enable_disk_support = true)"
   type = object({
-    install_openebs           = optional(bool, true)
     run_disk_setup_script     = optional(bool, true)
     create_storage_class      = optional(bool, true)
     openebs_version           = optional(string, "4.2.0")

@@ -1,13 +1,17 @@
-# Single instance configuration - not a list
 variable "instance_name" {
   description = "Name of the Materialize instance"
   type        = string
 }
 
+variable "create_namespace" {
+  description = "Whether to create the Kubernetes namespace. Set to false if the namespace already exists."
+  type        = bool
+  default     = true
+}
+
 variable "instance_namespace" {
-  description = "Kubernetes namespace for the instance. If not provided, will use operator_namespace"
+  description = "Kubernetes namespace for the instance."
   type        = string
-  default     = null
 }
 
 variable "metadata_backend_url" {
@@ -115,17 +119,4 @@ variable "balancer_cpu_request" {
   description = "CPU request for balancer"
   type        = string
   default     = "100m"
-}
-
-# Namespace Management
-variable "create_namespace" {
-  description = "Whether to create the Kubernetes namespace"
-  type        = bool
-  default     = true
-}
-
-# Additional validation for namespace
-variable "operator_namespace" {
-  description = "Namespace where the operator is installed (used as fallback if instance_namespace is not provided)"
-  type        = string
 }

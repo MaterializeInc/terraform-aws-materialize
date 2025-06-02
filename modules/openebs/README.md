@@ -28,7 +28,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_install_openebs"></a> [install\_openebs](#input\_install\_openebs) | Whether to install OpenEBS for NVMe storage | `bool` | `true` | no |
+| <a name="input_create_openebs_namespace"></a> [create\_openebs\_namespace](#input\_create\_openebs\_namespace) | Whether to create the OpenEBS namespace. Set to false if the namespace already exists. | `bool` | `true` | no |
 | <a name="input_openebs_namespace"></a> [openebs\_namespace](#input\_openebs\_namespace) | Namespace for OpenEBS components | `string` | `"openebs"` | no |
 | <a name="input_openebs_version"></a> [openebs\_version](#input\_openebs\_version) | Version of OpenEBS Helm chart to install | `string` | `"4.2.0"` | no |
 

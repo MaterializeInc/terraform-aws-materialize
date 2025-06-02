@@ -34,7 +34,7 @@
 |------|-------------|------|---------|:--------:|
 | <a name="input_enable_cross_zone_load_balancing"></a> [enable\_cross\_zone\_load\_balancing](#input\_enable\_cross\_zone\_load\_balancing) | Whether to enable cross zone load balancing on the NLB. | `bool` | `true` | no |
 | <a name="input_instance_name"></a> [instance\_name](#input\_instance\_name) | The name of the Materialize instance. | `string` | n/a | yes |
-| <a name="input_internal"></a> [internal](#input\_internal) | Whether the NLB is an internal only NLB. | `bool` | `true` | no |
+| <a name="input_internal"></a> [internal](#input\_internal) | Whether the NLB is internal only. Defaults to true to avoid exposing Materialize to the internet. | `bool` | `true` | no |
 | <a name="input_mz_resource_id"></a> [mz\_resource\_id](#input\_mz\_resource\_id) | The resourceId from the Materialize CR | `string` | n/a | yes |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Prefix to use for NLB, Target Groups, Listeners, and TargetGroupBindings | `string` | n/a | yes |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Kubernetes namespace in which to install TargetGroupBindings | `string` | n/a | yes |

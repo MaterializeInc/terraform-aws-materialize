@@ -5,7 +5,7 @@ output "instance_name" {
 
 output "instance_namespace" {
   description = "Namespace of the Materialize instance"
-  value       = local.instance_namespace
+  value       = var.instance_namespace
 }
 
 output "instance_resource_id" {

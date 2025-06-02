@@ -1,13 +1,9 @@
-locals {
-  instance_namespace = var.instance_namespace != null ? var.instance_namespace : var.operator_namespace
-}
-
 # Create a namespace for this Materialize instance
 resource "kubernetes_namespace" "instance" {
   count = var.create_namespace ? 1 : 0
 
   metadata {
-    name = local.instance_namespace
+    name = var.instance_namespace
   }
 }
 
@@ -24,7 +20,7 @@ resource "kubernetes_manifest" "materialize_instance" {
     kind       = "Materialize"
     metadata = {
       name      = var.instance_name
-      namespace = local.instance_namespace
+      namespace = var.instance_namespace
     }
     spec = {
       environmentdImageRef = "materialize/environmentd:${var.environmentd_version}"
@@ -74,7 +70,7 @@ resource "kubernetes_manifest" "materialize_instance" {
 resource "kubernetes_secret" "materialize_backend" {
   metadata {
     name      = "${var.instance_name}-materialize-backend"
-    namespace = local.instance_namespace
+    namespace = var.instance_namespace
   }
 
   data = {
@@ -94,7 +90,7 @@ data "kubernetes_resource" "materialize_instance" {
   kind        = "Materialize"
   metadata {
     name      = var.instance_name
-    namespace = local.instance_namespace
+    namespace = var.instance_namespace
   }
 
   depends_on = [
