@@ -41,10 +41,10 @@ output "s3_bucket_name" {
 output "metadata_backend_url" {
   description = "PostgreSQL connection URL in the format required by Materialize"
   value = format("postgres://%s:%s@%s/%s?sslmode=require",
-    var.database_username,
-    var.database_password,
+    module.database.db_instance_username,
+    urlencode(random_password.database_password.result),
     module.database.db_instance_endpoint,
-    var.database_name
+    module.database.db_instance_name
   )
   sensitive = true
 }
@@ -53,13 +53,12 @@ output "persist_backend_url" {
   description = "S3 connection URL in the format required by Materialize using IRSA"
   value = format("s3://%s/%s:serviceaccount:%s:%s",
     module.storage.bucket_name,
-    var.environment,
+    var.name_prefix,
     var.kubernetes_namespace,
     var.service_account_name
   )
 }
 
-# oidc_provider_arn
 output "oidc_provider_arn" {
   description = "The ARN of the OIDC Provider"
   value       = module.eks.oidc_provider_arn
@@ -70,29 +69,15 @@ output "cluster_oidc_issuer_url" {
   value       = module.eks.cluster_oidc_issuer_url
 }
 
-# aws_iam_role.materialize_s3.arn
 output "materialize_s3_role_arn" {
   description = "The ARN of the IAM role for Materialize"
-  value       = aws_iam_role.materialize_s3.arn
-}
-
-output "operator_details" {
-  description = "Details of the installed Materialize operator"
-  value = var.install_materialize_operator ? {
-    namespace             = module.operator[0].operator_namespace
-    release_name          = module.operator[0].operator_release_name
-    release_status        = module.operator[0].operator_release_status
-    instances             = module.operator[0].materialize_instances
-    instance_resource_ids = module.operator[0].materialize_instance_resource_ids
-  } : null
+  value       = module.operator.materialize_s3_role_arn
 }
 
 output "nlb_details" {
   description = "Details of the Materialize instance NLBs."
   value = {
-    for nlb in module.nlb : nlb.instance_name => {
-      arn      = nlb.nlb_arn
-      dns_name = nlb.nlb_dns_name
-    }
+    arn      = try(module.materialize_nlb[0].nlb_arn, null)
+    dns_name = try(module.materialize_nlb[0].nlb_dns_name, null)
   }
 }

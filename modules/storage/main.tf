@@ -1,13 +1,9 @@
-locals {
-  name_prefix = "${var.namespace}-${var.environment}"
-}
-
 resource "random_id" "bucket_suffix" {
   byte_length = 4
 }
 
 resource "aws_s3_bucket" "materialize_storage" {
-  bucket        = "${local.name_prefix}-storage-${random_id.bucket_suffix.hex}"
+  bucket        = "${var.name_prefix}-storage-${random_id.bucket_suffix.hex}"
   force_destroy = var.bucket_force_destroy
 
   tags = var.tags

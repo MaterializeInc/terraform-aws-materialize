@@ -1,0 +1,19 @@
+output "operator_namespace" {
+  description = "Namespace where the operator is installed"
+  value       = kubernetes_namespace.materialize.metadata[0].name
+}
+
+output "operator_release_name" {
+  description = "Helm release name of the operator"
+  value       = helm_release.materialize_operator.name
+}
+
+output "operator_release_status" {
+  description = "Status of the helm release"
+  value       = helm_release.materialize_operator.status
+}
+
+output "materialize_s3_role_arn" {
+  description = "ARN of the IAM role for Materialize S3 access."
+  value       = aws_iam_role.materialize_s3.arn
+}
