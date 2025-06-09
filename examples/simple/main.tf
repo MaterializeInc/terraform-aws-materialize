@@ -1,231 +1,241 @@
 provider "aws" {
-  region = "us-east-1"
+  region = var.aws_region
 }
 
 provider "kubernetes" {
-  host                   = module.materialize_infrastructure.eks_cluster_endpoint
-  cluster_ca_certificate = base64decode(module.materialize_infrastructure.cluster_certificate_authority_data)
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    args        = ["eks", "get-token", "--cluster-name", module.materialize_infrastructure.eks_cluster_name]
+    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
   }
 }
 
 provider "helm" {
   kubernetes {
-    host                   = module.materialize_infrastructure.eks_cluster_endpoint
-    cluster_ca_certificate = base64decode(module.materialize_infrastructure.cluster_certificate_authority_data)
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
-      args        = ["eks", "get-token", "--cluster-name", module.materialize_infrastructure.eks_cluster_name]
+      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
     }
   }
 }
 
-module "materialize_infrastructure" {
-  # To pull this from GitHub, use the following:
-  # source = "git::https://github.com/MaterializeInc/terraform-aws-materialize.git"
-  source = "../../"
+# 1. Create network infrastructure
+module "networking" {
+  source = "../../modules/networking"
 
-  providers = {
-    aws        = aws
-    kubernetes = kubernetes
-    helm       = helm
-  }
+  name_prefix = var.name_prefix
 
-  # The namespace and environment variables are used to construct the names of the resources
-  # e.g. ${namespace}-${environment}-storage, ${namespace}-${environment}-db etc.
-  namespace   = var.namespace
-  environment = var.environment
-
-  # VPC Configuration
   vpc_cidr             = "10.0.0.0/16"
-  availability_zones   = ["us-east-1a", "us-east-1b"]
-  private_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
-  public_subnet_cidrs  = ["10.0.101.0/24", "10.0.102.0/24"]
-  single_nat_gateway   = true
+  availability_zones   = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  private_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  public_subnet_cidrs  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+  single_nat_gateway   = true # Use single NAT gateway to reduce costs for this example
+}
 
-  # EKS Configuration
+# 2. Create EKS cluster
+module "eks" {
+  source                                   = "../../modules/eks"
+  name_prefix                              = var.name_prefix
   cluster_version                          = "1.32"
-  node_group_instance_types                = ["r7gd.2xlarge"]
-  node_group_desired_size                  = 1
-  node_group_min_size                      = 1
-  node_group_max_size                      = 2
-  node_group_capacity_type                 = "ON_DEMAND"
+  vpc_id                                   = module.networking.vpc_id
+  private_subnet_ids                       = module.networking.private_subnet_ids
+  cluster_enabled_log_types                = ["api", "audit"]
   enable_cluster_creator_admin_permissions = true
+  tags                                     = {}
+}
 
-  # Storage Configuration
-  bucket_force_destroy = true
+# 2.1. Create EKS node group
+module "eks_node_group" {
+  source                            = "../../modules/eks-node-group"
+  cluster_name                      = module.eks.cluster_name
+  subnet_ids                        = module.networking.private_subnet_ids
+  node_group_name                   = "${var.name_prefix}-mz"
+  enable_disk_setup                 = true
+  cluster_service_cidr              = module.eks.cluster_service_cidr
+  cluster_primary_security_group_id = module.eks.node_security_group_id
+
+  labels = {
+    GithubRepo               = "materialize"
+    "materialize.cloud/disk" = "true"
+    "workload"               = "materialize-instance"
+  }
+}
+
+# 3. Install AWS Load Balancer Controller
+module "aws_lbc" {
+  source = "../../modules/aws-lbc"
+
+  name_prefix       = var.name_prefix
+  eks_cluster_name  = module.eks.cluster_name
+  oidc_provider_arn = module.eks.oidc_provider_arn
+  oidc_issuer_url   = module.eks.cluster_oidc_issuer_url
+  vpc_id            = module.networking.vpc_id
+  region            = var.aws_region
+
+  depends_on = [
+    module.eks,
+    module.eks_node_group,
+  ]
+}
+
+# 4. Install OpenEBS for storage
+module "openebs" {
+  source = "../../modules/openebs"
+
+  openebs_namespace = "openebs"
+  openebs_version   = "4.2.0"
+
+  depends_on = [
+    module.networking,
+    module.eks,
+    module.eks_node_group,
+    module.aws_lbc,
+  ]
+}
+
+# 5. Install Certificate Manager for TLS
+module "certificates" {
+  source = "../../modules/certificates"
+
+  install_cert_manager           = true
+  cert_manager_install_timeout   = 300
+  cert_manager_chart_version     = "v1.13.3"
+  use_self_signed_cluster_issuer = var.install_materialize_instance
+  cert_manager_namespace         = "cert-manager"
+  name_prefix                    = var.name_prefix
+
+  depends_on = [
+    module.networking,
+    module.eks,
+    module.eks_node_group,
+    module.aws_lbc,
+  ]
+}
+
+# 6. Install Materialize Operator
+module "operator" {
+  source = "../../modules/operator"
+
+  name_prefix                    = var.name_prefix
+  aws_region                     = var.aws_region
+  aws_account_id                 = data.aws_caller_identity.current.account_id
+  oidc_provider_arn              = module.eks.oidc_provider_arn
+  cluster_oidc_issuer_url        = module.eks.cluster_oidc_issuer_url
+  s3_bucket_arn                  = module.storage.bucket_arn
+  use_self_signed_cluster_issuer = true
+
+  depends_on = [
+    module.eks,
+    module.networking,
+    module.eks_node_group,
+  ]
+}
+
+resource "random_password" "database_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+# 7. Setup dedicated database instance for Materialize
+module "database" {
+  source                     = "../../modules/database"
+  name_prefix                = var.name_prefix
+  postgres_version           = "15"
+  instance_class             = "db.t3.large"
+  allocated_storage          = 50
+  max_allocated_storage      = 100
+  database_name              = "materialize"
+  database_username          = "materialize"
+  database_password          = random_password.database_password.result
+  multi_az                   = false
+  database_subnet_ids        = module.networking.private_subnet_ids
+  vpc_id                     = module.networking.vpc_id
+  eks_security_group_id      = module.eks.cluster_security_group_id
+  eks_node_security_group_id = module.eks.node_security_group_id
+  tags                       = {}
+}
+
+# 8. Setup S3 bucket for Materialize
+module "storage" {
+  source                 = "../../modules/storage"
+  name_prefix            = var.name_prefix
+  bucket_lifecycle_rules = []
+  bucket_force_destroy   = true
 
   # For testing purposes, we are disabling encryption and versioning to allow for easier cleanup
   # This should be enabled in production environments for security and data integrity
   enable_bucket_versioning = false
   enable_bucket_encryption = false
 
-  # Database Configuration
-  database_password    = random_password.pass.result
-  postgres_version     = "15"
-  db_instance_class    = "db.t3.large"
-  db_allocated_storage = 20
-  database_name        = "materialize"
-  database_username    = "materialize"
-  db_multi_az          = false
-
-  # Basic monitoring
-  enable_monitoring      = true
-  metrics_retention_days = 3
-
-  # Certificates
-  install_cert_manager           = var.install_cert_manager
-  use_self_signed_cluster_issuer = var.use_self_signed_cluster_issuer
-
-  # Enable and configure Materialize operator
-  install_materialize_operator = true
-  operator_version             = var.operator_version
-  orchestratord_version        = var.orchestratord_version
-  helm_values                  = var.helm_values
-
-  # Once the operator is installed, you can define your Materialize instances here.
-  materialize_instances = var.materialize_instances
-
-  # Tags
-  tags = {
-    Environment = "dev"
-    Project     = "materialize-simple"
-    Terraform   = "true"
-  }
+  tags = {}
 }
 
-resource "random_password" "pass" {
-  length  = 20
-  special = false
+# 9. Setup Materialize instance
+module "materialize_instance" {
+  count = var.install_materialize_instance ? 1 : 0
+
+  source               = "../../modules/materialize-instance"
+  instance_name        = "main"
+  instance_namespace   = "materialize-environment"
+  metadata_backend_url = local.metadata_backend_url
+  persist_backend_url  = local.persist_backend_url
+
+  depends_on = [
+    module.eks,
+    module.database,
+    module.storage,
+    module.networking,
+    module.certificates,
+    module.operator,
+    module.aws_lbc,
+    module.eks_node_group,
+    module.openebs,
+  ]
 }
 
+# 10. Setup dedicated NLB for Materialize instance
+module "materialize_nlb" {
+  count = var.install_materialize_instance && var.create_nlb ? 1 : 0
 
-variable "namespace" {
-  description = "Namespace for the resources. Used to prefix the names of the resources"
-  type        = string
-  default     = "simple-mz-tf"
+  source = "../../modules/nlb"
+
+  instance_name                    = "main"
+  name_prefix                      = var.name_prefix
+  namespace                        = "materialize-environment"
+  subnet_ids                       = module.networking.private_subnet_ids
+  enable_cross_zone_load_balancing = true
+  vpc_id                           = module.networking.vpc_id
+  mz_resource_id                   = module.materialize_instance[0].instance_resource_id
+
+  depends_on = [
+    module.materialize_instance
+  ]
 }
 
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
+locals {
+  metadata_backend_url = format(
+    "postgres://%s:%s@%s/%s?sslmode=require",
+    module.database.db_instance_username,
+    urlencode(random_password.database_password.result),
+    module.database.db_instance_endpoint,
+    module.database.db_instance_name
+  )
+
+  persist_backend_url = format(
+    "s3://%s/%s:serviceaccount:%s:%s",
+    module.storage.bucket_name,
+    var.name_prefix,
+    "materialize-environment",
+    "main"
+  )
 }
 
-variable "operator_version" {
-  description = "Version of the Materialize operator to install"
-  type        = string
-  default     = null
-}
-
-variable "orchestratord_version" {
-  description = "Version of the Materialize orchestrator to install"
-  type        = string
-  default     = null
-}
-
-variable "materialize_instances" {
-  description = "List of Materialize instances to be created."
-  type = list(object({
-    name                    = string
-    namespace               = string
-    database_name           = string
-    environmentd_version    = optional(string)
-    cpu_request             = string
-    memory_request          = string
-    memory_limit            = string
-    create_database         = optional(bool)
-    create_nlb              = optional(bool)
-    internal_nlb            = optional(bool)
-    in_place_rollout        = optional(bool, false)
-    request_rollout         = optional(string)
-    force_rollout           = optional(string)
-    balancer_memory_request = optional(string, "256Mi")
-    balancer_memory_limit   = optional(string, "256Mi")
-    balancer_cpu_request    = optional(string, "100m")
-    license_key             = optional(string)
-  }))
-  default = []
-}
-
-variable "helm_values" {
-  description = "Additional Helm values to merge with defaults"
-  type        = any
-  default     = {}
-}
-
-variable "install_cert_manager" {
-  description = "Whether to install cert-manager."
-  type        = bool
-  default     = true
-}
-
-variable "use_self_signed_cluster_issuer" {
-  description = "Whether to install and use a self-signed ClusterIssuer for TLS. To work around limitations in Terraform, this will be treated as `false` if no materialize instances are defined."
-  type        = bool
-  default     = true
-}
-
-# Outputs
-output "vpc_id" {
-  description = "VPC ID"
-  value       = module.materialize_infrastructure.vpc_id
-}
-
-output "eks_cluster_endpoint" {
-  description = "EKS cluster endpoint"
-  value       = module.materialize_infrastructure.eks_cluster_endpoint
-}
-
-output "eks_cluster_name" {
-  description = "EKS cluster name"
-  value       = module.materialize_infrastructure.eks_cluster_name
-}
-
-output "database_endpoint" {
-  description = "RDS instance endpoint"
-  value       = module.materialize_infrastructure.database_endpoint
-}
-
-output "s3_bucket_name" {
-  description = "Name of the S3 bucket"
-  value       = module.materialize_infrastructure.s3_bucket_name
-}
-
-output "metadata_backend_url" {
-  description = "PostgreSQL connection URL in the format required by Materialize"
-  value       = module.materialize_infrastructure.metadata_backend_url
-  sensitive   = true
-}
-
-output "persist_backend_url" {
-  description = "S3 connection URL in the format required by Materialize using IRSA"
-  value       = module.materialize_infrastructure.persist_backend_url
-}
-
-output "oidc_provider_arn" {
-  description = "The ARN of the OIDC Provider"
-  value       = module.materialize_infrastructure.oidc_provider_arn
-}
-
-output "materialize_s3_role_arn" {
-  description = "The ARN of the IAM role for Materialize"
-  value       = module.materialize_infrastructure.materialize_s3_role_arn
-}
-
-output "cluster_certificate_authority_data" {
-  description = "The CA certificate for the EKS cluster"
-  value       = module.materialize_infrastructure.cluster_certificate_authority_data
-  sensitive   = true
-}
-
-output "nlb_details" {
-  description = "Details of the Materialize instance NLBs."
-  value       = module.materialize_infrastructure.nlb_details
-}
+data "aws_caller_identity" "current" {}

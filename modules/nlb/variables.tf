@@ -9,7 +9,7 @@ variable "name_prefix" {
 }
 
 variable "internal" {
-  description = "Whether the NLB is an internal only NLB."
+  description = "Whether the NLB is internal only. Defaults to true to avoid exposing Materialize to the internet."
   type        = bool
   default     = true
 }

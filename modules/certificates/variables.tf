@@ -6,6 +6,7 @@ variable "install_cert_manager" {
 variable "use_self_signed_cluster_issuer" {
   description = "Whether to install and use a self-signed ClusterIssuer for TLS. Due to limitations in Terraform, this may not be enabled before the cert-manager CRDs are installed."
   type        = bool
+  default     = false
 }
 
 variable "cert_manager_namespace" {

@@ -1,12 +1,12 @@
 formatter: markdown
 
-header-from: "docs/header.md"
-footer-from: "docs/footer.md"
-
-output:
-  file: README.md
-  mode: inject
-
-sort:
-  enabled: true
-  by: name
+output-file: README.md
+output-mode: inject
+sections:
+  show-header: true
+  show-inputs: true
+  show-outputs: true
+  show-providers: false
+  show-requirements: false
+  show-resources: false
+  show-data-sources: false
