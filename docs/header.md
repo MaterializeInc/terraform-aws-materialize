@@ -99,21 +99,6 @@ disk_support_config = {
 
 The `materialize_instances` variable is a list of objects that define the configuration for each Materialize instance.
 
-### `environmentd_extra_env`
-
-Optional list of extra environment variables to pass to the `environmentd` container. This allows you to pass any additional configuration supported by Materialize.
-
-Each entry should be an object with `name` and `value` fields:
-
-```hcl
-environmentd_extra_env = [
-  {
-    name  = "MZ_LOG_FILTER"
-    value = "materialized::coord=debug"
-  }
-]
-```
-
 ### `environmentd_extra_args`
 
 Optional list of additional command-line arguments to pass to the `environmentd` container. This can be used to override default system parameters or enable specific features.
