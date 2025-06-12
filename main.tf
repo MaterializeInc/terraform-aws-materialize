@@ -267,7 +267,6 @@ locals {
       create_nlb                       = instance.create_nlb
       internal_nlb                     = instance.internal_nlb
       enable_cross_zone_load_balancing = instance.enable_cross_zone_load_balancing
-      environmentd_extra_env           = instance.environmentd_extra_env
       environmentd_extra_args          = instance.environmentd_extra_args
 
       metadata_backend_url = format(
