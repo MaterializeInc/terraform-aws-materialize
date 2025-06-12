@@ -133,24 +133,25 @@ variable "orchestratord_version" {
 variable "materialize_instances" {
   description = "List of Materialize instances to be created."
   type = list(object({
-    name                    = string
-    namespace               = string
-    database_name           = string
-    environmentd_version    = optional(string)
-    cpu_request             = string
-    memory_request          = string
-    memory_limit            = string
-    create_database         = optional(bool)
-    create_nlb              = optional(bool)
-    internal_nlb            = optional(bool)
-    in_place_rollout        = optional(bool, false)
-    request_rollout         = optional(string)
-    force_rollout           = optional(string)
-    balancer_memory_request = optional(string, "256Mi")
-    balancer_memory_limit   = optional(string, "256Mi")
-    balancer_cpu_request    = optional(string, "100m")
-    license_key             = optional(string)
-    environmentd_extra_args = optional(list(string), [])
+    name                              = string
+    namespace                         = string
+    database_name                     = string
+    environmentd_version              = optional(string)
+    cpu_request                       = string
+    memory_request                    = string
+    memory_limit                      = string
+    create_database                   = optional(bool)
+    create_nlb                        = optional(bool)
+    internal_nlb                      = optional(bool)
+    in_place_rollout                  = optional(bool, false)
+    request_rollout                   = optional(string)
+    force_rollout                     = optional(string)
+    balancer_memory_request           = optional(string, "256Mi")
+    balancer_memory_limit             = optional(string, "256Mi")
+    balancer_cpu_request              = optional(string, "100m")
+    license_key                       = optional(string)
+    external_login_password_mz_system = optional(string)
+    environmentd_extra_args           = optional(list(string), [])
   }))
   default = []
 }
