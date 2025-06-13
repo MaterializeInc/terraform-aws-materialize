@@ -367,6 +367,7 @@ variable "materialize_instances" {
     balancer_memory_limit             = optional(string, "256Mi")
     balancer_cpu_request              = optional(string, "100m")
     license_key                       = optional(string)
+    authenticator_kind                = optional(string, "None")
     external_login_password_mz_system = optional(string)
     environmentd_extra_args           = optional(list(string), [])
   }))
