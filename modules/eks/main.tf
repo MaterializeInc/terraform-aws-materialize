@@ -34,17 +34,32 @@ module "eks" {
       labels = {
         Environment              = var.environment
         GithubRepo               = "materialize"
-        "materialize.cloud/disk" = var.enable_disk_setup ? "true" : "false"
+        "materialize.cloud/disk" = "false"
         "workload"               = "materialize-instance"
       }
 
-      cloudinit_pre_nodeadm = var.enable_disk_setup ? [
+      cloudinit_pre_nodeadm = [
         {
           content_type = "text/x-shellscript"
           content      = local.disk_setup_script
-        }
-      ] : []
-
+        },
+        {
+          content_type = "application/node.eks.aws"
+          content      = <<-EOT
+            ---
+            apiVersion: node.eks.aws/v1alpha1
+            kind: NodeConfig
+            spec:
+              kubelet:
+                config:
+                  failSwapOn: false
+                  featureGates:
+                    NodeSwap: true
+                  memorySwap:
+                    swapBehavior: LimitedSwap
+          EOT
+        },
+      ]
     }
   }
 
