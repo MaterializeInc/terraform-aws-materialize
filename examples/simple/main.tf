@@ -105,6 +105,10 @@ resource "random_password" "pass" {
   special = false
 }
 
+resource "random_password" "analytics_mz_system" {
+  length  = 20
+  special = true
+}
 
 variable "namespace" {
   description = "Namespace for the resources. Used to prefix the names of the resources"

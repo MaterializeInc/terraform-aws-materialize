@@ -13,7 +13,7 @@ environment = "dev"   // maximum 8 characters, lowercase alphanumeric only (e.g.
 #     memory_request                    = "4Gi"
 #     memory_limit                      = "4Gi"
 #     authenticator_kind                = "Password"
-#     external_login_password_mz_system = "your-password"
+#     external_login_password_mz_system = random_password.analytics_mz_system.result
 #   },
 #   {
 #     name                = "demo"
