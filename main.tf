@@ -288,6 +288,10 @@ locals {
 
       license_key = instance.license_key
 
+      authenticator_kind = instance.authenticator_kind
+
+      external_login_password_mz_system = instance.external_login_password_mz_system != null ? instance.external_login_password_mz_system : null
+
       cpu_request    = instance.cpu_request
       memory_request = instance.memory_request
       memory_limit   = instance.memory_limit

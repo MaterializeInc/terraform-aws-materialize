@@ -6,19 +6,21 @@ environment = "dev"   // maximum 8 characters, lowercase alphanumeric only (e.g.
 
 # materialize_instances = [
 #   {
-#     name           = "analytics"
-#     namespace      = "materialize-environment"
-#     database_name  = "analytics_db"
-#     cpu_request    = "2"
-#     memory_request = "4Gi"
-#     memory_limit   = "4Gi"
+#     name                              = "analytics"
+#     namespace                         = "materialize-environment"
+#     database_name                     = "analytics_db"
+#     cpu_request                       = "2"
+#     memory_request                    = "4Gi"
+#     memory_limit                      = "4Gi"
+#     authenticator_kind                = "Password"
+#     external_login_password_mz_system = random_password.analytics_mz_system.result
 #   },
 #   {
-#     name           = "demo"
-#     namespace      = "materialize-environment"
-#     database_name  = "demo_db"
-#     cpu_request    = "2"
-#     memory_request = "4Gi"
-#     memory_limit   = "4Gi"
+#     name                = "demo"
+#     namespace           = "materialize-environment"
+#     database_name       = "demo_db"
+#     cpu_request         = "2"
+#     memory_request      = "4Gi"
+#     memory_limit        = "4Gi"
 #   }
 # ]
