@@ -270,11 +270,12 @@ locals {
       environmentd_extra_args          = instance.environmentd_extra_args
 
       metadata_backend_url = format(
-        "postgres://%s:%s@%s/%s?sslmode=require",
+        "postgres://%s:%s@%s/%s?sslmode=require&options=-c%%20statement_timeout%%3D%s",
         var.database_username,
         urlencode(var.database_password),
         module.database.db_instance_endpoint,
-        coalesce(instance.database_name, instance.name)
+        coalesce(instance.database_name, instance.name),
+        var.database_statement_timeout
       )
 
       persist_backend_url = format(
