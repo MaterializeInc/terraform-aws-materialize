@@ -191,6 +191,12 @@ variable "database_password" {
   }
 }
 
+variable "database_statement_timeout" {
+  description = "Statement timeout for the database"
+  type        = string
+  default     = "15min"
+}
+
 variable "db_multi_az" {
   description = "Enable multi-AZ deployment for RDS"
   type        = bool

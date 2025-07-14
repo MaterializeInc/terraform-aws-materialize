@@ -40,11 +40,12 @@ output "s3_bucket_name" {
 
 output "metadata_backend_url" {
   description = "PostgreSQL connection URL in the format required by Materialize"
-  value = format("postgres://%s:%s@%s/%s?sslmode=require",
+  value = format("postgres://%s:%s@%s/%s?sslmode=require&options=-c%%20statement_timeout%%3D%s",
     var.database_username,
     var.database_password,
     module.database.db_instance_endpoint,
-    var.database_name
+    var.database_name,
+    var.database_statement_timeout
   )
   sensitive = true
 }
