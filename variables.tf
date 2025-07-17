@@ -279,6 +279,23 @@ variable "install_cert_manager" {
   default     = true
 }
 
+variable "install_karpenter" {
+  description = "Whether to instal-karpenter."
+  type        = bool
+  default     = false
+}
+
+variable "karpenter_instance_sizes" {
+  description = "Additional settings for Karpenter Helm chart"
+  type        = list(string)
+  default = [
+    "r7gd.xlarge",
+    "r7gd.2xlarge",
+    "r7gd.4xlarge",
+    "r7gd.8xlarge",
+  ]
+}
+
 variable "use_self_signed_cluster_issuer" {
   description = "Whether to install and use a self-signed ClusterIssuer for TLS. To work around limitations in Terraform, this will be treated as `false` if no materialize instances are defined."
   type        = bool

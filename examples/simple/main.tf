@@ -26,6 +26,51 @@ provider "helm" {
   }
 }
 
+provider "kubectl" {
+  host                   = module.materialize_infrastructure.eks_cluster_endpoint
+  cluster_ca_certificate = base64decode(module.materialize_infrastructure.cluster_certificate_authority_data)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", module.materialize_infrastructure.eks_cluster_name]
+  }
+  load_config_file = false
+}
+
+
+locals {
+  with_karpenter_installed = {
+    "clusterd" = {
+      nodeSelector = {
+        workload = "materialize-instance-karpenter"
+      }
+    }
+    "operator" = {
+      nodeSelector = {
+        workload = "materialize-instance"
+      }
+    }
+    "environmentd" = {
+      nodeSelector = {
+        workload = "materialize-instance-karpenter"
+      }
+    }
+    "console" = {
+      nodeSelector = {
+        workload = "materialize-instance"
+        # "karpenter.sh/registered" = "m7g.medium"
+      }
+    }
+    "balancerd" = {
+      nodeSelector = {
+        workload = "materialize-instance"
+        # "karpenter.sh/registered" = "m7g.medium"
+      }
+    }
+  }
+  node_selectors = var.install_karpenter ? local.with_karpenter_installed : {}
+}
+
 module "materialize_infrastructure" {
   # To pull this from GitHub, use the following:
   # source = "git::https://github.com/MaterializeInc/terraform-aws-materialize.git"
@@ -52,11 +97,15 @@ module "materialize_infrastructure" {
   # EKS Configuration
   cluster_version                          = "1.32"
   node_group_instance_types                = ["r7gd.2xlarge"]
-  node_group_desired_size                  = 1
-  node_group_min_size                      = 1
+  node_group_desired_size                  = 2
+  node_group_min_size                      = 2
   node_group_max_size                      = 2
   node_group_capacity_type                 = "ON_DEMAND"
   enable_cluster_creator_admin_permissions = true
+  install_karpenter                        = var.install_karpenter
+  karpenter_instance_sizes                 = var.karpenter_instance_sizes
+
+  enable_disk_support = true
 
   # Storage Configuration
   bucket_force_destroy = true
@@ -87,7 +136,7 @@ module "materialize_infrastructure" {
   install_materialize_operator = true
   operator_version             = var.operator_version
   orchestratord_version        = var.orchestratord_version
-  helm_values                  = var.helm_values
+  helm_values                  = merge(local.node_selectors, var.helm_values)
 
   # Once the operator is installed, you can define your Materialize instances here.
   materialize_instances = var.materialize_instances
@@ -179,6 +228,27 @@ variable "use_self_signed_cluster_issuer" {
   default     = true
 }
 
+variable "install_karpenter" {
+  description = "Whether to install karpenter: https://karpenter.sh"
+  type        = bool
+  default     = false
+}
+
+variable "karpenter_instance_sizes" {
+  description = "Additional settings for Karpenter Helm chart"
+  type        = list(string)
+  default = [
+    # Optionally,  console and balancer don't
+    # need disk we should be able to throw them on their own nodes
+    # "m7g.medium",
+    # Recommended clusters sizes
+    "r7gd.xlarge",
+    "r7gd.2xlarge",
+    "r7gd.4xlarge",
+    "r7gd.8xlarge",
+    "r7gd.16xlarge",
+  ]
+}
 # Outputs
 output "vpc_id" {
   description = "VPC ID"
