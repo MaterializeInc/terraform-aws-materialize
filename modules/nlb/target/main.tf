@@ -11,7 +11,7 @@ resource "aws_lb_target_group" "target_group" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     interval            = 10
-    protocol            = "HTTP"
+    protocol            = var.health_check_protocol
     port                = 8080
     path                = var.health_check_path
     matcher             = "200"
