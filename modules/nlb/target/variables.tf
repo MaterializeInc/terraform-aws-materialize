@@ -23,6 +23,11 @@ variable "port" {
   type        = number
 }
 
+variable "health_check_protocol" {
+  description = "The protocol to use for the health check"
+  type        = string
+}
+
 variable "health_check_path" {
   description = "The URL path for target group health checks"
   type        = string
