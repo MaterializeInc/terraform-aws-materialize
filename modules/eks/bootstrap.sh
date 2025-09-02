@@ -24,14 +24,15 @@ fi
 
 # Create physical volumes
 for device in "${SSD_NVME_DEVICE_LIST[@]}"; do
-  pvcreate -f "$device"
+  mkswap "$device"
+  swapon "$device"
 done
 
-# Create volume group
-vgcreate instance-store-vg "${SSD_NVME_DEVICE_LIST[@]}"
-
-# Display results
-pvs
-vgs
-
 echo "Disk setup completed"
+
+modprobe zram
+zramctl /dev/zram0 --algorithm zstd --size "$(($(grep -Po 'MemTotal:\s*\K\d+' /proc/meminfo)/2))KiB"
+mkswap /dev/zram0
+swapon --discard --priority 100 /dev/zram0
+
+echo "ram setup completed"
