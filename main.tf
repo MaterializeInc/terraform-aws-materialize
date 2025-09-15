@@ -198,6 +198,9 @@ locals {
       }
     }
     operator = {
+      clusters = {
+        swap_enabled = false
+      }
       image = var.orchestratord_version == null ? {} : {
         tag = var.orchestratord_version
       },

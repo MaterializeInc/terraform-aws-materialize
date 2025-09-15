@@ -32,10 +32,11 @@ module "eks" {
       name = local.name_prefix
 
       labels = {
-        Environment              = var.environment
-        GithubRepo               = "materialize"
-        "materialize.cloud/disk" = var.enable_disk_setup ? "true" : "false"
-        "workload"               = "materialize-instance"
+        Environment                    = var.environment
+        GithubRepo                     = "materialize"
+        "materialize.cloud/disk"       = var.enable_disk_setup ? "true" : "false"
+        "materialize.cloud/scratch-fs" = var.enable_disk_setup ? "true" : "false"
+        "workload"                     = "materialize-instance"
       }
 
       cloudinit_pre_nodeadm = var.enable_disk_setup ? [
