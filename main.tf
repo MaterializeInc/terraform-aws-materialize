@@ -22,9 +22,11 @@ module "eks" {
   # e.g. ${namespace}-${environment}-eks
   namespace   = var.namespace
   environment = var.environment
+  region      = data.aws_region.current.name
 
   cluster_version                          = var.cluster_version
   vpc_id                                   = local.network_id
+  vpc_cidr                                 = var.vpc_cidr
   private_subnet_ids                       = local.network_private_subnet_ids
   node_group_desired_size                  = var.node_group_desired_size
   node_group_min_size                      = var.node_group_min_size
@@ -34,6 +36,8 @@ module "eks" {
   cluster_enabled_log_types                = var.cluster_enabled_log_types
   node_group_capacity_type                 = var.node_group_capacity_type
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
+
+  install_karpenter = var.install_karpenter
 
   install_openebs   = local.disk_config.install_openebs
   enable_disk_setup = local.disk_config.run_disk_setup_script
