@@ -258,7 +258,59 @@ locals {
     } : {}
   }
 
-  merged_helm_values = merge(local.default_helm_values, var.helm_values)
+  default_operator = lookup(local.default_helm_values, "operator", {})
+  user_operator    = lookup(var.helm_values, "operator", {})
+
+  default_storage = lookup(local.default_helm_values, "storage", {})
+  user_storage    = lookup(var.helm_values, "storage", {})
+
+  default_tls = lookup(local.default_helm_values, "tls", {})
+  user_tls    = lookup(var.helm_values, "tls", {})
+
+  # Deep merge for operator block
+  merged_operator = merge(
+    local.default_operator,
+    local.user_operator,
+    {
+      clusters      = merge(lookup(local.default_operator, "clusters", {}), lookup(local.user_operator, "clusters", {}))
+      image         = merge(lookup(local.default_operator, "image", {}), lookup(local.user_operator, "image", {}))
+      cloudProvider = merge(lookup(local.default_operator, "cloudProvider", {}), lookup(local.user_operator, "cloudProvider", {}))
+    }
+  )
+
+  # Deep merge for storage block
+  merged_storage = length(local.default_storage) > 0 || length(local.user_storage) > 0 ? merge(
+    local.default_storage,
+    local.user_storage,
+    {
+      storageClass = merge(
+        lookup(local.default_storage, "storageClass", {}),
+        lookup(local.user_storage, "storageClass", {})
+      )
+    }
+  ) : {}
+
+  # Deep merge for tls block
+  merged_tls = merge(
+    local.default_tls,
+    local.user_tls,
+    length(local.default_tls) > 0 ? {
+      defaultCertificateSpecs = merge(
+        lookup(local.default_tls, "defaultCertificateSpecs", {}),
+        lookup(local.user_tls, "defaultCertificateSpecs", {})
+      )
+    } : {}
+  )
+
+  merged_helm_values = merge(
+    local.default_helm_values,
+    var.helm_values,
+    {
+      operator = local.merged_operator
+      storage  = local.merged_storage
+      tls      = local.merged_tls
+    }
+  )
 
   instances = [
     for instance in var.materialize_instances : {
