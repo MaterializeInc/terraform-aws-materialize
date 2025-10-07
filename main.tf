@@ -258,53 +258,8 @@ locals {
     } : {}
   }
 
-  # Deep merge helm values
-  merged_helm_values = merge(
-    local.default_helm_values,
-    var.helm_values,
-    {
-      operator = merge(
-        try(local.default_helm_values.operator, {}),
-        try(var.helm_values.operator, {}),
-        {
-          clusters = merge(
-            try(local.default_helm_values.operator.clusters, {}),
-            try(var.helm_values.operator.clusters, {})
-          )
-          image = merge(
-            try(local.default_helm_values.operator.image, {}),
-            try(var.helm_values.operator.image, {})
-          )
-          cloudProvider = merge(
-            try(local.default_helm_values.operator.cloudProvider, {}),
-            try(var.helm_values.operator.cloudProvider, {})
-          )
-        }
-      )
-      storage = merge(
-        try(local.default_helm_values.storage, {}),
-        try(var.helm_values.storage, {}),
-        try(local.default_helm_values.storage.storageClass, null) != null ||
-        try(var.helm_values.storage.storageClass, null) != null ? {
-          storageClass = merge(
-            try(local.default_helm_values.storage.storageClass, {}),
-            try(var.helm_values.storage.storageClass, {})
-          )
-        } : {}
-      )
-      tls = merge(
-        try(local.default_helm_values.tls, {}),
-        try(var.helm_values.tls, {}),
-        try(local.default_helm_values.tls.defaultCertificateSpecs, null) != null ||
-        try(var.helm_values.tls.defaultCertificateSpecs, null) != null ? {
-          defaultCertificateSpecs = merge(
-            try(local.default_helm_values.tls.defaultCertificateSpecs, {}),
-            try(var.helm_values.tls.defaultCertificateSpecs, {})
-          )
-        } : {}
-      )
-    }
-  )
+  # Deep merge helm values using cloudposse/utils provider
+  merged_helm_values = yamldecode(data.utils_deep_merge_yaml.helm_values.output)
 
   instances = [
     for instance in var.materialize_instances : {
