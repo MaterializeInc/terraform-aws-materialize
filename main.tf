@@ -258,8 +258,7 @@ locals {
     } : {}
   }
 
-  # Deep merge helm values using cloudposse/utils provider
-  merged_helm_values = yamldecode(data.utils_deep_merge_yaml.helm_values.output)
+  merged_helm_values = provider::deepmerge::mergo(local.default_helm_values, var.helm_values)
 
   instances = [
     for instance in var.materialize_instances : {

@@ -18,9 +18,9 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.0"
     }
-    utils = {
-      source  = "cloudposse/utils"
-      version = "1.31.0"
+    deepmerge = {
+      source  = "isometry/deepmerge"
+      version = "~> 1.0"
     }
   }
 }
