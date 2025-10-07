@@ -123,12 +123,14 @@ These flags configure default limits for clusters, connections, and tables. You 
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 2.0 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | ~> 2.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.0 |
+| <a name="requirement_utils"></a> [utils](#requirement\_utils) | 1.31.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 5.100.0 |
+| <a name="provider_utils"></a> [utils](#provider\_utils) | 1.31.0 |
 
 ## Modules
 
@@ -152,6 +154,7 @@ These flags configure default limits for clusters, connections, and tables. You 
 | [aws_iam_role_policy.materialize_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+| [utils_deep_merge_yaml.helm_values](https://registry.terraform.io/providers/cloudposse/utils/1.31.0/docs/data-sources/deep_merge_yaml) | data source |
 
 ## Inputs
 
