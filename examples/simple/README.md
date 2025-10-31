@@ -60,6 +60,7 @@ Once the infrastructure and the Materialize Operator are installed, you can depl
        cpu_request    = "2"
        memory_request = "4Gi"
        memory_limit   = "4Gi"
+       license_key    = "[...]"
      },
      {
        name           = "demo"
@@ -68,6 +69,7 @@ Once the infrastructure and the Materialize Operator are installed, you can depl
        cpu_request    = "2"
        memory_request = "4Gi"
        memory_limit   = "4Gi"
+       license_key    = "[...]"
      }
    ]
    ```
