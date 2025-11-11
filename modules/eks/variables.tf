@@ -89,7 +89,7 @@ variable "openebs_namespace" {
 variable "openebs_version" {
   description = "Version of OpenEBS Helm chart to install"
   type        = string
-  default     = "4.2.0"
+  default     = "4.3.3"
 }
 
 variable "enable_disk_setup" {
