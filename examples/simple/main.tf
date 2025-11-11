@@ -58,6 +58,8 @@ module "materialize_infrastructure" {
   node_group_capacity_type                 = "ON_DEMAND"
   enable_cluster_creator_admin_permissions = true
 
+  swap_enabled = var.swap_enabled
+
   # Storage Configuration
   bucket_force_destroy = true
 

@@ -47,6 +47,38 @@ module "eks" {
   ]
 }
 
+module "swap_node_group" {
+  source = "./modules/eks-node-group"
+  count  = var.swap_enabled ? 1 : 0
+
+  cluster_name                      = module.eks.cluster_name
+  subnet_ids                        = local.network_private_subnet_ids
+  node_group_name                   = "${local.name_prefix}-mz-swap"
+  instance_types                    = var.node_group_instance_types
+  swap_enabled                      = true
+  min_size                          = var.node_group_min_size
+  max_size                          = var.node_group_max_size
+  desired_size                      = var.node_group_desired_size
+  cluster_service_cidr              = module.eks.cluster_service_cidr
+  cluster_primary_security_group_id = module.eks.node_security_group_id
+
+  labels = {
+    "materialize.cloud/swap" = "true"
+    "workload"               = "materialize-instance"
+  }
+
+  tags = merge(
+    local.common_tags,
+    {
+      Swap = "true"
+    }
+  )
+
+  depends_on = [
+    module.eks,
+  ]
+}
+
 module "aws_lbc" {
   source = "./modules/aws-lbc"
   count  = var.install_aws_load_balancer_controller ? 1 : 0
@@ -136,6 +168,7 @@ module "operator" {
 
   depends_on = [
     module.eks,
+    module.swap_node_group,
     module.database,
     module.storage,
     module.networking,
@@ -199,7 +232,7 @@ locals {
     }
     operator = {
       clusters = {
-        swap_enabled = false
+        swap_enabled = var.swap_enabled
       }
       image = var.orchestratord_version == null ? {} : {
         tag = var.orchestratord_version

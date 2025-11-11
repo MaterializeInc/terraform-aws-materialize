@@ -404,6 +404,12 @@ variable "enable_disk_support" {
   default     = true
 }
 
+variable "swap_enabled" {
+  description = "Enable swap for Materialize. When enabled, this configures swap on a new nodepool, and adds it to the clusterd node selectors."
+  type        = bool
+  default     = false
+}
+
 variable "disk_support_config" {
   description = "Advanced configuration for disk support (only used when enable_disk_support = true)"
   type = object({
