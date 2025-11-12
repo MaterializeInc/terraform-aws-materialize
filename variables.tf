@@ -410,7 +410,7 @@ variable "disk_support_config" {
     install_openebs           = optional(bool, true)
     run_disk_setup_script     = optional(bool, true)
     create_storage_class      = optional(bool, true)
-    openebs_version           = optional(string, "4.2.0")
+    openebs_version           = optional(string, "4.3.3")
     openebs_namespace         = optional(string, "openebs")
     storage_class_name        = optional(string, "openebs-lvm-instance-store-ext4")
     storage_class_provisioner = optional(string, "local.csi.openebs.io")

@@ -104,10 +104,57 @@ resource "helm_release" "openebs" {
   chart      = "openebs"
   version    = var.openebs_version
 
-  set {
-    name  = "engines.replicated.mayastor.enabled"
-    value = "false"
-  }
+  values = [jsonencode({
+    "alloy" : {
+      "enabled" : false,
+    },
+    "localpv-provisioner" : {
+      "localpv" : {
+        "enabled" : false,
+      },
+      "hostpathClass" : {
+        "enabled" : false,
+      },
+      "serviceAccount" : {
+        "create" : false,
+      },
+    },
+    "zfs-localpv" : {
+      "enabled" : false,
+    },
+    "loki" : {
+      "enabled" : false,
+    },
+    "mayastor" : {
+      "enabled" : false,
+    },
+    "minio" : {
+      "enabled" : false,
+    },
+    "lvm-localpv" : {
+      "analytics" : {
+        "enabled" : false,
+      },
+      "lvmNode" : {
+        "nodeSelector" : {
+          "materialize.cloud/scratch-fs" : "true",
+          "workload" : "materialize-instance",
+        },
+      },
+    },
+    "engines" : {
+      "local" : {
+        "zfs" : {
+          "enabled" : false,
+        },
+      },
+      "replicated" : {
+        "mayastor" : {
+          "enabled" : false,
+        },
+      },
+    },
+  })]
 
   depends_on = [kubernetes_namespace.openebs]
 }
