@@ -8,6 +8,11 @@ output "cluster_name" {
   value       = module.eks.cluster_name
 }
 
+output "cluster_service_cidr" {
+  description = "CIDR of kubernetes service IP addresses"
+  value       = module.eks.cluster_service_cidr
+}
+
 output "cluster_security_group_id" {
   description = "Security group ID attached to the EKS cluster"
   value       = module.eks.cluster_security_group_id
