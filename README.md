@@ -261,6 +261,24 @@ More advanced TLS support using user-provided CAs or per-Materialize `Issuer`s a
 
 ## Upgrade Notes
 
+#### v0.6.1
+
+We now have some initial support for swap.
+
+To use swap:
+1. Set `swap_enabled` to `true`.
+2. Ensure your `environmentd_version` is at least `v0.26.0`.
+3. Update your `request_rollout` (and `force_rollout` if already at the correct `environmentd_version`).
+4. Run `terraform apply`.
+
+This will create a new node group configured for swap, and migrate your clusterd pods there.
+
+
+#### v0.6.0
+
+This version is missing the updated helm chart.
+Skip this version, go to v0.6.1.
+
 #### v0.4.0
 We now install `cert-manager` and configure a self-signed `ClusterIssuer` by default.
 
