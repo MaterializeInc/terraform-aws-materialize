@@ -87,7 +87,7 @@ In case that you need more control over the disk setup:
 enable_disk_support = true
 
 disk_support_config = {
-  openebs_version = "4.2.0"
+  openebs_version = "4.3.3"
   storage_class_name = "custom-storage-class"
   storage_class_parameters = {
     volgroup = "custom-volume-group"

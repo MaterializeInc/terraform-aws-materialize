@@ -88,7 +88,7 @@ In case that you need more control over the disk setup:
 enable_disk_support = true
 
 disk_support_config = {
-  openebs_version = "4.2.0"
+  openebs_version = "4.3.3"
   storage_class_name = "custom-storage-class"
   storage_class_parameters = {
     volgroup = "custom-volume-group"
@@ -269,7 +269,7 @@ We now have some initial support for swap.
 
 To use swap:
 1. Set `swap_enabled` to `true`.
-2. Ensure your `environmentd_version` is at least `v0.26.0`.
+2. Ensure your `environmentd_version` is at least `v26.0.0`.
 3. Update your `request_rollout` (and `force_rollout` if already at the correct `environmentd_version`).
 4. Run `terraform apply`.
 
