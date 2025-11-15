@@ -6,6 +6,7 @@ provider "registry.terraform.io/hashicorp/aws" {
   constraints = ">= 4.33.0, ~> 5.0, >= 5.79.0, >= 5.92.0, >= 5.95.0, < 6.0.0"
   hashes = [
     "h1:Ijt7pOlB7Tr7maGQIqtsLFbl7pSMIj06TVdkoSBcYOw=",
+    "h1:edXOJWE4ORX8Fm+dpVpICzMZJat4AX0VRCAy/xkcOc0=",
     "h1:wOhTPz6apLBuF7/FYZuCoXRK/MLgrNprZ3vXmq83g5k=",
     "zh:054b8dd49f0549c9a7cc27d159e45327b7b65cf404da5e5a20da154b90b8a644",
     "zh:0b97bf8d5e03d15d83cc40b0530a1f84b459354939ba6f135a0086c20ebbe6b2",
@@ -73,6 +74,7 @@ provider "registry.terraform.io/hashicorp/kubernetes" {
   version     = "2.38.0"
   constraints = "~> 2.0"
   hashes = [
+    "h1:5CkveFo5ynsLdzKk+Kv+r7+U9rMrNjfZPT3a0N/fhgE=",
     "h1:XCkL/mxjWTawg6gg+jlpCQhF/+SNRoCEZxbbkDTj42s=",
     "h1:soK8Lt0SZ6dB+HsypFRDzuX/npqlMU6M0fvyaR1yW0k=",
     "zh:0af928d776eb269b192dc0ea0f8a3f0f5ec117224cd644bdacdc682300f84ba0",
@@ -182,6 +184,7 @@ provider "registry.terraform.io/isometry/deepmerge" {
   version     = "1.1.1"
   constraints = "~> 1.0"
   hashes = [
+    "h1:7KIvcisSEPLmcJNqMQ+x9vHgeJN8FT/JGgZ2VeUgaX0=",
     "h1:cz245e3V3rCGuTzUKKH3PaCqfVdoZkm2AQtc7Bqjq6E=",
     "h1:zET81Lj0Qa5oLysmYgS2RW378M/hHBqyFuOLs2dUlhw=",
     "zh:159857ca239c8051b02aac924430d2a24024cb65e91ca7ca0321e649ec932df5",
