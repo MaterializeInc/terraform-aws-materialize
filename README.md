@@ -265,11 +265,17 @@ More advanced TLS support using user-provided CAs or per-Materialize `Issuer`s a
 
 #### v0.6.1
 
-We now have some initial support for swap.
+If coming from `v25.2.X`, we now have initial support for swap and require license keys.
 
-To use swap:
+##### Installing a license key:
+
+To obtain a license key, follow the guide here: https://materialize.com/docs/installation/install-on-aws/upgrade-on-aws/#license-key
+
+After receiving the license key, update the `license_key` variable with it in `mz_instances.tfvars`.
+
+##### Enabling swap:
 1. Set `swap_enabled` to `true`.
-2. Ensure your `environmentd_version` is at least `v26.0.0`.
+2. Ensure your `environmentd_version` is at least `v26.0.0` and `operator_version` is the same version.
 3. Update your `request_rollout` (and `force_rollout` if already at the correct `environmentd_version`).
 4. Run `terraform apply`.
 
