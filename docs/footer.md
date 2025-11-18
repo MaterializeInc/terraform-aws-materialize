@@ -25,6 +25,19 @@ More advanced TLS support using user-provided CAs or per-Materialize `Issuer`s a
 
 ## Upgrade Notes
 
+#### v0.7.0
+
+Breaking changes:
+* Swap is enabled by default.
+* Support for lgalloc, our legacy spill to disk mechanism, is removed.
+* We now always use two node groups, one for system workloads and one for Materialize workloads.
+    * Variables for configuring these node groups have been renamed, so they may be configured separately.
+    * Both node groups are now locked to Bottlerocket AMIs and ON_DEMAND scheduling.
+
+You must upgrade to at least v0.6.x before upgrading to v0.7.0 of this terraform code.
+
+It is strongly recommended to have enabled swap on v0.6.x before upgrading to v0.7.0 or higher.
+
 #### v0.6.1
 
 We now have some initial support for swap.

@@ -60,40 +60,7 @@ You can also set the `AWS_PROFILE` environment variable to the name of the profi
 export AWS_PROFILE=your-profile-name
 ```
 
-## Disk Support for Materialize
-
-This module supports configuring disk support for Materialize using NVMe instance storage and OpenEBS and lgalloc.
-
-When using disk support, you need to use instance types from the `r7gd` or `r6gd` family or other instance types with NVMe instance storage.
-
-### Enabling Disk Support
-
-To enable disk support with default settings:
-
-```hcl
-enable_disk_support = true
-```
-
-This will:
-1. Install OpenEBS via Helm
-2. Configure NVMe instance store volumes using the bootstrap script
-3. Create appropriate storage classes for Materialize
-
 ### Advanced Configuration
-
-In case that you need more control over the disk setup:
-
-```hcl
-enable_disk_support = true
-
-disk_support_config = {
-  openebs_version = "4.3.3"
-  storage_class_name = "custom-storage-class"
-  storage_class_parameters = {
-    volgroup = "custom-volume-group"
-  }
-}
-```
 
 ## `materialize_instances` variable
 
