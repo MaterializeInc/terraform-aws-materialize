@@ -267,6 +267,8 @@ More advanced TLS support using user-provided CAs or per-Materialize `Issuer`s a
 
 We now have some initial support for swap.
 
+We recommend upgrading to at least v0.5.10 before upgrading to v0.6.x of this terraform code.
+
 To use swap:
 1. Set `swap_enabled` to `true`.
 2. Ensure your `environmentd_version` is at least `v26.0.0`.
