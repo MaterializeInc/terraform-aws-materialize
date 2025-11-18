@@ -26,15 +26,14 @@ module "eks" {
   cluster_version                          = var.cluster_version
   vpc_id                                   = local.network_id
   private_subnet_ids                       = local.network_private_subnet_ids
-  node_group_desired_size                  = var.node_group_desired_size
-  node_group_min_size                      = var.node_group_min_size
-  node_group_max_size                      = var.node_group_max_size
-  node_group_instance_types                = var.node_group_instance_types
-  node_group_ami_type                      = var.node_group_ami_type
+  node_group_desired_size                  = var.system_node_group_desired_size
+  node_group_min_size                      = var.system_node_group_min_size
+  node_group_max_size                      = var.system_node_group_max_size
+  node_group_instance_types                = var.system_node_group_instance_types
   cluster_enabled_log_types                = var.cluster_enabled_log_types
-  node_group_capacity_type                 = var.node_group_capacity_type
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
+  # We can't uninstall this until we're certain that we're no longer using it.
   install_openebs   = local.disk_config.install_openebs
   enable_disk_setup = local.disk_config.run_disk_setup_script
   openebs_namespace = local.disk_config.openebs_namespace
@@ -47,18 +46,17 @@ module "eks" {
   ]
 }
 
-module "swap_node_group" {
+module "materialize_node_group" {
   source = "./modules/eks-node-group"
-  count  = var.swap_enabled ? 1 : 0
 
   cluster_name                      = module.eks.cluster_name
   subnet_ids                        = local.network_private_subnet_ids
   node_group_name                   = "${local.name_prefix}-mz-swap"
-  instance_types                    = var.node_group_instance_types
+  instance_types                    = var.materialize_node_group_instance_types
   swap_enabled                      = true
-  min_size                          = var.node_group_min_size
-  max_size                          = var.node_group_max_size
-  desired_size                      = var.node_group_desired_size
+  min_size                          = var.materialize_node_group_min_size
+  max_size                          = var.materialize_node_group_max_size
+  desired_size                      = var.materialize_node_group_desired_size
   cluster_service_cidr              = module.eks.cluster_service_cidr
   cluster_primary_security_group_id = module.eks.node_security_group_id
 
@@ -77,6 +75,11 @@ module "swap_node_group" {
   depends_on = [
     module.eks,
   ]
+}
+
+moved {
+  from = module.swap_node_group[0]
+  to   = module.materialize_node_group
 }
 
 module "aws_lbc" {
@@ -168,7 +171,7 @@ module "operator" {
 
   depends_on = [
     module.eks,
-    module.swap_node_group,
+    module.materialize_node_group,
     module.database,
     module.storage,
     module.networking,
@@ -232,7 +235,7 @@ locals {
     }
     operator = {
       clusters = {
-        swap_enabled = var.swap_enabled
+        swap_enabled = true
       }
       image = var.orchestratord_version == null ? {} : {
         tag = var.orchestratord_version
@@ -253,6 +256,7 @@ locals {
         }
       }
     }
+    # TODO we can't delete this until we're certain no one is using it
     storage = var.enable_disk_support ? {
       storageClass = {
         create      = local.disk_config.create_storage_class
@@ -353,6 +357,7 @@ locals {
     }
   )
 
+  # TODO we can't delete this until we're certain no one is using it
   # Disk support configuration
   disk_config = {
     install_openebs           = var.enable_disk_support ? lookup(var.disk_support_config, "install_openebs", true) : false

@@ -25,6 +25,26 @@ More advanced TLS support using user-provided CAs or per-Materialize `Issuer`s a
 
 ## Upgrade Notes
 
+#### v0.7.0
+
+This is an intermediate version to handle some changes that must be applied in stages.
+It is recommended to upgrade to v0.8.x after upgrading to this version.
+
+Breaking changes:
+* Swap is enabled by default.
+* Support for lgalloc, our legacy spill to disk mechanism, is deprecated, and will be removed in the next version.
+* We now always use two node groups, one for system workloads and one for Materialize workloads.
+    * Variables for configuring these node groups have been renamed, so they may be configured separately.
+
+To avoid downtime when upgrading to future versions, you must perform a rollout at this version.
+1. Ensure your `environmentd_version` is at least `v26.0.0`.
+2. Update your `request_rollout` (and `force_rollout` if already at the correct `environmentd_version`).
+3. Run `terraform apply`.
+
+You must upgrade to at least v0.6.x before upgrading to v0.7.0 of this terraform code.
+
+It is strongly recommended to have enabled swap on v0.6.x before upgrading to v0.7.0 or higher.
+
 #### v0.6.1
 
 We now have some initial support for swap.

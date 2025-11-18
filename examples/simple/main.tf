@@ -50,15 +50,19 @@ module "materialize_infrastructure" {
   single_nat_gateway   = true
 
   # EKS Configuration
-  cluster_version                          = "1.32"
-  node_group_instance_types                = ["r7gd.2xlarge"]
-  node_group_desired_size                  = 1
-  node_group_min_size                      = 1
-  node_group_max_size                      = 2
-  node_group_capacity_type                 = "ON_DEMAND"
-  enable_cluster_creator_admin_permissions = true
+  cluster_version = "1.32"
 
-  swap_enabled = var.swap_enabled
+  system_node_group_instance_types = ["r7gd.2xlarge"]
+  system_node_group_desired_size   = 2
+  system_node_group_min_size       = 1
+  system_node_group_max_size       = 2
+
+  materialize_node_group_instance_types = ["r7gd.2xlarge"]
+  materialize_node_group_desired_size   = 1
+  materialize_node_group_min_size       = 1
+  materialize_node_group_max_size       = 2
+
+  enable_cluster_creator_admin_permissions = true
 
   # Storage Configuration
   bucket_force_destroy = true

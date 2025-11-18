@@ -89,25 +89,49 @@ variable "cluster_version" {
   default     = "1.32"
 }
 
-variable "node_group_desired_size" {
+variable "system_node_group_desired_size" {
   description = "Desired number of worker nodes"
   type        = number
   default     = 2
 }
 
-variable "node_group_min_size" {
+variable "system_node_group_min_size" {
   description = "Minimum number of worker nodes"
   type        = number
   default     = 1
 }
 
-variable "node_group_max_size" {
+variable "system_node_group_max_size" {
   description = "Maximum number of worker nodes"
   type        = number
   default     = 4
 }
 
-variable "node_group_instance_types" {
+variable "system_node_group_instance_types" {
+  description = "Instance types for system nodes."
+  type        = list(string)
+  default     = ["r7g.xlarge"]
+}
+
+variable "materialize_node_group_desired_size" {
+  description = "Desired number of worker nodes"
+  type        = number
+  default     = 2
+}
+
+variable "materialize_node_group_min_size" {
+  description = "Minimum number of worker nodes"
+  type        = number
+  default     = 1
+}
+
+variable "materialize_node_group_max_size" {
+  description = "Maximum number of worker nodes"
+  type        = number
+  default     = 4
+}
+
+variable "materialize_node_group_instance_types" {
   description = <<EOF
 Instance types for worker nodes.
 
@@ -118,18 +142,6 @@ Recommended Configuration for Running Materialize with disk:
 EOF
   type        = list(string)
   default     = ["r7gd.2xlarge"]
-}
-
-variable "node_group_capacity_type" {
-  description = "Capacity type for worker nodes (ON_DEMAND or SPOT)"
-  type        = string
-  default     = "ON_DEMAND"
-}
-
-variable "node_group_ami_type" {
-  description = "AMI type for the node group"
-  type        = string
-  default     = "AL2023_ARM_64_STANDARD"
 }
 
 variable "cluster_enabled_log_types" {
@@ -402,12 +414,6 @@ variable "enable_disk_support" {
   description = "Enable disk support for Materialize using OpenEBS and NVMe instance storage. When enabled, this configures OpenEBS, runs the disk setup script for NVMe devices, and creates appropriate storage classes."
   type        = bool
   default     = true
-}
-
-variable "swap_enabled" {
-  description = "Enable swap for Materialize. When enabled, this configures swap on a new nodepool, and adds it to the clusterd node selectors."
-  type        = bool
-  default     = false
 }
 
 variable "disk_support_config" {
