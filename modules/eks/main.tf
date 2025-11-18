@@ -1,7 +1,5 @@
 locals {
   name_prefix = "${var.namespace}-${var.environment}"
-
-  disk_setup_script = file("${path.module}/bootstrap.sh")
 }
 
 module "eks" {
@@ -20,7 +18,7 @@ module "eks" {
   cluster_enabled_log_types = var.cluster_enabled_log_types
 
   eks_managed_node_groups = {
-    "${local.name_prefix}-mz" = {
+    "${local.name_prefix}-system" = {
       desired_size = var.node_group_desired_size
       min_size     = var.node_group_min_size
       max_size     = var.node_group_max_size
@@ -32,19 +30,10 @@ module "eks" {
       name = local.name_prefix
 
       labels = {
-        Environment                    = var.environment
-        GithubRepo                     = "materialize"
-        "materialize.cloud/disk"       = var.enable_disk_setup ? "true" : "false"
-        "materialize.cloud/scratch-fs" = var.enable_disk_setup ? "true" : "false"
-        "workload"                     = "materialize-instance"
+        Environment = var.environment
+        GithubRepo  = "materialize"
+        "workload"  = "system"
       }
-
-      cloudinit_pre_nodeadm = var.enable_disk_setup ? [
-        {
-          content_type = "text/x-shellscript"
-          content      = local.disk_setup_script
-        }
-      ] : []
     }
   }
 
@@ -83,77 +72,4 @@ module "eks" {
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
   tags = var.tags
-}
-
-# Install OpenEBS for lgalloc support
-resource "kubernetes_namespace" "openebs" {
-  count = var.install_openebs ? 1 : 0
-
-  metadata {
-    name = var.openebs_namespace
-  }
-}
-
-resource "helm_release" "openebs" {
-  count = var.install_openebs ? 1 : 0
-
-  name       = "openebs"
-  namespace  = kubernetes_namespace.openebs[0].metadata[0].name
-  repository = "https://openebs.github.io/openebs"
-  chart      = "openebs"
-  version    = var.openebs_version
-
-  values = [jsonencode({
-    "alloy" : {
-      "enabled" : false,
-    },
-    "localpv-provisioner" : {
-      "localpv" : {
-        "enabled" : false,
-      },
-      "hostpathClass" : {
-        "enabled" : false,
-      },
-      "serviceAccount" : {
-        "create" : false,
-      },
-    },
-    "zfs-localpv" : {
-      "enabled" : false,
-    },
-    "loki" : {
-      "enabled" : false,
-    },
-    "mayastor" : {
-      "enabled" : false,
-    },
-    "minio" : {
-      "enabled" : false,
-    },
-    "lvm-localpv" : {
-      "analytics" : {
-        "enabled" : false,
-      },
-      "lvmNode" : {
-        "nodeSelector" : {
-          "materialize.cloud/scratch-fs" : "true",
-          "workload" : "materialize-instance",
-        },
-      },
-    },
-    "engines" : {
-      "local" : {
-        "zfs" : {
-          "enabled" : false,
-        },
-      },
-      "replicated" : {
-        "mayastor" : {
-          "enabled" : false,
-        },
-      },
-    },
-  })]
-
-  depends_on = [kubernetes_namespace.openebs]
 }

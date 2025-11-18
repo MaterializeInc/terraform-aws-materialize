@@ -46,7 +46,7 @@ variable "node_group_instance_types" {
 variable "node_group_ami_type" {
   description = "AMI type for the node group"
   type        = string
-  default     = "AL2023_ARM_64_STANDARD"
+  default     = "BOTTLEROCKET_ARM_64"
 }
 
 variable "cluster_enabled_log_types" {
@@ -69,31 +69,6 @@ variable "node_group_capacity_type" {
 
 variable "enable_cluster_creator_admin_permissions" {
   description = "To add the current caller identity as an administrator"
-  type        = bool
-  default     = true
-}
-
-# OpenEBS configuration
-variable "install_openebs" {
-  description = "Whether to install OpenEBS for NVMe storage"
-  type        = bool
-  default     = true
-}
-
-variable "openebs_namespace" {
-  description = "Namespace for OpenEBS components"
-  type        = string
-  default     = "openebs"
-}
-
-variable "openebs_version" {
-  description = "Version of OpenEBS Helm chart to install"
-  type        = string
-  default     = "4.3.3"
-}
-
-variable "enable_disk_setup" {
-  description = "Whether to enable disk setup using the bootstrap script"
   type        = bool
   default     = true
 }
