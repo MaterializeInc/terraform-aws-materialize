@@ -26,19 +26,12 @@ module "eks" {
   cluster_version                          = var.cluster_version
   vpc_id                                   = local.network_id
   private_subnet_ids                       = local.network_private_subnet_ids
-  node_group_desired_size                  = var.node_group_desired_size
-  node_group_min_size                      = var.node_group_min_size
-  node_group_max_size                      = var.node_group_max_size
-  node_group_instance_types                = var.node_group_instance_types
-  node_group_ami_type                      = var.node_group_ami_type
+  node_group_desired_size                  = var.system_node_group_desired_size
+  node_group_min_size                      = var.system_node_group_min_size
+  node_group_max_size                      = var.system_node_group_max_size
+  node_group_instance_types                = var.system_node_group_instance_types
   cluster_enabled_log_types                = var.cluster_enabled_log_types
-  node_group_capacity_type                 = var.node_group_capacity_type
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
-
-  install_openebs   = local.disk_config.install_openebs
-  enable_disk_setup = local.disk_config.run_disk_setup_script
-  openebs_namespace = local.disk_config.openebs_namespace
-  openebs_version   = local.disk_config.openebs_version
 
   tags = local.common_tags
 
@@ -47,18 +40,17 @@ module "eks" {
   ]
 }
 
-module "swap_node_group" {
+module "materialize_node_group" {
   source = "./modules/eks-node-group"
-  count  = var.swap_enabled ? 1 : 0
 
   cluster_name                      = module.eks.cluster_name
   subnet_ids                        = local.network_private_subnet_ids
   node_group_name                   = "${local.name_prefix}-mz-swap"
-  instance_types                    = var.node_group_instance_types
-  swap_enabled                      = true
-  min_size                          = var.node_group_min_size
-  max_size                          = var.node_group_max_size
-  desired_size                      = var.node_group_desired_size
+  instance_types                    = var.materialize_node_group_instance_types
+  swap_enabled                      = var.swap_enabled
+  min_size                          = var.materialize_node_group_min_size
+  max_size                          = var.materialize_node_group_max_size
+  desired_size                      = var.materialize_node_group_desired_size
   cluster_service_cidr              = module.eks.cluster_service_cidr
   cluster_primary_security_group_id = module.eks.node_security_group_id
 
@@ -77,6 +69,11 @@ module "swap_node_group" {
   depends_on = [
     module.eks,
   ]
+}
+
+moved {
+  from = module.swap_node_group[0]
+  to   = module.materialize_node_group
 }
 
 module "aws_lbc" {
@@ -168,7 +165,7 @@ module "operator" {
 
   depends_on = [
     module.eks,
-    module.swap_node_group,
+    module.materialize_node_group,
     module.database,
     module.storage,
     module.networking,
@@ -232,7 +229,7 @@ locals {
     }
     operator = {
       clusters = {
-        swap_enabled = var.swap_enabled
+        swap_enabled = true
       }
       image = var.orchestratord_version == null ? {} : {
         tag = var.orchestratord_version
@@ -253,14 +250,6 @@ locals {
         }
       }
     }
-    storage = var.enable_disk_support ? {
-      storageClass = {
-        create      = local.disk_config.create_storage_class
-        name        = local.disk_config.storage_class_name
-        provisioner = local.disk_config.storage_class_provisioner
-        parameters  = local.disk_config.storage_class_parameters
-      }
-    } : {}
     tls = (var.use_self_signed_cluster_issuer && length(var.materialize_instances) > 0) ? {
       defaultCertificateSpecs = {
         balancerdExternal = {
@@ -352,22 +341,6 @@ locals {
       ManagedBy   = "terraform"
     }
   )
-
-  # Disk support configuration
-  disk_config = {
-    install_openebs           = var.enable_disk_support ? lookup(var.disk_support_config, "install_openebs", true) : false
-    run_disk_setup_script     = var.enable_disk_support ? lookup(var.disk_support_config, "run_disk_setup_script", true) : false
-    create_storage_class      = var.enable_disk_support ? lookup(var.disk_support_config, "create_storage_class", true) : false
-    openebs_version           = lookup(var.disk_support_config, "openebs_version", "4.3.3")
-    openebs_namespace         = lookup(var.disk_support_config, "openebs_namespace", "openebs")
-    storage_class_name        = lookup(var.disk_support_config, "storage_class_name", "openebs-lvm-instance-store-ext4")
-    storage_class_provisioner = lookup(var.disk_support_config, "storage_class_provisioner", "local.csi.openebs.io")
-    storage_class_parameters = {
-      storage  = try(var.disk_support_config.storage_class_parameters.storage, "lvm")
-      fsType   = try(var.disk_support_config.storage_class_parameters.fsType, "ext4")
-      volgroup = try(var.disk_support_config.storage_class_parameters.volgroup, "instance-store-vg")
-    }
-  }
 }
 
 resource "aws_cloudwatch_log_group" "materialize" {
