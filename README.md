@@ -142,11 +142,9 @@ These flags configure default limits for clusters, connections, and tables. You 
 | <a name="input_db_instance_class"></a> [db\_instance\_class](#input\_db\_instance\_class) | Instance class for the RDS instance. This is used for concensus and metadata and is general not bottlnecked by memory or disk. Recomended instance family m7i, m6i, m7g, and m8g | `string` | `"db.m6i.large"` | no |
 | <a name="input_db_max_allocated_storage"></a> [db\_max\_allocated\_storage](#input\_db\_max\_allocated\_storage) | Maximum storage for autoscaling (in GB) | `number` | `100` | no |
 | <a name="input_db_multi_az"></a> [db\_multi\_az](#input\_db\_multi\_az) | Enable multi-AZ deployment for RDS | `bool` | `false` | no |
-| <a name="input_disk_support_config"></a> [disk\_support\_config](#input\_disk\_support\_config) | Advanced configuration for disk support (only used when enable\_disk\_support = true) | <pre>object({<br/>    install_openebs           = optional(bool, true)<br/>    run_disk_setup_script     = optional(bool, true)<br/>    create_storage_class      = optional(bool, true)<br/>    openebs_version           = optional(string, "4.3.3")<br/>    openebs_namespace         = optional(string, "openebs")<br/>    storage_class_name        = optional(string, "openebs-lvm-instance-store-ext4")<br/>    storage_class_provisioner = optional(string, "local.csi.openebs.io")<br/>    storage_class_parameters = optional(object({<br/>      storage  = optional(string, "lvm")<br/>      fsType   = optional(string, "ext4")<br/>      volgroup = optional(string, "instance-store-vg")<br/>    }), {})<br/>  })</pre> | `{}` | no |
 | <a name="input_enable_bucket_encryption"></a> [enable\_bucket\_encryption](#input\_enable\_bucket\_encryption) | Enable server-side encryption for the S3 bucket | `bool` | `true` | no |
 | <a name="input_enable_bucket_versioning"></a> [enable\_bucket\_versioning](#input\_enable\_bucket\_versioning) | Enable versioning for the S3 bucket | `bool` | `true` | no |
 | <a name="input_enable_cluster_creator_admin_permissions"></a> [enable\_cluster\_creator\_admin\_permissions](#input\_enable\_cluster\_creator\_admin\_permissions) | To add the current caller identity as an administrator | `bool` | `true` | no |
-| <a name="input_enable_disk_support"></a> [enable\_disk\_support](#input\_enable\_disk\_support) | Enable disk support for Materialize using OpenEBS and NVMe instance storage. When enabled, this configures OpenEBS, runs the disk setup script for NVMe devices, and creates appropriate storage classes. | `bool` | `true` | no |
 | <a name="input_enable_monitoring"></a> [enable\_monitoring](#input\_enable\_monitoring) | Enable CloudWatch monitoring | `bool` | `true` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Environment name (e.g., prod, staging, dev) | `string` | n/a | yes |
 | <a name="input_helm_chart"></a> [helm\_chart](#input\_helm\_chart) | Chart name from repository or local path to chart. For local charts, set the path to the chart directory. | `string` | `"materialize-operator"` | no |
@@ -230,6 +228,15 @@ TLS support is provided by using `cert-manager` and a self-signed `ClusterIssuer
 More advanced TLS support using user-provided CAs or per-Materialize `Issuer`s are out of scope for this Terraform module. Please refer to the [cert-manager documentation](https://cert-manager.io/docs/configuration/) for detailed guidance on more advanced usage.
 
 ## Upgrade Notes
+
+#### v0.8.0
+
+You must upgrade to at least v0.7.x before upgrading to v0.8.x of this terraform code.
+
+Breaking changes:
+* The system node group is renamed and significantly modified, forcing a recreation.
+* Both node groups are now locked to Bottlerocket AMIs and ON\_DEMAND scheduling.
+* Openebs is removed, and with it all support for lgalloc, our legacy spill to disk mechanism.
 
 #### v0.7.0
 
