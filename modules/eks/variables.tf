@@ -46,7 +46,7 @@ variable "node_group_instance_types" {
 variable "node_group_ami_type" {
   description = "AMI type for the node group"
   type        = string
-  default     = "AL2023_x86_64_STANDARD"
+  default     = "AL2023_ARM_64_STANDARD"
 }
 
 variable "cluster_enabled_log_types" {

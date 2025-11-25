@@ -61,40 +61,7 @@ You can also set the `AWS_PROFILE` environment variable to the name of the profi
 export AWS_PROFILE=your-profile-name
 ```
 
-## Disk Support for Materialize
-
-This module supports configuring disk support for Materialize using NVMe instance storage and OpenEBS and lgalloc.
-
-When using disk support, you need to use instance types from the `r7gd` or `r6gd` family or other instance types with NVMe instance storage.
-
-### Enabling Disk Support
-
-To enable disk support with default settings:
-
-```hcl
-enable_disk_support = true
-```
-
-This will:
-1. Install OpenEBS via Helm
-2. Configure NVMe instance store volumes using the bootstrap script
-3. Create appropriate storage classes for Materialize
-
 ### Advanced Configuration
-
-In case that you need more control over the disk setup:
-
-```hcl
-enable_disk_support = true
-
-disk_support_config = {
-  openebs_version = "4.3.3"
-  storage_class_name = "custom-storage-class"
-  storage_class_parameters = {
-    volgroup = "custom-volume-group"
-  }
-}
-```
 
 ## `materialize_instances` variable
 
@@ -139,11 +106,11 @@ These flags configure default limits for clusters, connections, and tables. You 
 | <a name="module_certificates"></a> [certificates](#module\_certificates) | ./modules/certificates | n/a |
 | <a name="module_database"></a> [database](#module\_database) | ./modules/database | n/a |
 | <a name="module_eks"></a> [eks](#module\_eks) | ./modules/eks | n/a |
+| <a name="module_materialize_node_group"></a> [materialize\_node\_group](#module\_materialize\_node\_group) | ./modules/eks-node-group | n/a |
 | <a name="module_networking"></a> [networking](#module\_networking) | ./modules/networking | n/a |
 | <a name="module_nlb"></a> [nlb](#module\_nlb) | ./modules/nlb | n/a |
 | <a name="module_operator"></a> [operator](#module\_operator) | github.com/MaterializeInc/terraform-helm-materialize | v0.1.35 |
 | <a name="module_storage"></a> [storage](#module\_storage) | ./modules/storage | n/a |
-| <a name="module_swap_node_group"></a> [swap\_node\_group](#module\_swap\_node\_group) | ./modules/eks-node-group | n/a |
 
 ## Resources
 
@@ -191,17 +158,15 @@ These flags configure default limits for clusters, connections, and tables. You 
 | <a name="input_kubernetes_namespace"></a> [kubernetes\_namespace](#input\_kubernetes\_namespace) | The Kubernetes namespace for the Materialize resources | `string` | `"materialize-environment"` | no |
 | <a name="input_log_group_name_prefix"></a> [log\_group\_name\_prefix](#input\_log\_group\_name\_prefix) | Prefix for the CloudWatch log group name (will be combined with environment name) | `string` | `"materialize"` | no |
 | <a name="input_materialize_instances"></a> [materialize\_instances](#input\_materialize\_instances) | Configuration for Materialize instances. Due to limitations in Terraform, `materialize_instances` cannot be defined on the first `terraform apply`. | <pre>list(object({<br/>    name                              = string<br/>    namespace                         = optional(string)<br/>    database_name                     = string<br/>    environmentd_version              = optional(string)<br/>    cpu_request                       = optional(string, "1")<br/>    memory_request                    = optional(string, "1Gi")<br/>    memory_limit                      = optional(string, "1Gi")<br/>    create_database                   = optional(bool, true)<br/>    create_nlb                        = optional(bool, true)<br/>    internal_nlb                      = optional(bool, true)<br/>    enable_cross_zone_load_balancing  = optional(bool, true)<br/>    in_place_rollout                  = optional(bool, false)<br/>    request_rollout                   = optional(string)<br/>    force_rollout                     = optional(string)<br/>    balancer_memory_request           = optional(string, "256Mi")<br/>    balancer_memory_limit             = optional(string, "256Mi")<br/>    balancer_cpu_request              = optional(string, "100m")<br/>    license_key                       = optional(string)<br/>    authenticator_kind                = optional(string, "None")<br/>    external_login_password_mz_system = optional(string)<br/>    environmentd_extra_args           = optional(list(string), [])<br/>  }))</pre> | `[]` | no |
+| <a name="input_materialize_node_group_desired_size"></a> [materialize\_node\_group\_desired\_size](#input\_materialize\_node\_group\_desired\_size) | Desired number of worker nodes | `number` | `2` | no |
+| <a name="input_materialize_node_group_instance_types"></a> [materialize\_node\_group\_instance\_types](#input\_materialize\_node\_group\_instance\_types) | Instance types for worker nodes.<br/><br/>Recommended Configuration for Running Materialize with disk:<br/>- Tested instance types: `r6gd`, `r7gd` families (ARM-based Graviton instances)<br/>- Enable disk setup when using `r7gd`<br/>- Note: Ensure instance store volumes are available and attached to the nodes for optimal performance with disk-based workloads. | `list(string)` | <pre>[<br/>  "r7gd.2xlarge"<br/>]</pre> | no |
+| <a name="input_materialize_node_group_max_size"></a> [materialize\_node\_group\_max\_size](#input\_materialize\_node\_group\_max\_size) | Maximum number of worker nodes | `number` | `4` | no |
+| <a name="input_materialize_node_group_min_size"></a> [materialize\_node\_group\_min\_size](#input\_materialize\_node\_group\_min\_size) | Minimum number of worker nodes | `number` | `1` | no |
 | <a name="input_metrics_retention_days"></a> [metrics\_retention\_days](#input\_metrics\_retention\_days) | Number of days to retain CloudWatch metrics | `number` | `7` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for all resources, usually the organization or project name | `string` | n/a | yes |
 | <a name="input_network_id"></a> [network\_id](#input\_network\_id) | The ID of the VPC in which resources will be deployed. Only used if create\_vpc is false. | `string` | `""` | no |
 | <a name="input_network_private_subnet_ids"></a> [network\_private\_subnet\_ids](#input\_network\_private\_subnet\_ids) | A list of private subnet IDs in the VPC. Only used if create\_vpc is false. | `list(string)` | `[]` | no |
 | <a name="input_network_public_subnet_ids"></a> [network\_public\_subnet\_ids](#input\_network\_public\_subnet\_ids) | A list of public subnet IDs in the VPC. Only used if create\_vpc is false. | `list(string)` | `[]` | no |
-| <a name="input_node_group_ami_type"></a> [node\_group\_ami\_type](#input\_node\_group\_ami\_type) | AMI type for the node group | `string` | `"AL2023_ARM_64_STANDARD"` | no |
-| <a name="input_node_group_capacity_type"></a> [node\_group\_capacity\_type](#input\_node\_group\_capacity\_type) | Capacity type for worker nodes (ON\_DEMAND or SPOT) | `string` | `"ON_DEMAND"` | no |
-| <a name="input_node_group_desired_size"></a> [node\_group\_desired\_size](#input\_node\_group\_desired\_size) | Desired number of worker nodes | `number` | `2` | no |
-| <a name="input_node_group_instance_types"></a> [node\_group\_instance\_types](#input\_node\_group\_instance\_types) | Instance types for worker nodes.<br/><br/>Recommended Configuration for Running Materialize with disk:<br/>- Tested instance types: `r6gd`, `r7gd` families (ARM-based Graviton instances)<br/>- Enable disk setup when using `r7gd`<br/>- Note: Ensure instance store volumes are available and attached to the nodes for optimal performance with disk-based workloads. | `list(string)` | <pre>[<br/>  "r7gd.2xlarge"<br/>]</pre> | no |
-| <a name="input_node_group_max_size"></a> [node\_group\_max\_size](#input\_node\_group\_max\_size) | Maximum number of worker nodes | `number` | `4` | no |
-| <a name="input_node_group_min_size"></a> [node\_group\_min\_size](#input\_node\_group\_min\_size) | Minimum number of worker nodes | `number` | `1` | no |
 | <a name="input_operator_namespace"></a> [operator\_namespace](#input\_operator\_namespace) | Namespace for the Materialize operator | `string` | `"materialize"` | no |
 | <a name="input_operator_version"></a> [operator\_version](#input\_operator\_version) | Version of the Materialize operator to install | `string` | `null` | no |
 | <a name="input_orchestratord_version"></a> [orchestratord\_version](#input\_orchestratord\_version) | Version of the Materialize orchestrator to install | `string` | `null` | no |
@@ -210,7 +175,10 @@ These flags configure default limits for clusters, connections, and tables. You 
 | <a name="input_public_subnet_cidrs"></a> [public\_subnet\_cidrs](#input\_public\_subnet\_cidrs) | CIDR blocks for public subnets | `list(string)` | <pre>[<br/>  "10.0.101.0/24",<br/>  "10.0.102.0/24",<br/>  "10.0.103.0/24"<br/>]</pre> | no |
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | Name of the service account | `string` | `"12345678-1234-1234-1234-123456789012"` | no |
 | <a name="input_single_nat_gateway"></a> [single\_nat\_gateway](#input\_single\_nat\_gateway) | Use a single NAT Gateway for all private subnets | `bool` | `false` | no |
-| <a name="input_swap_enabled"></a> [swap\_enabled](#input\_swap\_enabled) | Enable swap for Materialize. When enabled, this configures swap on a new nodepool, and adds it to the clusterd node selectors. | `bool` | `false` | no |
+| <a name="input_system_node_group_desired_size"></a> [system\_node\_group\_desired\_size](#input\_system\_node\_group\_desired\_size) | Desired number of worker nodes | `number` | `2` | no |
+| <a name="input_system_node_group_instance_types"></a> [system\_node\_group\_instance\_types](#input\_system\_node\_group\_instance\_types) | Instance types for system nodes. | `list(string)` | <pre>[<br/>  "r7g.xlarge"<br/>]</pre> | no |
+| <a name="input_system_node_group_max_size"></a> [system\_node\_group\_max\_size](#input\_system\_node\_group\_max\_size) | Maximum number of worker nodes | `number` | `4` | no |
+| <a name="input_system_node_group_min_size"></a> [system\_node\_group\_min\_size](#input\_system\_node\_group\_min\_size) | Minimum number of worker nodes | `number` | `1` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Default tags to apply to all resources | `map(string)` | <pre>{<br/>  "Environment": "dev",<br/>  "Project": "materialize",<br/>  "Terraform": "true"<br/>}</pre> | no |
 | <a name="input_use_local_chart"></a> [use\_local\_chart](#input\_use\_local\_chart) | Whether to use a local chart instead of one from a repository | `bool` | `false` | no |
 | <a name="input_use_self_signed_cluster_issuer"></a> [use\_self\_signed\_cluster\_issuer](#input\_use\_self\_signed\_cluster\_issuer) | Whether to install and use a self-signed ClusterIssuer for TLS. To work around limitations in Terraform, this will be treated as `false` if no materialize instances are defined. | `bool` | `true` | no |
@@ -262,6 +230,26 @@ TLS support is provided by using `cert-manager` and a self-signed `ClusterIssuer
 More advanced TLS support using user-provided CAs or per-Materialize `Issuer`s are out of scope for this Terraform module. Please refer to the [cert-manager documentation](https://cert-manager.io/docs/configuration/) for detailed guidance on more advanced usage.
 
 ## Upgrade Notes
+
+#### v0.7.0
+
+This is an intermediate version to handle some changes that must be applied in stages.
+It is recommended to upgrade to v0.8.x after upgrading to this version.
+
+Breaking changes:
+* Swap is enabled by default.
+* Support for lgalloc, our legacy spill to disk mechanism, is deprecated, and will be removed in the next version.
+* We now always use two node groups, one for system workloads and one for Materialize workloads.
+    * Variables for configuring these node groups have been renamed, so they may be configured separately.
+
+To avoid downtime when upgrading to future versions, you must perform a rollout at this version.
+1. Ensure your `environmentd_version` is at least `v26.0.0`.
+2. Update your `request_rollout` (and `force_rollout` if already at the correct `environmentd_version`).
+3. Run `terraform apply`.
+
+You must upgrade to at least v0.6.x before upgrading to v0.7.0 of this terraform code.
+
+It is strongly recommended to have enabled swap on v0.6.x before upgrading to v0.7.0 or higher.
 
 #### v0.6.1
 

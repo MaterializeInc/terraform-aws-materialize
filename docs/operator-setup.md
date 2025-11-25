@@ -24,42 +24,6 @@ Verify the connection:
 kubectl get nodes
 ```
 
-## (Optional) Storage Configuration
-
-The Materialize Operator requires fast, locally-attached NVMe storage for optimal performance. We'll set up OpenEBS with LVM Local PV for managing local volumes.
-
-1. Install OpenEBS:
-```bash
-# Add the OpenEBS Helm repository
-helm repo add openebs https://openebs.github.io/openebs
-helm repo update
-
-# Install OpenEBS with only Local PV enabled
-helm install openebs --namespace openebs openebs/openebs \
-  --set engines.replicated.mayastor.enabled=false \
-  --create-namespace
-```
-
-2. Verify the installation:
-```bash
-kubectl get pods -n openebs -l role=openebs-lvm
-```
-
-### LVM Configuration for AWS Bottlerocket nodes
-
-TODO: Add more detailed instructions for setting up LVM on Bottlerocket nodes.
-
-If you're using the recommended Bottlerocket AMI with the Terraform module, the LVM configuration needs to be done through the Bottlerocket bootstrap container. This is automatically handled by the EKS module using the provided user data script.
-
-To verify the LVM setup:
-```bash
-kubectl debug -it node/<node-name> --image=amazonlinux:2
-chroot /host
-lvs
-```
-
-You should see a volume group named `instance-store-vg`.
-
 ## Install the Materialize Operator
 
 The Materialize Operator is installed automatically when you set the following in your Terraform configuration:

@@ -45,7 +45,6 @@ module "eks" {
           content      = local.disk_setup_script
         }
       ] : []
-
     }
   }
 
