@@ -144,6 +144,12 @@ EOF
   default     = ["r7gd.2xlarge"]
 }
 
+variable "materialize_node_group_iam_role_use_name_prefix" {
+  description = "Use name prefix for Materialize node group IAM roles. Set to false to avoid AWS 38-character prefix limit when using long namespace/environment names."
+  type        = bool
+  default     = true
+}
+
 variable "cluster_enabled_log_types" {
   description = "List of desired control plane logging to enable"
   type        = list(string)

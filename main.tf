@@ -53,6 +53,7 @@ module "materialize_node_group" {
   desired_size                      = var.materialize_node_group_desired_size
   cluster_service_cidr              = module.eks.cluster_service_cidr
   cluster_primary_security_group_id = module.eks.node_security_group_id
+  iam_role_use_name_prefix          = var.materialize_node_group_iam_role_use_name_prefix
 
   labels = {
     "materialize.cloud/swap" = "true"
