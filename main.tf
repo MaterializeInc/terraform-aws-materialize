@@ -251,6 +251,12 @@ locals {
         }
       }
     }
+    environmentd = {
+      nodeSelector = {
+        "materialize.cloud/swap" = "true"
+        "workload"               = "materialize-instance"
+      }
+    }
     tls = (var.use_self_signed_cluster_issuer && length(var.materialize_instances) > 0) ? {
       defaultCertificateSpecs = {
         balancerdExternal = {
