@@ -25,6 +25,10 @@ More advanced TLS support using user-provided CAs or per-Materialize `Issuer`s a
 
 ## Upgrade Notes
 
+#### v0.9.0
+
+Environmentd now selects swap nodes by default.
+
 #### v0.8.0
 
 You must upgrade to at least v0.7.x before upgrading to v0.8.x of this terraform code.
