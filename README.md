@@ -1,4 +1,11 @@
 <!-- BEGIN_TF_DOCS -->
+> [!WARNING]
+> This repository is DEPRECATED!
+>
+> We strongly recommend you migrate to [our new Terraform modules](https://github.com/MaterializeInc/materialize-terraform-self-managed) instead.
+>
+> While migration is not completely automated, we do have [examples and scripts](https://github.com/MaterializeInc/materialize-terraform-self-managed/tree/main/aws/examples/migration) to help with the transition.
+
 # Materialize on AWS Cloud Platform
 
 Terraform module for deploying Materialize on AWS Cloud Platform with all required infrastructure components.
