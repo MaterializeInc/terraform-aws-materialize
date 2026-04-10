@@ -1,11 +1,4 @@
 <!-- BEGIN_TF_DOCS -->
-> [!WARNING]
-> This repository is DEPRECATED!
->
-> We strongly recommend you migrate to [our new Terraform modules](https://github.com/MaterializeInc/materialize-terraform-self-managed) instead.
->
-> While migration is not completely automated, we do have [examples and scripts](https://github.com/MaterializeInc/materialize-terraform-self-managed/tree/main/aws/examples/migration) to help with the transition.
-
 # Materialize on AWS Cloud Platform
 
 Terraform module for deploying Materialize on AWS Cloud Platform with all required infrastructure components.
@@ -116,7 +109,7 @@ These flags configure default limits for clusters, connections, and tables. You 
 | <a name="module_materialize_node_group"></a> [materialize\_node\_group](#module\_materialize\_node\_group) | ./modules/eks-node-group | n/a |
 | <a name="module_networking"></a> [networking](#module\_networking) | ./modules/networking | n/a |
 | <a name="module_nlb"></a> [nlb](#module\_nlb) | ./modules/nlb | n/a |
-| <a name="module_operator"></a> [operator](#module\_operator) | github.com/MaterializeInc/terraform-helm-materialize | v0.1.58 |
+| <a name="module_operator"></a> [operator](#module\_operator) | github.com/MaterializeInc/terraform-helm-materialize | v0.1.59 |
 | <a name="module_storage"></a> [storage](#module\_storage) | ./modules/storage | n/a |
 
 ## Resources
