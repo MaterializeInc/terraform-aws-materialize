@@ -177,18 +177,18 @@ provider "registry.terraform.io/hashicorp/tls" {
 }
 
 provider "registry.terraform.io/isometry/deepmerge" {
-  version     = "1.2.1"
+  version     = "1.2.3"
   constraints = "~> 1.0"
   hashes = [
-    "h1:UPoCcV6yLDUH7yzHB4PN5tPYI+Q2T/1uLHUHfIO89Ng=",
-    "zh:13be4c31971addc10e26a003e22b8867dba41737ffbc9de86ed84555c4a539b7",
-    "zh:320a939a594c8a2563f4c11108e02428e7fda3bd51a4fc2298089299cf23f516",
+    "h1:JzQs5DUgtCPysN86AoQjSZfVSJ29ETe25ZsPNZh2uTE=",
+    "zh:3992af64b5484dd4f55cc864bd549e870d90474ebb85c1e9e0e8eb239b849a8d",
+    "zh:587a78a9fde56ab4ac0ba5fb66a98b7fdffc4ff0c2d79c98faba2068750b2743",
+    "zh:5b3285a722c66dff4d7719cef6f8ff6ea7b9b6964e16966cd2edb003698b5e7e",
+    "zh:5c6b4936121adbf31700feed8187d47b5f38e388752f34a9fa9f2672e07cba31",
     "zh:890df766e9b839623b1f0437355032a3c006226a6c200cd911e15ee1a9014e9f",
-    "zh:9407fe1f9d332ecbd5252faa5b04f62b7fa47f19efe35a9e92d30ef2c603db45",
-    "zh:a0af6ad4d4a52a1355df5b73fe38e406f50d9fd5c8af165929a602f906de0ff7",
-    "zh:a44628f6e9bc612dbdcb013a8cf33aca3893f1697c4492847859f7db5b59c4dd",
-    "zh:abaaa7d71f7975505824adcebed320aae43fc7e13c901ffc51448f6eb59585fe",
-    "zh:ad2b1b3f348ad478ee64d294a85835625e560324e58a826530b13f49fafa9bac",
-    "zh:e8bec252634868283e47ef1208cb89b53c1e0cdd2ad804acf91d0ff368048416",
+    "zh:c030dc5738a15c7bfac7647f4c81a0ae1086babcfc516e2fa7c83d284b2eb694",
+    "zh:d76a0dc6603af4d20c094062dd0450111103928e104e95605f42090d3c3b69bf",
+    "zh:dbacd4898def75875be94eb2fcaa155b01da467a0886a3e451d1e6985af0f37f",
+    "zh:f5298caf2869d5f70c67225c8152aaef06981869cd2fcb5bd4fd5af4256bf225",
   ]
 }

@@ -158,7 +158,7 @@ module "certificates" {
 }
 
 module "operator" {
-  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.61"
+  source = "github.com/MaterializeInc/terraform-helm-materialize?ref=v0.1.62"
 
   count = var.install_materialize_operator ? 1 : 0
 
