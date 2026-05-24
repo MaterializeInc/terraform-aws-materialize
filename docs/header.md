@@ -1,3 +1,6 @@
+> [!NOTE]
+> A newer module is available at [materialize-terraform-self-managed](https://github.com/MaterializeInc/materialize-terraform-self-managed). It takes a more modular approach so you can pick the pieces you need. If you would like to move over, the [AWS migration example](https://github.com/MaterializeInc/materialize-terraform-self-managed/tree/main/aws/examples/migration) is a good starting point.
+
 # Materialize on AWS Cloud Platform
 
 Terraform module for deploying Materialize on AWS Cloud Platform with all required infrastructure components.
