@@ -16,6 +16,7 @@ module "target_pgwire" {
   port              = 6875
   service_name      = "mz${var.mz_resource_id}-balancerd"
   health_check_path = "/api/readyz"
+  health_check_protocol = "HTTP"
 }
 
 module "target_http" {
@@ -28,6 +29,7 @@ module "target_http" {
   port              = 6876
   service_name      = "mz${var.mz_resource_id}-balancerd"
   health_check_path = "/api/readyz"
+  health_check_protocol = "HTTP"
 }
 
 module "target_console" {
@@ -40,4 +42,5 @@ module "target_console" {
   port              = 8080
   service_name      = "mz${var.mz_resource_id}-console"
   health_check_path = "/"
+  health_check_protocol = "HTTPS"
 }
